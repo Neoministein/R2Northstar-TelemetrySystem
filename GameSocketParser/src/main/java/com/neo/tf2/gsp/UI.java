@@ -1,6 +1,8 @@
 package com.neo.tf2.gsp;
 
 
+import org.json.JSONObject;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +23,7 @@ public class UI {
     private final BufferedImage image;
     private final BufferedImage player;
 
+    private List<JSONObject> gameStateList = Collections.emptyList();
 
     public UI(int mapSizeX, int maxSizeZ) {
         try {
@@ -64,7 +67,8 @@ public class UI {
 
     }
 
-    public void repaint() {
+    public void repaint(List<JSONObject> gameStateList) {
+        this.gameStateList = gameStateList;
         uiDrawComponent.paint(uiDrawComponent.getGraphics());
     }
 
@@ -81,35 +85,34 @@ public class UI {
 
         @Override
         public void paint(Graphics g) {
-            /*
-            //setColor to  surface background
-            //g.clipRect(0,0,1000,1000);
-            uiBackGroundComponent.paint(uiBackGroundComponent.getGraphics());
-            int i = 0;
-            for (PlayerGameState positionData: positionDataList) {
-                i++;
-                g.setColor(Color.BLACK);
-                if (positionData.getPlayer().getTeam().equals("1")) {
-                    g.setColor(Color.CYAN);
-                }
-                if (positionData.getPlayer().getTeam().equals("2")) {
-                    g.setColor(Color.RED);
-                }
-                if (positionData.getPlayer().getTeam().equals("3")) {
-                    g.setColor(Color.GREEN);
-                }
-                if (i < 20) {
-                    g.fillRect(
-                            Math.round((positionData.getPosition().getX() + 5325) / 10.1f),
-                            Math.round((positionData.getPosition().getY() * -1 + 5700) / 10.1f),
-                            5,
-                            5);
-                }
-/*
+            g.clipRect(0,0,1000,1000);
+            int startingPoint = Math.max(gameStateList.size() - 20, 0);
+            System.out.println(startingPoint);
+            if (!gameStateList.isEmpty()) {
+               List<JSONObject> a = gameStateList.subList(startingPoint , gameStateList.size());
+                for (JSONObject gameState : a) {
+
+                    for (int i = 0; i < gameState.getJSONArray("players").length(); i++) {
+                        JSONObject player =  gameState.getJSONArray("players").getJSONObject(i);
+                        if (player.getInt("team") == 2) {
+                            g.setColor(Color.RED);
+                        }
+                        if (player.getInt("team") == 3) {
+                            g.setColor(Color.GREEN);
+                        }
+                        int x = player.getJSONObject("position").getInt("x");
+                        int y = player.getJSONObject("position").getInt("y");
 
 
+                        g.fillRect(
+                                Math.round((x + 5325) / 10.1f),
+                                Math.round((y * -1 + 5700) / 10.1f),
+                                5,
+                                5);
+                    }
+                }
+                System.out.print("");
             }
-            */
         }
     }
 }

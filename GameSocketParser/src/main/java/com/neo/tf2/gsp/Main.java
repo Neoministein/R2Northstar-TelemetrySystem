@@ -30,7 +30,7 @@ public class Main {
 
     public void run() {
         parseData();
-        //ui.repaint(playerGameStateList);
+        ui.repaint(gameStateList);
     }
 
     private void parseData() {
@@ -53,6 +53,7 @@ public class Main {
     }
 
     private void concludeGame() {
+        ui.repaint(gameStateList);
         playerMap = new HashMap<>();
         gameStateList = new ArrayList<>();
         gameState = null;
@@ -71,6 +72,8 @@ public class Main {
                     }
                     gameStateList.add(gameState.toJson());
                     gameState.setEventList(new ArrayList<>());
+                    Thread.sleep(10);
+                    ui.repaint(gameStateList);
                     //TODO SEND DATA TO WEBSERVER
                     break;
                 case 1:

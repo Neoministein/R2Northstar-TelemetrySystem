@@ -19,8 +19,8 @@ public class Vector implements Serializable {
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
         json.put("x",x);
-        json.put("y",x);
-        json.put("z",x);
+        json.put("y",y);
+        json.put("z",z);
         return json;
     }
 
