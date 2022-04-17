@@ -1,0 +1,150 @@
+untyped
+global function MapSystem_Init
+
+struct {
+    bool isThreadRunning = false
+} file
+
+void function MapSystem_Init()
+{
+    //InterstellarMessage("TEST")
+    AddCallback_GameStateEnter( eGameState.WaitingForPlayers, OnWaitingForPlayers )
+    AddCallback_GameStateEnter( eGameState.Playing, OnGameStartePlay )
+    AddCallback_GameStateEnter( eGameState.Postmatch, OnGameFinished )
+    
+
+    AddCallback_OnClientConnected( Map_PlayerConnect )
+    AddCallback_OnClientDisconnected( Map_PlayerDisconnect )
+
+    AddCallback_OnPilotBecomesTitan( Map_PilotBecomesTitan )
+    AddCallback_OnTitanBecomesPilot( Map_TitanBecomesPilot )
+    AddCallback_OnPlayerKilled( Map_PlayerKilled )
+
+    AddCallback_OnPlayerRespawned( Map_PlayerRespawned )
+
+    AddCallback_OnPlayerGetsNewPilotLoadout( Map_OnPlayerGetsNewPilotLoadout )
+
+}
+
+void function OnWaitingForPlayers() 
+{
+    print( "|1|" + GetMapName())
+}
+
+
+void function OnGameStartePlay()
+{
+    if ( !file.isThreadRunning ) {
+        file.isThreadRunning = true
+        thread printDynamicInfos()
+    }
+}
+
+void function OnGameFinished()
+{
+    file.isThreadRunning = false
+    wait 0.1
+    print( "|2" )
+}
+
+void function Map_PlayerConnect( entity player ) 
+{
+	print( "|3|" + player.GetUID() + "|" + player.GetTeam() )
+
+    AddPlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
+    AddPlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
+
+    AddButtonPressedPlayerInputCallback( player, 1, Map_StartShoot)
+    AddButtonReleasedPlayerInputCallback( player, 1, Map_EndShoot)
+}
+
+void function Map_PlayerDisconnect( entity player ) 
+{
+	print( "|4|" + player.GetUID() )
+
+    RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
+    RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
+
+    RemoveButtonPressedPlayerInputCallback( player, 1, Map_StartShoot)
+    RemoveButtonPressedPlayerInputCallback( player, 1, Map_EndShoot)
+}
+
+void function printDynamicInfos() 
+{
+	while ( file.isThreadRunning ) 
+	{
+        array<entity> players = GetPlayerArray()
+        string infos = "|0|" + players.len()
+		foreach(entity player in GetPlayerArray()) 
+		{
+			infos += "|" + player.GetUID()
+			infos += "|" + player.GetOrigin()
+			infos += "|" + player.GetAngles()
+			infos += "|" + player.GetVelocity()
+			infos += "|" + (100.0 * player.GetHealth() / player.GetMaxHealth())
+		}
+        print( infos )
+		wait 0.001
+	}
+}
+
+void function Map_PlayerKilled( entity victim, entity attacker, var damageInfo ) 
+{
+    string infos = "|5"
+    try {
+        infos += "|" + attacker.GetUID()
+    } catch (exception) {
+        infos += "|UNKOWN"
+    }
+    infos += "|" + victim.GetUID()
+    infos += "|" + DamageInfo_GetDamageWeaponName( damageInfo )
+    print( infos )
+}
+
+void function Map_PlayerRespawned( entity player ) 
+{
+    print( "|6|" + player.GetUID() )
+}
+
+void function Map_PilotBecomesTitan( entity player, entity titan )
+{
+	string infos = "|7"
+    infos += "|" + player.GetUID()
+    infos += "|" + GetActiveTitanLoadout( player ).titanClass
+    print( infos )
+}
+
+void function Map_TitanBecomesPilot( entity player, entity titan )
+{
+    print( "|8|" + player.GetUID() )
+}
+
+void function Map_OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef newTitanLoadout ) 
+{
+    string infos = "|9"
+	infos += "|" + player.GetUID()
+	infos += "|" + GetActivePilotLoadout( player ).primary
+	infos += "|" + GetActivePilotLoadout( player ).secondary
+	infos += "|" + GetActivePilotLoadout( player ).weapon3
+    print( infos )
+}
+
+void function Map_OnPlayerBeginWallrun( entity player ) 
+{
+    print( "|10|" + player.GetUID() + "|true" )
+}
+
+void function Map_OnPlayerEndWallrun( entity player ) 
+{
+    print( "|10|" + player.GetUID() + "|false" )
+}
+
+void function Map_StartShoot( entity player ) 
+{
+    print( "|11|" + player.GetUID() + "|true" )
+}
+
+void function Map_EndShoot( entity player ) 
+{
+    print( "|11|" + player.GetUID() + "|false" )
+}
