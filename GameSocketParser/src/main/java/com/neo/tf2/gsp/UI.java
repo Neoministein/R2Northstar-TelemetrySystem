@@ -15,20 +15,18 @@ import java.util.List;
 public class UI {
 
     //private static final String KODAI_LOCATION = "F:\\00-Data\\04-Pictrues\\Kodai2.0.png";
-    private static final String KODAI_LOCATION = "F:\\00-Data\\04-Pictrues\\0x98f6cb7c629836b0.png";
+    private static final String KODAI_LOCATION = System.getenv("user.dir") + "\\0x98f6cb7c629836b0.png";
 
     private UIBackGroundComponent uiBackGroundComponent = new UIBackGroundComponent();
     private UIDrawComponent uiDrawComponent = new UIDrawComponent();
 
     private final BufferedImage image;
-    private final BufferedImage player;
 
     private List<JSONObject> gameStateList = Collections.emptyList();
 
     public UI(int mapSizeX, int maxSizeZ) {
         try {
             image = ImageIO.read(new File(KODAI_LOCATION));
-            player = ImageIO.read(new File("F:\\00-Data\\04-Pictrues\\player.png"));
         } catch (IOException e) {
             throw new RuntimeException();
         }
