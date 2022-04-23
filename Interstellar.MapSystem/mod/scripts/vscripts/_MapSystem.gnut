@@ -7,7 +7,6 @@ struct {
 
 void function MapSystem_Init()
 {
-    //InterstellarMessage("TEST")
     AddCallback_GameStateEnter( eGameState.WaitingForPlayers, OnWaitingForPlayers )
     AddCallback_GameStateEnter( eGameState.Playing, OnGameStartePlay )
     AddCallback_GameStateEnter( eGameState.Postmatch, OnGameFinished )
@@ -23,7 +22,6 @@ void function MapSystem_Init()
     AddCallback_OnPlayerRespawned( Map_PlayerRespawned )
 
     AddCallback_OnPlayerGetsNewPilotLoadout( Map_OnPlayerGetsNewPilotLoadout )
-
 }
 
 void function OnWaitingForPlayers() 
@@ -54,8 +52,23 @@ void function Map_PlayerConnect( entity player )
     AddPlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
     AddPlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
 
+    AddPlayerMovementEventCallback( player, ePlayerMovementEvents.JUMP, Map_OnPlayerJump )
+    AddPlayerMovementEventCallback( player, ePlayerMovementEvents.DOUBLE_JUMP, Map_OnPlayerDoubleJump )
+
+    AddPlayerMovementEventCallback( player, ePlayerMovementEvents.LEAVE_GROUND, Map_OnPlayerLeaveGround )
+    AddPlayerMovementEventCallback( player, ePlayerMovementEvents.TOUCH_GROUND, Map_OnPlayerTochGround )
+
+    AddPlayerMovementEventCallback( player, ePlayerMovementEvents.MANTLE, Map_OnPlayerMantle )
+
+    AddPlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLHANG, Map_OnPlayerBeginWallHang )
+    AddPlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLHANG, Map_OnPlayerEndWallHang )
+
+
     AddButtonPressedPlayerInputCallback( player, 1, Map_StartShoot)
     AddButtonReleasedPlayerInputCallback( player, 1, Map_EndShoot)
+
+    AddButtonPressedPlayerInputCallback( player, 4, Map_OnPlayerBeginCrouch)
+    AddButtonReleasedPlayerInputCallback( player, 4, Map_OnPlayerEndCrouch)
 }
 
 void function Map_PlayerDisconnect( entity player ) 
@@ -64,6 +77,17 @@ void function Map_PlayerDisconnect( entity player )
 
     RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
     RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
+
+    RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.JUMP, Map_OnPlayerJump )
+    RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.DOUBLE_JUMP, Map_OnPlayerDoubleJump )
+
+    RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.LEAVE_GROUND, Map_OnPlayerLeaveGround )
+    RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.TOUCH_GROUND, Map_OnPlayerTochGround )
+
+    RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.MANTLE, Map_OnPlayerMantle )
+
+    RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLHANG, Map_OnPlayerBeginWallHang )
+    RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLHANG, Map_OnPlayerEndWallHang )
 
     RemoveButtonPressedPlayerInputCallback( player, 1, Map_StartShoot)
     RemoveButtonPressedPlayerInputCallback( player, 1, Map_EndShoot)
@@ -81,6 +105,7 @@ void function printDynamicInfos()
 			infos += "|" + player.GetOrigin()
 			infos += "|" + player.GetAngles()
 			infos += "|" + player.GetVelocity()
+            //infos += "|" + player.GetActiveWeapon().GetWeaponClassName()
 			infos += "|" + (100.0 * player.GetHealth() / player.GetMaxHealth())
 		}
         print( infos )
@@ -121,11 +146,14 @@ void function Map_TitanBecomesPilot( entity player, entity titan )
 
 void function Map_OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef newTitanLoadout ) 
 {
+    PilotLoadoutDef modifiedLoadout = GetActivePilotLoadout( player )
+
     string infos = "|9"
 	infos += "|" + player.GetUID()
-	infos += "|" + GetActivePilotLoadout( player ).primary
-	infos += "|" + GetActivePilotLoadout( player ).secondary
-	infos += "|" + GetActivePilotLoadout( player ).weapon3
+	infos += "|" + modifiedLoadout.primary
+	infos += "|" + modifiedLoadout.secondary
+	infos += "|" + modifiedLoadout.weapon3
+    infos += "|" + modifiedLoadout.special
     print( infos )
 }
 
@@ -147,4 +175,51 @@ void function Map_StartShoot( entity player )
 void function Map_EndShoot( entity player ) 
 {
     print( "|11|" + player.GetUID() + "|false" )
+}
+
+/**/
+
+void function Map_OnPlayerJump( entity player ) 
+{
+    print( "|12|" + player.GetUID() )
+}
+
+void function Map_OnPlayerDoubleJump( entity player ) 
+{
+    print( "|13|" + player.GetUID() )
+}
+
+void function Map_OnPlayerLeaveGround( entity player ) 
+{
+    print( "|14|" + player.GetUID() + "|true" )
+}
+
+void function Map_OnPlayerTochGround( entity player ) 
+{
+    print( "|14|" + player.GetUID() + "|false" )
+}
+
+void function Map_OnPlayerMantle( entity player ) 
+{
+    print( "|15|" + player.GetUID() )
+}
+
+void function Map_OnPlayerBeginWallHang( entity player ) 
+{
+    print( "|16|" + player.GetUID() + "|true" )
+}
+
+void function Map_OnPlayerEndWallHang( entity player ) 
+{
+    print( "|16|" + player.GetUID() + "|false" )
+}
+
+void function Map_OnPlayerBeginCrouch( entity player ) 
+{
+    print( "|17|" + player.GetUID() + "|true" )
+}
+
+void function Map_OnPlayerEndCrouch( entity player ) 
+{
+    print( "|17|" + player.GetUID() + "|false" )
 }
