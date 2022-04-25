@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CSNamedPipeServer
+﻿namespace CSNamedPipeServer
 {
-    public enum LogType
+    public enum EventType
     {
         DynamicInfos = 0,
         WaitingForPlayers = 1,
