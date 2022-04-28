@@ -1,0 +1,337 @@
+{
+  "type": "object",
+  "properties": {
+    "matchId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36
+    },
+    "map": {
+      "type": "string"
+    },
+    "timePassed": {
+      "type": "integer"
+    },
+    "players": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string"
+          },
+          "team": {
+            "type": "integer"
+          },
+          "titanClass": {
+            "type": "string"
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "rotation": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "velocity": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "primary": {
+            "type": "string"
+          },
+          "secondary": {
+            "type": "string"
+          },
+          "weapon3": {
+            "type": "string"
+          },
+          "special": {
+            "type": "string"
+          },
+          "isTitan": {
+            "type": "boolean"
+          },
+          "isWallRunning": {
+            "type": "boolean"
+          },
+          "isShooting": {
+            "type": "boolean"
+          },
+          "isGrounded": {
+            "type": "boolean"
+          },
+          "isHanging": {
+            "type": "boolean"
+          },
+          "isCrouching": {
+            "type": "boolean"
+          },
+          "isAlive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "playerId",
+          "team",
+          "position",
+          "rotation",
+          "velocity",
+          "primary",
+          "secondary",
+          "weapon3",
+          "special",
+          "isTitan",
+          "isWallRunning",
+          "isShooting",
+          "isGrounded",
+          "isHanging",
+          "isCrouching",
+          "isAlive"
+        ]
+      }
+    },
+    "events": {
+      "type": "object",
+      "properties": {
+        "eventPlayerConnect": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              },
+              "team": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "playerId",
+              "team"
+            ]
+          }
+        },
+        "eventPlayerDisconnect": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "playerId"
+            ]
+          }
+        },
+        "eventPlayerKilled": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "attackerId": {
+                "type": "string"
+              },
+              "victimId": {
+                "type": "string"
+              },
+              "weapon": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "attackerId",
+              "victimId",
+              "weapon"
+            ]
+          }
+        },
+        "eventPlayerRespawned": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "playerId"
+            ]
+          }
+        },
+        "eventPilotBecomesTitan": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              },
+              "titanClass": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "playerId",
+              "titanClass"
+            ]
+          }
+        },
+        "eventTitanBecomesPilot": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "playerId"
+            ]
+          }
+        },
+        "eventPlayerGetsNewPilotLoadout": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              },
+              "primary": {
+                "type": "string"
+              },
+              "secondary": {
+                "type": "string"
+              },
+              "weapon3": {
+                "type": "string"
+              },
+              "special": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "playerId",
+              "primary",
+              "secondary",
+              "weapon3",
+              "special"
+            ]
+          }
+        },
+        "eventPlayerJump": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "playerId"
+            ]
+          }
+        },
+        "eventPlayerDoubleJump": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "playerId"
+            ]
+          }
+        },
+        "eventPlayerMantle": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "playerId"
+            ]
+          }
+        }
+      },
+      "required": [
+        "eventPlayerConnect",
+        "eventPlayerDisconnect",
+        "eventPlayerKilled",
+        "eventPlayerRespawned",
+        "eventPilotBecomesTitan",
+        "eventTitanBecomesPilot",
+        "eventPlayerGetsNewPilotLoadout",
+        "eventPlayerJump",
+        "eventPlayerDoubleJump",
+        "eventPlayerMantle"
+      ]
+    }
+  },
+  "required": [
+    "matchId",
+    "map",
+    "timePassed",
+    "players",
+    "events"
+  ]
+}
