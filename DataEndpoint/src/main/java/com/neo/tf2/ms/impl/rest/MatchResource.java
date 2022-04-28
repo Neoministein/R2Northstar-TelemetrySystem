@@ -1,24 +1,23 @@
 package com.neo.tf2.ms.impl.rest;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.common.api.action.Action;
 import com.neo.common.api.json.Views;
 import com.neo.common.impl.StringUtils;
-import com.neo.common.impl.exception.InternalJsonException;
 import com.neo.common.impl.exception.InternalLogicException;
+import com.neo.common.impl.json.JsonSchemaUtil;
 import com.neo.common.impl.json.JsonUtil;
 import com.neo.common.impl.lazy.LazyAction;
 import com.neo.javax.api.persitence.repository.EntityRepository;
 import com.neo.tf2.ms.impl.persistence.entity.Match;
 import com.neo.util.javax.api.rest.RestAction;
-import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
 import com.neo.util.javax.impl.rest.DefaultResponse;
 import com.neo.util.javax.impl.rest.HttpMethod;
 import com.neo.util.javax.impl.rest.RequestContext;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
+import com.neo.util.javax.impl.rest.entity.AbstractEntityRestEndpoint;
+import com.networknt.schema.JsonSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,17 +33,19 @@ import java.util.UUID;
 @RequestScoped
 @Path(MatchResource.RESOURCE_LOCATION)
 @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
-public class MatchResource extends AbstractRestEndpoint {
+public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchResource.class);
+
+    protected static final JsonSchema JSON_SCHEMA = JsonSchemaUtil.generateSchemaFromResource("schemas/NewMatch.json");
 
     public static final String RESOURCE_LOCATION = "api/v1/match";
 
     public static final String P_NEW = "/new";
     public static final String P_END = "/end";
 
-    protected static final JSONObject E_NOT_FOUND = DefaultResponse.errorObject("resources/000","Entity not found");
-    protected static final JSONObject E_CANNOT_PARSE = DefaultResponse.errorObject("resources/001","Unable to retrieve entity");
+    protected static final ObjectNode E_NOT_FOUND = DefaultResponse.errorObject("resources/000","Entity not found");
+    protected static final ObjectNode E_CANNOT_PARSE = DefaultResponse.errorObject("resources/001","Unable to retrieve entity");
 
     @Inject
     EntityRepository entityRepository;
@@ -54,18 +55,19 @@ public class MatchResource extends AbstractRestEndpoint {
     public Response newGame(String x) {
         RequestContext requestContext = getContext(HttpMethod.POST, P_NEW);
         RestAction restAction = () -> {
-            JSONObject data = new JSONObject(new JSONTokener(x));
-
+            JsonNode json = JsonUtil.fromJson(x);
+            JsonSchemaUtil.isValidOrThrow(json, JSON_SCHEMA);
             Action<Response> createEntity = () -> {
-                Match game = new Match();
-                game.setMap(data.getString("map"));
-                game.setNsServerName("ns_server_name");
+                Match match = new Match();
+                match.setMap(json.get("map").asText());
+                match.setNsServerName(json.get("ns_server_name").asText());
+                match.setGamemode(json.get("gamemode").asText());
                 try {
-                    entityRepository.create(game);
+                    entityRepository.create(match);
                 } catch (RollbackException ex) {
                     throw new InternalLogicException(ex);
                 }
-                return parseEntityToResponse(game, requestContext, Views.Public.class);
+                return parseEntityToResponse(match, requestContext, Views.Public.class);
             };
 
             return LazyAction.call(createEntity,3);
@@ -107,14 +109,18 @@ public class MatchResource extends AbstractRestEndpoint {
         return RESOURCE_LOCATION;
     }
 
-    protected Response parseEntityToResponse(Match entity, RequestContext requestContext, Class<?> serializationScope) {
+    @Override
+    protected Object convertToPrimaryKey(String s) {
         try {
-            String result = JsonUtil.toJson(entity, serializationScope);
-            return DefaultResponse
-                    .success(requestContext, new JSONArray().put(new JSONObject(new JSONTokener(result))));
-        } catch (JSONException | InternalJsonException ex) {
-            LOGGER.error("Unable to parse database entity to JSON {}", ex.getMessage());
-            return DefaultResponse.error(500, E_CANNOT_PARSE, requestContext);
+            return UUID.fromString(s);
+        } catch (IllegalArgumentException ex) {
+            return new Object();
         }
+
+    }
+
+    @Override
+    protected Class<Match> getEntityClass() {
+        return Match.class;
     }
 }
