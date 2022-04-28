@@ -7,6 +7,7 @@ import com.neo.javax.api.persitence.repository.SearchRepository;
 import com.neo.tf2.ms.impl.persistence.searchable.MatchState;
 import com.neo.util.javax.api.rest.RestAction;
 import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
+import com.neo.util.javax.impl.rest.DefaultResponse;
 import com.neo.util.javax.impl.rest.HttpMethod;
 import com.neo.util.javax.impl.rest.RequestContext;
 import org.slf4j.Logger;
@@ -33,15 +34,15 @@ public class MatchStateResource extends AbstractRestEndpoint {
     SearchRepository searchRepository;
 
     @PUT
-    public Response get(String x) {
-        RequestContext requestContext = getContext(HttpMethod.GET,"");
+    public Response put(String x) {
+        RequestContext requestContext = getContext(HttpMethod.PUT,"");
         RestAction restAction = () -> {
             JsonNode jsonNode = JsonUtil.fromJson(x);
             JsonSchemaUtil.isValidOrThrow(jsonNode, MatchState.JSON_SCHEMA);
             MatchState matchState = new MatchState(jsonNode.deepCopy());
 
             searchRepository.index(matchState);
-            return Response.ok().build();
+            return DefaultResponse.success(requestContext);
         };
 
         return super.restCall(restAction,requestContext);
