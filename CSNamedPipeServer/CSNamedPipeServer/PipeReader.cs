@@ -11,7 +11,7 @@ namespace CSNamedPipeServer
         private NamedPipeServerStream m_server = null;
         private const int BUFFER_SIZE = 512;
         private const int TCHAR_SIZE = 2;
-        private Match m_currentMatch = new Match("");
+        private Match m_currentMatch = new Match(""); // only testing
         private Queue<DynamicInfos> m_sendInfos = new Queue<DynamicInfos>();
         private DynamicInfos m_currentInfo = new DynamicInfos();
 
@@ -58,7 +58,7 @@ namespace CSNamedPipeServer
             //TODO: if prev string == current string discard it
         }
 
-        public void ProcessCommand(string[] cmd)
+        public async void ProcessCommand(string[] cmd)
         {
             bool sendCurrentInfo = false;
             EventType logType = (EventType)int.Parse(cmd[0]);
@@ -173,7 +173,7 @@ namespace CSNamedPipeServer
             m_currentInfo.players = m_currentMatch.players.Values.ToArray();
             m_currentInfo.matchId = m_currentMatch.matchId;
             m_currentInfo.map = m_currentMatch.mapName;
-            string json = JsonConvert.SerializeObject(m_currentInfo, Formatting.Indented);
+            string json = JsonConvert.SerializeObject(m_currentInfo);
             Console.WriteLine(json); // TODO: Send
             // Add to queue and send async
             m_currentInfo = new DynamicInfos();
@@ -204,29 +204,41 @@ namespace CSNamedPipeServer
         public Match(string _mapName)
         {
             mapName = _mapName;
-            //Task t1 = Task.Run(() => GetMatchId(""));
+            Task t1 = Task.Run(() => GetMatchId(_mapName));
         }
 
         static readonly HttpClient client = new HttpClient();
 
-        public async Task GetMatchId(string url)
+        public async Task GetMatchId(string _mapName)
         {
-            string retVal = "";
-            string answer = await client.GetStringAsync(url);
+            string servername = "TestServerName";
+            string url = "localhost:8080/api/v1/game";
+            string answer = await client.GetStringAsync(url + "/new?map=" + _mapName);
             if (!String.IsNullOrWhiteSpace(answer))
             {
                 // TODO: create object to serialze to
-                JObject jsonAnswer = JObject.Parse(answer);
-                IList<JToken> newMatchIdList = jsonAnswer["data"].Children().ToList();
-                foreach (var item in newMatchIdList)
+                NewMatchResponse result = JsonConvert.DeserializeObject<NewMatchResponse>(answer);
+                foreach (NewMatchResponseData item in result.data.Where(data => data.nsServerName == servername))
                 {
-                    retVal = item["id"].ToString();
-                }
-                lock (matchId)
-                {
-                    matchId = retVal;
+                    matchId = item.id;
                 }
             }
         }
+    }
+
+    public class NewMatchResponse
+    {
+        public string apiVersion;
+        public List<NewMatchResponseData> data;
+        public string context;
+        public string status;
+    }
+
+    public class NewMatchResponseData
+    {
+        public bool isRunning;
+        public string nsServerName;
+        public string id;
+        public string map;
     }
 }
