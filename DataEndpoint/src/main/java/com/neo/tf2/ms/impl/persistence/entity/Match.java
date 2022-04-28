@@ -20,6 +20,7 @@ public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
     public static final String TABLE_NAME = "match";
     public static final String C_IS_PLAYING = "is_running";
     public static final String C_NS_SERVER_NAME = "ns_server_name";
+    public static final String C_GAMEMODE = "gamemode";
     public static final String C_MAP = "map";
 
     @Id
@@ -29,7 +30,7 @@ public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
     private UUID id = UUID.randomUUID();
 
     @Column(name = C_IS_PLAYING, nullable = false)
-        @JsonView(Views.Public.class)
+        @JsonView(Views.Internal.class)
     private boolean isRunning = true;
 
     @Column(name = C_NS_SERVER_NAME, nullable = false)
@@ -39,6 +40,10 @@ public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
     @Column(name = C_MAP, nullable = false)
         @JsonView(Views.Public.class)
     private String map;
+
+    @Column(name = C_GAMEMODE, nullable = false)
+        @JsonView(Views.Public.class)
+    private String gamemode;
 
     public UUID getId() {
         return id;
@@ -70,6 +75,14 @@ public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
 
     public void setMap(String map) {
         this.map = map;
+    }
+
+    public String getGamemode() {
+        return gamemode;
+    }
+
+    public void setGamemode(String gamemode) {
+        this.gamemode = gamemode;
     }
 
     @Override

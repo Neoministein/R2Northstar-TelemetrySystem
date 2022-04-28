@@ -1,7 +1,6 @@
 package com.neo.tf2.ms.impl.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.neo.common.impl.StopWatch;
 import com.neo.common.impl.json.JsonSchemaUtil;
 import com.neo.common.impl.json.JsonUtil;
 import com.neo.javax.api.persitence.repository.SearchRepository;
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -33,21 +32,15 @@ public class MatchStateResource extends AbstractRestEndpoint {
     @Inject
     SearchRepository searchRepository;
 
-    @GET
+    @PUT
     public Response get(String x) {
         RequestContext requestContext = getContext(HttpMethod.GET,"");
         RestAction restAction = () -> {
-
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
             JsonNode jsonNode = JsonUtil.fromJson(x);
             JsonSchemaUtil.isValidOrThrow(jsonNode, MatchState.JSON_SCHEMA);
             MatchState matchState = new MatchState(jsonNode.deepCopy());
 
-
             searchRepository.index(matchState);
-            stopWatch.stop();
-            LOGGER.error("Stopwatch {}",stopWatch.getElapsedTimeMs());
             return Response.ok().build();
         };
 

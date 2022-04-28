@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "map": {
+      "type": "string"
+    },
+    "ns_server_name": {
+      "type": "string"
+    },
+    "gamemode": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "map",
+    "ns_server_name",
+    "gamemode"
+  ]
+}
