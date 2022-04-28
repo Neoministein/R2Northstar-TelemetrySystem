@@ -2,16 +2,16 @@
 {
     public struct Vector
     {
-        public float x;
-        public float y;
-        public float z;
+        public int x;
+        public int y;
+        public int z;
 
-        public Vector(float _x, float _y, float _z)
+        public Vector(int _x, int _y, int _z)
         {
             x = _x; y = _y; z = _z;
         }
 
-        public Vector(float[] _floats)
+        public Vector(int[] _floats)
         {
             x = _floats[0];
             y = _floats[1];
@@ -25,6 +25,6 @@
         public string matchId;
         public string map;
         public Events events = new Events();
-        public TimeSpan timePassed;
+        public int timePassed;
     }
 }

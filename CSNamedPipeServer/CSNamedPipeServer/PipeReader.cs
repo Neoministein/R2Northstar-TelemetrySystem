@@ -8,12 +8,15 @@ namespace CSNamedPipeServer
 {
     internal class PipeReader
     {
+        // Http post erstellen
+        // Http put schließen
         private NamedPipeServerStream m_server = null;
         private const int BUFFER_SIZE = 512;
         private const int TCHAR_SIZE = 2;
-        private Match m_currentMatch = new Match(""); // only testing
+        private Match m_currentMatch = new Match("empty", "empty", true); // only testing
         private Queue<DynamicInfos> m_sendInfos = new Queue<DynamicInfos>();
         private DynamicInfos m_currentInfo = new DynamicInfos();
+        private DateTime m_startTime = DateTime.Now;
 
         public void MainLoop()
         {
@@ -47,8 +50,14 @@ namespace CSNamedPipeServer
                 // Remove leading empty string
                 if (curLog[0] == "")
                     curLog = curLog.Skip(1).ToArray();
-
-                ProcessCommand(curLog);
+                try
+                {
+                    ProcessCommand(curLog);
+                }
+                catch (Exception _ex)
+                {
+                    Console.WriteLine(_ex);
+                }
             }
 
 
@@ -70,9 +79,10 @@ namespace CSNamedPipeServer
                     sendCurrentInfo = true;
                     break;
                 case EventType.WaitingForPlayers: // 1
-                    // |1|MapName
+                    // |1|MapName|Gamemode
                     // TODO: Get match key (http GET) and save it for a new match
-                    m_currentMatch = new Match(cmd[1]);
+                    m_currentMatch = new Match(cmd[1], cmd[2], false);
+                    m_startTime = DateTime.Now;
                     break;
                 case EventType.GameFinished: // 2
                     // |2|
@@ -164,7 +174,7 @@ namespace CSNamedPipeServer
                 m_currentMatch.players[_cmd[(i * 5)]].position = new Vector(GetVectorData(_cmd[1 + (i * 5)]));
                 m_currentMatch.players[_cmd[(i * 5)]].rotation = new Vector(GetVectorData(_cmd[2 + (i * 5)]));
                 m_currentMatch.players[_cmd[(i * 5)]].velocity = new Vector(GetVectorData(_cmd[3 + (i * 5)]));
-                m_currentMatch.players[_cmd[(i * 5)]].health = (byte)Math.Clamp(0, 100, double.Parse(_cmd[4 + (i * 5)])); // Not sure how accurate health is saved in squirrel
+                m_currentMatch.players[_cmd[(i * 5)]].health = (byte)Math.Clamp(double.Parse(_cmd[4 + (i * 5)]), 0, 100); // Not sure how accurate health is saved in squirrel
             }
         }
 
@@ -173,19 +183,20 @@ namespace CSNamedPipeServer
             m_currentInfo.players = m_currentMatch.players.Values.ToArray();
             m_currentInfo.matchId = m_currentMatch.matchId;
             m_currentInfo.map = m_currentMatch.mapName;
+            m_currentInfo.timePassed = (int)(DateTime.Now - m_startTime).TotalMilliseconds;
             string json = JsonConvert.SerializeObject(m_currentInfo);
             Console.WriteLine(json); // TODO: Send
             // Add to queue and send async
             m_currentInfo = new DynamicInfos();
         }
 
-        public static float[] GetVectorData(string _vector)
+        public static int[] GetVectorData(string _vector)
         {
             _vector = _vector.Substring(1, _vector.Length-2);
             string[] strVec = _vector.Split(", ");
-            float[] result = new float[strVec.Length];
+            int[] result = new int[strVec.Length];
             for (int i = 0; i < strVec.Length; i++)
-                result[i] = float.Parse(strVec[i]);
+                result[i] = (int)float.Parse(strVec[i]);
             return result;
         }
     }
@@ -193,7 +204,8 @@ namespace CSNamedPipeServer
     public class Match
     {
         public string mapName;
-        public string matchId;
+        public string matchId = "";
+        public string gamemode;
         public Dictionary<string, Player> players = new Dictionary<string, Player>();
 
         /// <summary>
@@ -201,10 +213,14 @@ namespace CSNamedPipeServer
         /// </summary>
         /// <param name="_mapName">Name of map</param>
         /// <param name="_matchId">Id of map given by the backend</param>
-        public Match(string _mapName)
+        public Match(string _mapName, string _gamemode, bool dontAskServer = false)
         {
             mapName = _mapName;
-            Task t1 = Task.Run(() => GetMatchId(_mapName));
+            gamemode = _gamemode;
+            if (!dontAskServer)
+            {
+                Task t1 = Task.Run(() => GetMatchId(_mapName));
+            }
         }
 
         static readonly HttpClient client = new HttpClient();
@@ -240,5 +256,12 @@ namespace CSNamedPipeServer
         public string nsServerName;
         public string id;
         public string map;
+    }
+
+    public class NewMatchRequest
+    {
+        public string map;
+        public string ns_server_name; // random string erstmal
+        public string gamemode;
     }
 }
