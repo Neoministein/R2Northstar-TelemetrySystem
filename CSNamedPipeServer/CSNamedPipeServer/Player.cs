@@ -2,25 +2,84 @@
 {
     public class Player
     {
+        /// <summary>
+        /// Team Id
+        /// </summary>
         public byte team = 0;
+        /// <summary>
+        /// Health in percent
+        /// </summary>
         public byte health = 0; // 8bit int
-        public Vector rotation = new Vector();
-        public Vector position = new Vector();
-        public Vector velocity = new Vector();
+        /// <summary>
+        /// Rotation (reduced to flat degree values)
+        /// </summary>
+        public Vector<int> rotation = new Vector<int>();
+        /// <summary>
+        /// Position (reduced to flat degree values)
+        /// </summary>
+        public Vector<int> position = new Vector<int>();
+        /// <summary>
+        /// Rotation (reduced to flat degree values)
+        /// </summary>
+        public Vector<int> velocity = new Vector<int>();
+        /// <summary>
+        /// Unique player id
+        /// </summary>
         public string playerId = "";
+        /// <summary>
+        /// Primary weapon
+        /// </summary>
         public string primary = "none";
+        /// <summary>
+        /// Secondary weapon
+        /// </summary>
         public string secondary = "none";
+        /// <summary>
+        /// Third weapon
+        /// </summary>
         public string weapon3 = "none";
+        /// <summary>
+        /// Pilot ability
+        /// </summary>
         public string special = "none";
+        /// <summary>
+        /// Type of titan
+        /// </summary>
         public string titanClass = "none";
+        /// <summary>
+        /// Currently wallrunning
+        /// </summary>
         public bool isWallRunning = false;
+        /// <summary>
+        /// Currently piloting titan
+        /// </summary>
         public bool isTitan = false;
+        /// <summary>
+        /// Currently Shooting
+        /// </summary>
         public bool isShooting = false;
+        /// <summary>
+        /// Currently on the ground
+        /// </summary>
         public bool isGrounded = true;
+        /// <summary>
+        /// Currently hanging on a ledge
+        /// </summary>
         public bool isHanging = true;
+        /// <summary>
+        /// Currently crouching
+        /// </summary>
         public bool isCrouching = false;
+        /// <summary>
+        /// Currently alive
+        /// </summary>
         public bool isAlive = false;
 
+        /// <summary>
+        /// Creates a new player
+        /// </summary>
+        /// <param name="_id">Unique id</param>
+        /// <param name="_team">Team id</param>
         public Player(string _id, byte _team)
         {
             playerId = _id;
