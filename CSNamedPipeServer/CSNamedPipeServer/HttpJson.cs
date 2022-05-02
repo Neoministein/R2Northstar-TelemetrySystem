@@ -26,7 +26,8 @@ namespace CSNamedPipeServer
             {
                 Console.WriteLine("Start match+ - Send:");
                 Console.WriteLine("Url: " + _uri + " | String: " + _send);
-                HttpResponseMessage postResponse = await client.PostAsJsonAsync(_uri, _send);
+                var content = new StringContent(_send, Encoding.UTF8, "application/json");
+                HttpResponseMessage postResponse = await client.PostAsync(_uri, content);
                 postResponse.EnsureSuccessStatusCode();
                 responseMessage = await postResponse.Content.ReadAsStringAsync();
                 Console.WriteLine("Start match- - Recive:");
@@ -49,7 +50,8 @@ namespace CSNamedPipeServer
         {
             try
             {
-                var putResponse = await client.PutAsJsonAsync(_uri, _send);
+                var content = new StringContent(_send, Encoding.UTF8, "application/json");
+                var putResponse = await client.PutAsync(_uri, content);
                 putResponse.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
