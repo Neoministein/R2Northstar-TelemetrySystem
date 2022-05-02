@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Net.Http.Json;
+using System.Net.Http;
 using System.IO.Pipes;
 using System.Text;
 using System.Collections;
@@ -23,7 +25,7 @@ namespace CSNamedPipeServer
             // TODO: Accept multiple pipes
             bool m_closed = false;
             m_server = new NamedPipeServerStream("GameDataPipe", PipeDirection.In, 1, PipeTransmissionMode.Byte);
-            m_server.WaitForConnection();
+            m_server.WaitForConnection(); // TODO: Timeout
             Console.WriteLine("Connection: " + m_server.IsConnected);
             if (!m_server.IsConnected)
             {
@@ -35,7 +37,7 @@ namespace CSNamedPipeServer
 
 
 
-            while (!m_closed)
+            while (!m_closed && m_server.IsConnected) // TODO: Start new session when match ends or disconnect
             {
                 // TODO: Multithreading/Coroutine
                 m_server.Read(buff, 0, BUFFER_SIZE * TCHAR_SIZE);
@@ -63,7 +65,7 @@ namespace CSNamedPipeServer
 
 
 
-            Console.ReadKey();
+            //Console.ReadKey();
             //TODO: if prev string == current string discard it
         }
 
@@ -204,7 +206,7 @@ namespace CSNamedPipeServer
     public class Match
     {
         public string mapName;
-        public string matchId = "";
+        public string matchId = "4bd21f79-9394-481f-b060-7644335b87fb"; // 36 Stellen auch mit Bindestrichen
         public string gamemode;
         public Dictionary<string, Player> players = new Dictionary<string, Player>();
 
@@ -223,12 +225,12 @@ namespace CSNamedPipeServer
             }
         }
 
-        static readonly HttpClient client = new HttpClient();
-
         public async Task GetMatchId(string _mapName)
         {
             string servername = "TestServerName";
             string url = "localhost:8080/api/v1/game";
+            NewMatchResponse newResponse = new NewMatchResponse();
+            string answer = await UpDownData.PostJsonHttpClient(url + "/new", )
             string answer = await client.GetStringAsync(url + "/new?map=" + _mapName);
             if (!String.IsNullOrWhiteSpace(answer))
             {
@@ -244,14 +246,6 @@ namespace CSNamedPipeServer
 
     public class NewMatchResponse
     {
-        public string apiVersion;
-        public List<NewMatchResponseData> data;
-        public string context;
-        public string status;
-    }
-
-    public class NewMatchResponseData
-    {
         public bool isRunning;
         public string nsServerName;
         public string id;
@@ -261,7 +255,7 @@ namespace CSNamedPipeServer
     public class NewMatchRequest
     {
         public string map;
-        public string ns_server_name; // random string erstmal
+        public string ns_server_name;
         public string gamemode;
     }
 }

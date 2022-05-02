@@ -4,10 +4,11 @@ namespace CSNamedPipeServer
 {
     public static class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             PipeReader pipeReader = new PipeReader();
-            pipeReader.MainLoop();
+            string test = await UpDownData.PostJsonHttpClient("", "");
+            //pipeReader.MainLoop();
         }
     }
 }
