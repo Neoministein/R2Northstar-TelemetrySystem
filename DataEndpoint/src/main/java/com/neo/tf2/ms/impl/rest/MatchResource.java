@@ -1,7 +1,6 @@
 package com.neo.tf2.ms.impl.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.common.api.action.Action;
 import com.neo.common.api.json.Views;
 import com.neo.common.impl.StringUtils;
@@ -43,9 +42,6 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
     public static final String P_NEW = "/new";
     public static final String P_END = "/end";
-
-    protected static final ObjectNode E_NOT_FOUND = DefaultResponse.errorObject("resources/000","Entity not found");
-    protected static final ObjectNode E_CANNOT_PARSE = DefaultResponse.errorObject("resources/001","Unable to retrieve entity");
 
     @Inject
     EntityRepository entityRepository;
@@ -116,7 +112,6 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
         } catch (IllegalArgumentException ex) {
             return new Object();
         }
-
     }
 
     @Override

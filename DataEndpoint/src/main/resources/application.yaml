@@ -1,6 +1,6 @@
 elastic:
     nodes: [http://localhost:9200]
-    projectId: ms
+    postfix: ms
 server:
     port: 8081
 javax:
