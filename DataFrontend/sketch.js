@@ -26,16 +26,18 @@ function draw() {
 		let players = currentJsonData.players;
   
 		for(var i = 0; i < players.length; i++) {
+			push()
 		var player = players[i];
-	
-		translate((player.position.x + 5325) / 10.1, (player.position.y * -1 + 5700) / 10.1);
+		console.log( i + " | "  + ((player.position.x + 5325) / 10.1) + " | " + ((player.position.y * -1 + 5700) / 10.1) )
+		translate((player.position.x + 5272) / 10, (player.position.y * -1 + 5671) / 10);
 		rotate(PI / 180 * (90 - player.rotation.y));
-	
+		
 		if(player.team == 2) {
 			image(playerBlue, -7.5, -9.5, 15, 19);
 		} else {
 			image(playerOrange, -7.5, -9.5, 15, 19);
 		}
+		pop()
 	}
 	}
 }
