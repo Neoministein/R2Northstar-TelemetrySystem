@@ -22,7 +22,7 @@ namespace CSNamedPipeServer
         private bool m_closed = false;
 
         public static string servername = "TestServerName";
-        public static string url = "http://localhost:8081/api/v1";
+        public static string url = "http://localhost:8090/api/v1";
 
         /// <summary>
         /// Main Loop that executes the named pipe as well as handling http and json
@@ -43,7 +43,7 @@ namespace CSNamedPipeServer
 
 
 
-            while (!m_closed && m_server.IsConnected) // TODO: Start new session when match ends or disconnect
+            while (true) // TODO: Start new session when match ends or disconnect !m_closed && m_server.IsConnected
             {
                 // TODO: Multithreading/Coroutine
                 m_server.Read(buff, 0, BUFFER_SIZE * TCHAR_SIZE);
@@ -294,9 +294,9 @@ namespace CSNamedPipeServer
                 {
                     NewMatchResponse result = JsonConvert.DeserializeObject<NewMatchResponse>(answer);
 
-                    if (result.map == _mapName && result.nsServerName == PipeReader.servername)
+                    if (result.data.map == _mapName && result.data.nsServerName == PipeReader.servername)
                     {
-                        matchId = result.id;
+                        matchId = result.data.id;
                     }
                     else
                     {
@@ -321,6 +321,14 @@ namespace CSNamedPipeServer
     }
 
     public class NewMatchResponse
+    {
+        public string apiVersion;
+        public NewMatchResponseData data;
+        public string context;
+        public string status;
+    }
+
+    public class NewMatchResponseData
     {
         public bool isRunning;
         public string nsServerName;
