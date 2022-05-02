@@ -2,7 +2,7 @@ elastic:
     nodes: [http://localhost:9200]
     postfix: ms
 server:
-    port: 8081
+    port: 8090
 javax:
     sql:
         DataSource:

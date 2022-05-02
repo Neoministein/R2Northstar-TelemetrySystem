@@ -63,6 +63,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
                 } catch (RollbackException ex) {
                     throw new InternalLogicException(ex);
                 }
+				LOGGER.info("New game with id {}", match.getId());
                 return parseEntityToResponse(match, requestContext, Views.Public.class);
             };
 
