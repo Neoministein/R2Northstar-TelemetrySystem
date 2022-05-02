@@ -12,18 +12,21 @@ namespace CSNamedPipeServer
     {
         // Http post erstellen
         // Http put schließen
-        private NamedPipeServerStream m_server = null;
+        private NamedPipeServerStream m_server;
         private const int BUFFER_SIZE = 512;
         private const int TCHAR_SIZE = 2;
-        private Match m_currentMatch = new Match("empty", "empty", true); // only testing
+        private Match m_currentMatch = new Match("empty", "empty", true); // Needed, because its assigned outside of the constructor
         private Queue<DynamicInfos> m_sendInfos = new Queue<DynamicInfos>();
         private DynamicInfos m_currentInfo = new DynamicInfos();
         private DateTime m_startTime = DateTime.Now;
+        private bool m_closed = false;
+
+        public static string servername = "TestServerName";
+        public static string url = "localhost:8081/api/v1";
 
         public void MainLoop()
         {
             // TODO: Accept multiple pipes
-            bool m_closed = false;
             m_server = new NamedPipeServerStream("GameDataPipe", PipeDirection.In, 1, PipeTransmissionMode.Byte);
             m_server.WaitForConnection(); // TODO: Timeout
             Console.WriteLine("Connection: " + m_server.IsConnected);
@@ -69,7 +72,7 @@ namespace CSNamedPipeServer
             //TODO: if prev string == current string discard it
         }
 
-        public async void ProcessCommand(string[] cmd)
+        public void ProcessCommand(string[] cmd)
         {
             bool sendCurrentInfo = false;
             EventType logType = (EventType)int.Parse(cmd[0]);
@@ -88,7 +91,7 @@ namespace CSNamedPipeServer
                     break;
                 case EventType.GameFinished: // 2
                     // |2|
-                    // TODO: Send with other events or send by its own?
+                    EndMatch();
                     break;
                 case EventType.PlayerConnect: // 3
                     // |3|PlayerID|TeamID
@@ -180,6 +183,12 @@ namespace CSNamedPipeServer
             }
         }
 
+        public void EndMatch()
+        {
+            m_closed = true;
+            Task t1 = Task.Run(() => m_currentMatch.EndMatch().Wait());
+        }
+
         public void SendJsonDynamicInfos()
         {
             m_currentInfo.players = m_currentMatch.players.Values.ToArray();
@@ -187,8 +196,9 @@ namespace CSNamedPipeServer
             m_currentInfo.map = m_currentMatch.mapName;
             m_currentInfo.timePassed = (int)(DateTime.Now - m_startTime).TotalMilliseconds;
             string json = JsonConvert.SerializeObject(m_currentInfo);
-            Console.WriteLine(json); // TODO: Send
-            // Add to queue and send async
+            //Console.WriteLine(json);
+            Task dontAwaite = UpDownData.PutJsonHttpClient(url + "/matchstate", json); // Exceptions here will be lost since there is not await
+            // TODO: ?Add to queue - might not be neccesary anymore since its done in tasks which s result arent waited for
             m_currentInfo = new DynamicInfos();
         }
 
@@ -221,26 +231,41 @@ namespace CSNamedPipeServer
             gamemode = _gamemode;
             if (!dontAskServer)
             {
-                Task t1 = Task.Run(() => GetMatchId(_mapName));
+                Task t1 = Task.Run(() => GetMatchId(_mapName, _gamemode).Wait());
             }
         }
 
-        public async Task GetMatchId(string _mapName)
+        public async Task GetMatchId(string _mapName, string _gamemode)
         {
-            string servername = "TestServerName";
-            string url = "localhost:8080/api/v1/game";
-            NewMatchResponse newResponse = new NewMatchResponse();
-            string answer = await UpDownData.PostJsonHttpClient(url + "/new", )
-            string answer = await client.GetStringAsync(url + "/new?map=" + _mapName);
+            NewMatchRequest newResponse = new NewMatchRequest() { map = _mapName, ns_server_name = PipeReader.servername, gamemode = _gamemode };
+            string answer = await UpDownData.PostJsonHttpClient(PipeReader.url + "/match/new", JsonConvert.SerializeObject(newResponse)); // "localhost:8081/api/v1/match/new"
+            //string answer = await client.GetStringAsync(url + "/new?map=" + _mapName);
             if (!String.IsNullOrWhiteSpace(answer))
             {
                 // TODO: create object to serialze to
-                NewMatchResponse result = JsonConvert.DeserializeObject<NewMatchResponse>(answer);
-                foreach (NewMatchResponseData item in result.data.Where(data => data.nsServerName == servername))
+                try
                 {
-                    matchId = item.id;
+                    NewMatchResponse result = JsonConvert.DeserializeObject<NewMatchResponse>(answer);
+
+                    if (result.map == _mapName && result.nsServerName == PipeReader.servername)
+                    {
+                        matchId = result.id;
+                    }
+                    else
+                    {
+                        throw new WrongAnswerException("GetMatchId info for wrong match");
+                    }
+                }
+                catch (JsonException _ex)
+                {
+                    Console.WriteLine(_ex.ToString());
                 }
             }
+        }
+
+        public async Task EndMatch()
+        {
+            await UpDownData.PutJsonHttpClient(PipeReader.url + "/match/end/" + matchId, String.Empty);
         }
     }
 
@@ -257,5 +282,14 @@ namespace CSNamedPipeServer
         public string map;
         public string ns_server_name;
         public string gamemode;
+    }
+
+    public class WrongAnswerException : Exception
+    { 
+        public WrongAnswerException() { }
+
+        public WrongAnswerException(string _message) : base(_message) { }
+
+        public WrongAnswerException(string _message, Exception _inner) : base(_message, _inner) { }
     }
 }

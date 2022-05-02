@@ -15,7 +15,7 @@ namespace CSNamedPipeServer
         // TODO: Use queue instead
         public static async Task<string> PostJsonHttpClient(string _uri, string _send)
         {
-            var postResponse = await client.PostAsJsonAsync("http://echo.jsontest.com/key/value/one/two", "");
+            var postResponse = await client.PostAsJsonAsync(_uri, _send);
             postResponse.EnsureSuccessStatusCode();
             var responseMessage = await postResponse.Content.ReadAsStringAsync();
             return responseMessage;
@@ -23,13 +23,20 @@ namespace CSNamedPipeServer
 
         public static async Task PutJsonHttpClient(string _uri, string _send)
         {
-            var putResponse = await client.PutAsJsonAsync(_uri, _send);
-            putResponse.EnsureSuccessStatusCode();
+            try
+            {
+                var putResponse = await client.PutAsJsonAsync(_uri, _send);
+                putResponse.EnsureSuccessStatusCode();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         public static async Task<string> GetTaskAsync(string _uri)
         {
-            var responseMessage = await client.GetStringAsync(_uri);
+            var responseMessage = await client.GetFromJsonAsync<string>(_uri);
             return responseMessage;
         }
     }
