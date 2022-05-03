@@ -10,7 +10,7 @@
     </parent>
     
     <groupId>com.neo.tf2</groupId>
-    <artifactId>MapSystem-Data-Endpoint</artifactId>
+    <artifactId>mapsystem-data-endpoint</artifactId>
     <name>MapSystem Data Endpoint</name>
     <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>

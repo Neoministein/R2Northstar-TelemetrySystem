@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  mapsystem-dataendpoint-base:
+    build:
+      context: ../../..
+      dockerfile: install/docker/Dockerfile
+    ports:
+    - 8090:8090
+    - 5432:5432
+    env_file:
+    - container.env

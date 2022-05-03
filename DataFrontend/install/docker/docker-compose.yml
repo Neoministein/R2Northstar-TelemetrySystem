@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  mapsystem-datafrontend:
+    image: nginx:1.21.6
+    volumes:
+    - ../../root:/usr/share/nginx/html
+    ports:
+    - 80:80
