@@ -27,12 +27,13 @@ public class Player {
 
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
-        json.put("id", id);
+        json.put("playerId", id);
         json.put("team",team);
         json.put("isTitan",isTitan);
         json.put("titanClass", titanClass);
         json.put("primary",primary);
-        json.put("secondary",secondary);
+        json.put("secondary", secondary);
+        json.putOpt("secondary", "UNKNOWN");
         json.put("weapon3",weapon3);
         json.put("isWallRunning",isWallRunning);
         json.put("isShooting",isShooting);
@@ -40,6 +41,12 @@ public class Player {
         json.put("rotation",rotation.toJSON());
         json.put("velocity",velocity.toJSON());
         json.put("health",health);
+        json.put("special", secondary);
+        json.putOpt("special", "UNKNOWN");
+        json.put("isGrounded", true);
+        json.put("isHanging", false);
+        json.put("isCrouching", false);
+        json.put("isAlive", true);
         return json;
     }
 
