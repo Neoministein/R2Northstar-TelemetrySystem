@@ -20,5 +20,15 @@
         PlayerMantle = 15,
         PlayerWallHang = 16,
         PlayerCrouch = 17,
+
+        DebugMessage = 99,
+    }
+
+    public enum LogMode
+    {
+        None = 0,       // No logs
+        Event = 1,      // Event Logs // Note: Dynamic infos only in All - not yet
+        Most = 2,       // Event+Pipe Logs
+        All = 3,        // Event+Pipe+Send Logs
     }
 }
