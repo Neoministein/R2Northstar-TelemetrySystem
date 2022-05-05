@@ -24,7 +24,7 @@ namespace CSNamedPipeServer
         public const string argServername = "TestServerName";
         public const string argUrl = "http://localhost:8090/api/v1";
 
-        public static bool argUseHttp = false;
+        public static bool argUseHttp = true;
         public static LogMode argLogMode = LogMode.Event;
 
         /// <summary>
@@ -266,11 +266,8 @@ namespace CSNamedPipeServer
             {
                 Task dontAwaite = UpDownData.PutJsonHttpClient(argUrl + "/matchstate", json); // Exceptions here will be lost since there is not await
             }
-            else
-            {
-                if (argLogMode == LogMode.All)
-                    Console.WriteLine("Send: " + JValue.Parse(json).ToString(Formatting.Indented));
-            }
+            if (argLogMode == LogMode.All)
+                Console.WriteLine("Send: " + JValue.Parse(json).ToString(Formatting.Indented));
             // nTODO: Add to queue - might not be neccesary anymore since its done in tasks which s result arent waited for
             m_currentInfo = new DynamicInfos();
         }
@@ -286,7 +283,9 @@ namespace CSNamedPipeServer
             string[] strVec = _vector.Split(", ");
             int[] result = new int[strVec.Length];
             for (int i = 0; i < strVec.Length; i++)
-                result[i] = (int)float.Parse(strVec[i]);
+            {
+                result[i] = int.Parse(strVec[i].Split('.').First());
+            }
             return result;
         }
     }
