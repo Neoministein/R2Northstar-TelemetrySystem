@@ -10,6 +10,7 @@ void function MapSystem_Init()
     AddCallback_GameStateEnter( eGameState.WaitingForPlayers, OnWaitingForPlayers )
     AddCallback_GameStateEnter( eGameState.Playing, OnGameStartePlay )
     AddCallback_GameStateEnter( eGameState.Postmatch, OnGameFinished )
+    AddCallback_GameStateEnter( eGameState.Prematch, PrintDebug )
     
 
     AddCallback_OnClientConnected( Map_PlayerConnect )
@@ -26,7 +27,7 @@ void function MapSystem_Init()
 
 void function OnWaitingForPlayers() 
 {
-    NSSendToNamedPipe( "|1|" + GetMapName() + "|" + GameRules_GetGameMode() )
+    NSStartNewMatch( "|1|" + GetMapName() + "|" + GameRules_GetGameMode() )
 }
 
 
@@ -222,4 +223,9 @@ void function Map_OnPlayerBeginCrouch( entity player )
 void function Map_OnPlayerEndCrouch( entity player ) 
 {
     NSSendToNamedPipe( "|17|" + player.GetUID() + "|false" )
+}
+
+void function PrintDebug()
+{
+    NSSendToNamedPipe( "|99|DebugText" )
 }

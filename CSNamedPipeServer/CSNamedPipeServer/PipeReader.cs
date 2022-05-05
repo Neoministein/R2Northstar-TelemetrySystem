@@ -15,13 +15,12 @@ namespace CSNamedPipeServer
         private NamedPipeServerStream m_server;
         private const int BUFFER_SIZE = 512;
         private const int TCHAR_SIZE = 2;
-        private Match m_currentMatch = new Match("empty", "empty", true); // Needed, because its assigned outside of the constructor
+        private Match m_currentMatch = new Match("empty0", "empty1", "empty2", true); // Needed, because its assigned outside of the constructor
         private Queue<DynamicInfos> m_sendInfos = new Queue<DynamicInfos>();
         private DynamicInfos m_currentInfo = new DynamicInfos();
         private DateTime m_startTime = DateTime.Now;
         private bool m_closed = false;
 
-        public const string argServername = "TestServerName";
         public const string argUrl = "http://localhost:8090/api/v1";
 
         public static bool argUseHttp = true;
@@ -93,10 +92,10 @@ namespace CSNamedPipeServer
                         sendCurrentInfo = true;
                         break;
                     case EventType.WaitingForPlayers: // 1
-                        // |1|MapName|Gamemode
+                        // |1|MapName|Gamemode|Servername
                         if (argLogMode == LogMode.Event)
-                            Console.Write("Event: WaitingForPlayersh: gamemode: " + cmd[2]+ ", mapName: " + cmd[1]);
-                        m_currentMatch = new Match(cmd[1], cmd[2], false);
+                            Console.Write("Event: WaitingForPlayers: gamemode: " + cmd[2]+ ", mapName: " + cmd[1]);
+                        m_currentMatch = new Match(cmd[1], cmd[2], cmd[3], false);
                         m_startTime = DateTime.Now;
                         if (argLogMode == LogMode.Event)
                             Console.WriteLine(", matchId: " + m_currentMatch.matchId);
@@ -305,6 +304,10 @@ namespace CSNamedPipeServer
         /// </summary>
         public string gamemode;
         /// <summary>
+        /// Name of the server - same name as in ingame server browser
+        /// </summary>
+        public string serverName;
+        /// <summary>
         /// Dictionary of all players currently on the server
         /// </summary>
         public Dictionary<string, Player> players = new Dictionary<string, Player>();
@@ -314,13 +317,15 @@ namespace CSNamedPipeServer
         /// </summary>
         /// <param name="_mapName">Name of map</param>
         /// <param name="_matchId">Id of map given by the backend</param>
-        public Match(string _mapName, string _gamemode, bool dontAskServer = false)
+        /// <param name="_serverName">Name of the northstar server</param>
+        /// <param name="_dontAskServer">Backend wont be notified - for initial named pipe connection</param>
+        public Match(string _mapName, string _gamemode, string _serverName, bool _dontAskServer = false)
         {
             mapName = _mapName;
             gamemode = _gamemode;
-            if (!dontAskServer)
+            if (!_dontAskServer)
             {
-                Task t1 = Task.Run(() => AssignMatchId(_mapName, _gamemode).Wait());
+                Task t1 = Task.Run(() => AssignMatchId(_mapName, _gamemode, _serverName).Wait());
             }
         }
 
@@ -331,9 +336,9 @@ namespace CSNamedPipeServer
         /// <param name="_gamemode">Gamemode short term</param>
         /// <returns></returns>
         /// <exception cref="WrongAnswerException">Thrown when the data is for a different server</exception>
-        public async Task AssignMatchId(string _mapName, string _gamemode)
+        public async Task AssignMatchId(string _mapName, string _gamemode, string _serverName)
         {
-            NewMatchRequest newResponse = new NewMatchRequest() { map = _mapName, ns_server_name = PipeReader.argServername, gamemode = _gamemode };
+            NewMatchRequest newResponse = new NewMatchRequest() { map = _mapName, ns_server_name = _serverName, gamemode = _gamemode };
             if (PipeReader.argUseHttp)
             {
                 string answer = await UpDownData.PostJsonHttpClient(PipeReader.argUrl + "/match/new", JsonConvert.SerializeObject(newResponse)); // "localhost:8081/api/v1/match/new"
@@ -345,7 +350,7 @@ namespace CSNamedPipeServer
                     {
                         NewMatchResponse result = JsonConvert.DeserializeObject<NewMatchResponse>(answer);
 
-                        if (result.data.map == _mapName && result.data.nsServerName == PipeReader.argServername)
+                        if (result.data.map == _mapName && result.data.nsServerName == _serverName)
                         {
                             matchId = result.data.id;
                         }
