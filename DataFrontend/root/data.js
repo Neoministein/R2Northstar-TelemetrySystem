@@ -1,6 +1,10 @@
+const params = new Proxy(new URLSearchParams(window.location.search), {
+    get: (searchParams, prop) => searchParams.get(prop),
+});
+
 let json;
 
-function httpGetI(theUrl, reponse) {
+function httpGetI(theUrl) {
     fetch(theUrl, {
         method: "GET",
     }).then(function(response) {
@@ -17,11 +21,9 @@ function httpGetI(theUrl, reponse) {
 }
 
 function doLogic() {
-	let response;
-	httpGetI('http://localhost:8090/api/v1/matchstate/48a90d62-b797-4dbe-9d5c-078ffc222e53', response);
-	
-
+	httpGetI('http://localhost:8090/api/v1/matchstate/' + params.id);
 }
+
 function setupInterval() {
 	setInterval(doLogic, 10)
 }

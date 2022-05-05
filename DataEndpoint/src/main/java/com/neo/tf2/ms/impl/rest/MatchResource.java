@@ -8,7 +8,9 @@ import com.neo.common.impl.exception.InternalLogicException;
 import com.neo.common.impl.json.JsonSchemaUtil;
 import com.neo.common.impl.json.JsonUtil;
 import com.neo.common.impl.lazy.LazyAction;
-import com.neo.javax.api.persitence.repository.EntityRepository;
+import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
+import com.neo.javax.api.persitence.entity.EntityQuery;
+import com.neo.javax.api.persitence.entity.EntityRepository;
 import com.neo.tf2.ms.impl.persistence.entity.Match;
 import com.neo.util.javax.api.rest.RestAction;
 import com.neo.util.javax.impl.rest.DefaultResponse;
@@ -26,8 +28,7 @@ import javax.transaction.RollbackException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RequestScoped
 @Path(MatchResource.RESOURCE_LOCATION)
@@ -38,13 +39,16 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
     protected static final JsonSchema JSON_SCHEMA = JsonSchemaUtil.generateSchemaFromResource("schemas/NewMatch.json");
 
+    protected static final EntityQuery<Match> Q_ARE_PLAYING = new EntityQuery<>(Match.class, 0,null,
+            List.of(new ExplicitSearchCriteria(Match.C_IS_PLAYING,true)),
+            Map.of(Match.C_START_DATE, false));
+
     public static final String RESOURCE_LOCATION = "api/v1/match";
 
     public static final String P_NEW = "/new";
     public static final String P_END = "/end";
 
-    @Inject
-    EntityRepository entityRepository;
+    public static final String P_PLAYING = "/playing";
 
     @POST
     @Path(P_NEW)
@@ -87,7 +91,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
                     return DefaultResponse.error(404, E_NOT_FOUND, requestContext);
                 }
                 Match game = optGame.get();
-                game.setRunning(false);
+                game.setIsRunning(false);
 
                 entityRepository.edit(game);
                 return parseEntityToResponse(game, requestContext, Views.Public.class);
@@ -98,6 +102,17 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
             }
         };
 
+        return super.restCall(restAction, requestContext);
+    }
+
+    @GET
+    @Path(P_PLAYING)
+    public Response playing(){
+        RequestContext requestContext = new RequestContext(HttpMethod.GET, getClassURI(), P_PLAYING);
+        RestAction restAction = () -> {
+            String result = JsonUtil.toJson(entityRepository.find(Q_ARE_PLAYING), Views.Public.class);
+            return DefaultResponse.success(requestContext, JsonUtil.fromJson(result));
+        };
         return super.restCall(restAction, requestContext);
     }
 

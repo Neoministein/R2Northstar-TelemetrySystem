@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -18,10 +19,11 @@ import java.util.UUID;
 public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
 
     public static final String TABLE_NAME = "match";
-    public static final String C_IS_PLAYING = "is_running";
-    public static final String C_NS_SERVER_NAME = "ns_server_name";
+    public static final String C_IS_PLAYING = "isRunning";
+    public static final String C_NS_SERVER_NAME = "nsServerName";
     public static final String C_GAMEMODE = "gamemode";
     public static final String C_MAP = "map";
+    public static final String C_START_DATE = "startDate";
 
     @Id
     @Type(type = "uuid-char")
@@ -45,6 +47,10 @@ public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
         @JsonView(Views.Public.class)
     private String gamemode;
 
+    @Column(name = C_START_DATE, nullable = false, updatable = false)
+        @JsonView(Views.Public.class)
+    private Date startDate = new Date();
+
     public UUID getId() {
         return id;
     }
@@ -53,11 +59,11 @@ public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
         this.id = id;
     }
 
-    public boolean isRunning() {
+    public boolean getIsRunning() {
         return isRunning;
     }
 
-    public void setRunning(boolean running) {
+    public void setIsRunning(boolean running) {
         isRunning = running;
     }
 
@@ -83,6 +89,14 @@ public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
 
     public void setGamemode(String gamemode) {
         this.gamemode = gamemode;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     @Override

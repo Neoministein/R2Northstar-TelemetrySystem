@@ -3,7 +3,7 @@ package com.neo.tf2.ms.impl.rest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.common.impl.json.JsonSchemaUtil;
 import com.neo.common.impl.json.JsonUtil;
-import com.neo.javax.api.persitence.repository.SearchRepository;
+import com.neo.javax.api.persitence.search.SearchRepository;
 import com.neo.tf2.ms.impl.persistence.GlobalGameState;
 import com.neo.tf2.ms.impl.persistence.searchable.MatchState;
 import com.neo.util.javax.api.rest.RestAction;

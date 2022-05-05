@@ -2,9 +2,9 @@ package com.neo.tf2.ms.impl.persistence.searchable;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.common.impl.json.JsonSchemaUtil;
-import com.neo.javax.api.persitence.IndexPeriod;
-import com.neo.javax.api.persitence.entity.GenericSearchable;
-import com.neo.javax.api.persitence.entity.Searchable;
+import com.neo.javax.api.persitence.search.GenericSearchable;
+import com.neo.javax.api.persitence.search.IndexPeriod;
+import com.neo.javax.api.persitence.search.Searchable;
 import com.networknt.schema.JsonSchema;
 
 public class MatchState extends GenericSearchable implements Searchable {
