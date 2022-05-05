@@ -31,7 +31,7 @@ namespace CSNamedPipeServer
             // TODO: Accept multiple pipes
             m_namedPipeServer = new NamedPipeServerStream("GameDataPipe", PipeDirection.In, 1, PipeTransmissionMode.Byte);
             m_namedPipeServer.WaitForConnection(); // TODO: Timeout
-            Console.WriteLine("Connection: " + m_namedPipeServer.IsConnected);
+            Console.WriteLine("Connection: " + (m_namedPipeServer.IsConnected ? "connected" : "failed"));
             if (!m_namedPipeServer.IsConnected)
             {
                 Console.WriteLine("Error, closing server, no connection established!");
@@ -75,7 +75,8 @@ namespace CSNamedPipeServer
                 Console.WriteLine("Pipe connection lost. Ending current match");
                 EndMatch();
             }
-            Console.WriteLine("Exit: 0");
+            m_namedPipeServer.Dispose();
+            //Console.WriteLine("Exit: 0");
         }
 
         /// <summary>
