@@ -1,15 +1,21 @@
 let bg;
 let playerBlue;
 let playerOrange;
+
+let playerBlueDead;
+let playerOrangeDead;
 let scale;
 let allScales;
 
 
 function preload() {
-  playerBlue = loadImage("img/player-blue.png");
-  playerOrange = loadImage("img/player-orange.png");
-	let mapName = params.map;
-  bg = loadImage('img/' + mapName + '.png');
+  playerBlue = loadImage("img/icon/player-blue.png");
+  playerOrange = loadImage("img/icon/player-orange.png");
+
+  playerBlueDead = loadImage("img/icon/player-blue-dead.png"); // 41 53
+  playerOrangeDead = loadImage("img/icon/player-orange-dead.png");
+  let mapName = params.map;
+  bg = loadImage('img/map/' + mapName + '.png');
 
   for (let i = 0; i < allScales.length;i++) {
   	if (mapName === allScales[i].map) {
@@ -38,16 +44,32 @@ function draw() {
 			push()
 			var player = players[i];
 			translate((player.position.x + scale.posX) / scale.scale, (player.position.y * -1 + scale.posY) / scale.scale);
-			rotate(PI / 180 * (90 - player.rotation.y));
-		
-		if(player.team == 2) {
-			image(playerBlue, -7.5, -9.5, 15, 19);
-		} else {
-			image(playerOrange, -7.5, -9.5, 15, 19);
+
+			let playerIcon;
+
+			if (player.isAlive) {
+				rotate(PI / 180 * (90 - player.rotation.y));
+				if(player.team === 2) {
+					playerIcon = playerBlue;
+				} else {
+					playerIcon = playerOrange;
+				}
+			} else {
+				if(player.team === 2) {
+					playerIcon = playerBlueDead;
+				} else {
+					playerIcon = playerOrangeDead;
+				}
+			}
+			image(playerIcon, -7.5, -9.5,15,19); // 41 53
+			pop()
 		}
-		pop()
 	}
-	}
+}
+
+function mouseClicked() {
+	//ellipse(mouseX, mouseY, 5, 5);
+	return false;
 }
 
 allScales = [

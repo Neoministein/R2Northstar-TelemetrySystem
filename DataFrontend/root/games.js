@@ -1,34 +1,11 @@
+let table
+let thead
+let tbody
 function createTables(data) {
     if (data.status !== 200) {
         document.getElementById('body').innerHTML = 'Error connecting to backend'
         return
     }
-    let table = document.createElement('table');
-    let thead = document.createElement('thead');
-    let tbody = document.createElement('tbody');
-
-    table.appendChild(thead);
-    table.appendChild(tbody);
-
-    // Adding the entire table to the body tag
-    document.getElementById('body').appendChild(table);
-
-    // Creating and adding data to first row of the table
-    let tableHeadder = document.createElement('tr');
-    let heading_1 = document.createElement('th');
-    heading_1.innerHTML = "Ns Server Name";
-    let heading_2 = document.createElement('th');
-    heading_2.innerHTML = "Map";
-    let heading_3 = document.createElement('th');
-    heading_3.innerHTML = "Gamemode";
-    let heading_4 = document.createElement('th');
-    heading_4.innerHTML = "Start date";
-
-    tableHeadder.appendChild(heading_1);
-    tableHeadder.appendChild(heading_2);
-    tableHeadder.appendChild(heading_3);
-    tableHeadder.appendChild(heading_4);
-    thead.appendChild(tableHeadder);
 
     for (let i = 0; i < data.data.hitCount;i++) {
         let element = data.data.hits[i];
@@ -53,9 +30,39 @@ function createTables(data) {
 }
 
 function doLogic() {
+    table = document.createElement('table');
+    thead = document.createElement('thead');
+    tbody = document.createElement('tbody');
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    // Adding the entire table to the body tag
+    document.getElementById('body').appendChild(table);
+
+    // Creating and adding data to first row of the table
+    let tableHeadder = document.createElement('tr');
+    let heading_1 = document.createElement('th');
+    heading_1.innerHTML = "Ns Server Name";
+    let heading_2 = document.createElement('th');
+    heading_2.innerHTML = "Map";
+    let heading_3 = document.createElement('th');
+    heading_3.innerHTML = "Gamemode";
+    let heading_4 = document.createElement('th');
+    heading_4.innerHTML = "Start date";
+
+    tableHeadder.appendChild(heading_1);
+    tableHeadder.appendChild(heading_2);
+    tableHeadder.appendChild(heading_3);
+    tableHeadder.appendChild(heading_4);
+    thead.appendChild(tableHeadder);
+
+
     fetch('http://localhost:8090/api/v1/match/playing').then(response => response.json()).then(data => {
         console.log(data);
         createTables(data);
+    }).catch(err => {
+        document.getElementById('body').innerHTML = 'Error connecting to backend please try again later'
     });
 }
 
