@@ -1,8 +1,9 @@
 elastic:
-    nodes: [http://localhost:9200]
-    postfix: ms
+    nodes:
+        - ${org.elastic.node.0}
+    prefix: tfms
 server:
-    port: 8081
+    port: 8090
 javax:
     sql:
         DataSource:

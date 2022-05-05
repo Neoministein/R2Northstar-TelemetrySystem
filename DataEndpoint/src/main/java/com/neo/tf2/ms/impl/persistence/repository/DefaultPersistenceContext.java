@@ -1,7 +1,6 @@
 package com.neo.tf2.ms.impl.persistence.repository;
 
-
-import com.neo.javax.api.persistence.repository.PersistenceContextService;
+import com.neo.javax.api.persistence.entity.PersistenceContextService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
