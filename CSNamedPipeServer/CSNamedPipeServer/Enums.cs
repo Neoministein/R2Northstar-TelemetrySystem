@@ -27,7 +27,7 @@
     public enum LogMode
     {
         None = 0,       // No logs
-        Event = 1,      // Event Logs // Note: Dynamic infos only in All - not yet
+        Event = 1,      // Event Logs
         Most = 2,       // Event+Pipe Logs
         All = 3,        // Event+Pipe+Send Logs
     }

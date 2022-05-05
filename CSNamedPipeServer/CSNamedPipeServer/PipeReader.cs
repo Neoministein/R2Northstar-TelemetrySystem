@@ -1,7 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Net.Http.Json;
-using System.Net.Http;
 using System.IO.Pipes;
 using System.Text;
 using System.Collections;
@@ -12,19 +10,18 @@ namespace CSNamedPipeServer
     {
         // Http post erstellen
         // Http put schließen
-        private NamedPipeServerStream m_server;
-        private const int BUFFER_SIZE = 512;
-        private const int TCHAR_SIZE = 2;
-        private Match m_currentMatch = new Match("empty0", "empty1", "empty2", true); // Needed, because its assigned outside of the constructor
-        private Queue<DynamicInfos> m_sendInfos = new Queue<DynamicInfos>();
+        private NamedPipeServerStream m_namedPipeServer;
+        private const int BUFFER_SIZE = 512; // Same as northstar.dll
+        private const int TCHAR_SIZE = 2; // Same as northstar.dll
+        private Match m_currentMatch = new Match("empty0", "empty1", "empty2", false, true); // Needed, because its assigned outside of the constructor
         private DynamicInfos m_currentInfo = new DynamicInfos();
         private DateTime m_startTime = DateTime.Now;
         private bool m_closed = false;
 
         public const string argUrl = "http://localhost:8090/api/v1";
 
-        public static bool argUseHttp = true;
-        public static LogMode argLogMode = LogMode.Event;
+        public const bool argUseHttp = true;
+        public const LogMode argLogMode = LogMode.Event;
 
         /// <summary>
         /// Main Loop that executes the named pipe as well as handling http and json
@@ -32,25 +29,25 @@ namespace CSNamedPipeServer
         public void MainLoop()
         {
             // TODO: Accept multiple pipes
-            m_server = new NamedPipeServerStream("GameDataPipe", PipeDirection.In, 1, PipeTransmissionMode.Byte);
-            m_server.WaitForConnection(); // TODO: Timeout
-            Console.WriteLine("Connection: " + m_server.IsConnected);
-            if (!m_server.IsConnected)
+            m_namedPipeServer = new NamedPipeServerStream("GameDataPipe", PipeDirection.In, 1, PipeTransmissionMode.Byte);
+            m_namedPipeServer.WaitForConnection(); // TODO: Timeout
+            Console.WriteLine("Connection: " + m_namedPipeServer.IsConnected);
+            if (!m_namedPipeServer.IsConnected)
             {
                 Console.WriteLine("Error, closing server, no connection established!");
                 return;
             }
 
-            byte[] buff = new byte[BUFFER_SIZE * TCHAR_SIZE];
+            byte[] readBuffer = new byte[BUFFER_SIZE * TCHAR_SIZE];
 
 
 
-            while (true) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
+            while (m_namedPipeServer.IsConnected && 0 < m_namedPipeServer.Read(readBuffer, 0, BUFFER_SIZE * TCHAR_SIZE)) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
             {
                 // TODO: Multithreading/Coroutine
-                m_server.Read(buff, 0, BUFFER_SIZE * TCHAR_SIZE);
-                string readString = Encoding.Unicode.GetString(buff);
-                if (argLogMode == LogMode.Most)
+                
+                string readString = Encoding.Unicode.GetString(readBuffer);
+                if (argLogMode >= LogMode.Most)
                     Console.WriteLine("NamedPipe read: " + readString);
                 int index = readString.IndexOf('\0');
                 if (index >= 0)
@@ -62,7 +59,7 @@ namespace CSNamedPipeServer
                 // Remove leading empty string
                 if (curLog[0] == "")
                     curLog = curLog.Skip(1).ToArray();
-                if (argLogMode == LogMode.Most)
+                if (argLogMode >= LogMode.Most)
                     Console.WriteLine("NamedPipe result: " + String.Join("   ", curLog));
                 try
                 {
@@ -73,6 +70,12 @@ namespace CSNamedPipeServer
                     Console.WriteLine(_ex);
                 }
             }
+            if (m_currentMatch.isRunning)
+            {
+                Console.WriteLine("Pipe connection lost. Ending current match");
+                EndMatch();
+            }
+            Console.WriteLine("Exit: 0");
         }
 
         /// <summary>
@@ -93,50 +96,56 @@ namespace CSNamedPipeServer
                         break;
                     case EventType.WaitingForPlayers: // 1
                         // |1|MapName|Gamemode|Servername
-                        if (argLogMode == LogMode.Event)
+                        if (m_currentMatch.isRunning)
+                        {
+                            if (argLogMode >= LogMode.Event)
+                                Console.WriteLine("Event: WaitingForPlayers: Ending previous match with id: " + m_currentMatch.matchId);
+                            EndMatch();
+                        }
+                        if (argLogMode >= LogMode.Event)
                             Console.Write("Event: WaitingForPlayers: gamemode: " + cmd[2]+ ", mapName: " + cmd[1]);
-                        m_currentMatch = new Match(cmd[1], cmd[2], cmd[3], false);
+                        m_currentMatch = new Match(cmd[1], cmd[2], cmd[3]);
                         m_startTime = DateTime.Now;
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine(", matchId: " + m_currentMatch.matchId);
                         break;
                     case EventType.GameFinished: // 2
                         // |2|
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: GameFinished");
                         EndMatch();
                         break;
                     case EventType.PlayerConnect: // 3
                         // |3|PlayerID|TeamID
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: PlayerConnect: playerId: " + cmd[1] + ", teamId: " + cmd[2]);
                         m_currentMatch.players.Add(cmd[1], new Player(cmd[1], byte.Parse(cmd[2])));
                         m_currentInfo.events.eventPlayerConnect.Add(new Event_PlayerConnect(cmd[1], byte.Parse(cmd[2])));
                         break;
                     case EventType.PlayerDisconnect: // 4
                         // |4|PlayerID
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: PlayerDisconnect: playerId: " + cmd[1]);
                         m_currentMatch.players.Remove(cmd[1]);
                         m_currentInfo.events.eventPlayerDisconnect.Add(new Event_PlayerDisconnect(cmd[1]));
                         break;
                     case EventType.PlayerKilled: // 5
                         // |5|AttackerID|VictimID|Weapon
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerKilled: attackerId: " + cmd[1] + ", victimId: " + cmd[2] + ", weapon: " + cmd[3]);
                         m_currentMatch.players[cmd[2]].isAlive = false;
                         m_currentInfo.events.eventPlayerKilled.Add(new Event_PlayerKilled(cmd[1], cmd[2], cmd[3]));
                         break;
                     case EventType.PlayerRespawned: // 6
                         // |6|PlayerID
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerRespawned: playerId: " + cmd[1]);
                         m_currentMatch.players[cmd[1]].isAlive = true;
                         m_currentInfo.events.eventPlayerRespawned.Add(new Event_PlayerRespawned(cmd[1]));
                         break;
                     case EventType.PilotBecomesTitan: // 7
                         // |7|PlayerID|TitanClass
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: pilotBecomesTitan: playerId: " + cmd[1] + ", titanClass: " + cmd[2]);
                         m_currentMatch.players[cmd[1]].isTitan = true;
                         m_currentMatch.players[cmd[1]].titanClass = cmd[2];
@@ -144,14 +153,14 @@ namespace CSNamedPipeServer
                         break;
                     case EventType.TitanBecomesPilot: // 8
                         // |8|PlayerID
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: titanBecomesPilot: playerId: " + cmd[1]);
                         m_currentMatch.players[cmd[1]].isTitan = false;
                         m_currentInfo.events.eventTitanBecomesPilot.Add(new Event_TitanBecomesPilot(cmd[1]));
                         break;
                     case EventType.PlayerGetsNewPilotLoadout: // 9
                         // |9|PlayerID|Primary|Secondary|Weapon3|Special
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerGetsNewPilotLoadout: playerId: " + cmd[1] + ", primary: " + cmd[2] + ", secondary: " + cmd[3] + ", weapon3: " + cmd[4] + ", special: " + cmd[5]);
                         m_currentMatch.players[cmd[1]].primary = cmd[2];
                         m_currentMatch.players[cmd[1]].secondary = cmd[3];
@@ -161,48 +170,50 @@ namespace CSNamedPipeServer
                         break;
                     case EventType.PlayerWallrun: // 10
                         // |10|PlayerID|isWallRunning
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerWallrun: playerId: " + cmd[1] + ", isWallRunning: " + cmd[2]);
                         m_currentMatch.players[cmd[1]].isWallRunning = cmd[2] == "true";
                         break;
                     case EventType.Shoot: // 11
                         // |11|PlayerID|isShooting
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: shoot: playerId: " + cmd[1] + ", isShooting: " + cmd[2]);
                         m_currentMatch.players[cmd[1]].isShooting = cmd[2] == "true";
                         break;
                     case EventType.PlayerJump: // 12
                         // |12|PlayerID
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerJump: playerId: " + cmd[1]);
                         m_currentInfo.events.eventPlayerJump.Add(new Event_PlayerJump(cmd[1]));
                         break;
                     case EventType.PlayerDoubleJump: // 13
                         // |13|PlayerID
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerDoubleJump: playerId: " + cmd[1]);
                         m_currentInfo.events.eventPlayerDoubleJump.Add(new Event_PlayerDoubleJump(cmd[1]));
                         break;
                     case EventType.PlayerGround: // 14
                         // |14|PlayerID|isInAir
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerGround: playerId: " + cmd[1] + ", isInAir: " + cmd[2]);
                         m_currentMatch.players[cmd[1]].isGrounded = !(cmd[2] == "true");
                         break;
                     case EventType.PlayerMantle: // 15
                         // |15|PlayerID
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerMantle: playerId: " + cmd[1]);
                         m_currentInfo.events.eventPlayerMantle.Add(new Event_PlayerMantle(cmd[1]));
                         break;
                     case EventType.PlayerWallHang: // 16
                         // |16|PlayerID|isHanging
-                        if (argLogMode == LogMode.Event)
+                        if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerWallHang: playerId: " + cmd[1] + ", isHanging: " + cmd[2]);
                         m_currentMatch.players[cmd[1]].isHanging = cmd[2] == "true";
                         break;
                     case EventType.PlayerCrouch: // 17
                         // |17|PlayerID|isCrouching
+                        if (argLogMode >= LogMode.Event)
+                            Console.WriteLine("Event: playerCrouch: playerId: " + cmd[1] + ", isCrouching: " + cmd[2]);
                         m_currentMatch.players[cmd[1]].isCrouching = cmd[2] == "true";
                         break;
                     case EventType.DebugMessage: // 99
@@ -263,9 +274,9 @@ namespace CSNamedPipeServer
             //Console.WriteLine(json);
             if (argUseHttp)
             {
-                Task dontAwaite = UpDownData.PutJsonHttpClient(argUrl + "/matchstate", json); // Exceptions here will be lost since there is not await
+                Task dontAwaite = Output.PutJsonHttpClient(argUrl + "/matchstate", json); // Exceptions here will be lost since there is not await
             }
-            if (argLogMode == LogMode.All)
+            if (argLogMode >= LogMode.All)
                 Console.WriteLine("Send: " + JValue.Parse(json).ToString(Formatting.Indented));
             // nTODO: Add to queue - might not be neccesary anymore since its done in tasks which s result arent waited for
             m_currentInfo = new DynamicInfos();
@@ -287,135 +298,5 @@ namespace CSNamedPipeServer
             }
             return result;
         }
-    }
-
-    public class Match
-    {
-        /// <summary>
-        /// Name of the current map
-        /// </summary>
-        public string mapName;
-        /// <summary>
-        /// Unique id of the match
-        /// </summary>
-        public string matchId = "4bd21f79-9394-481f-b060-7644335b87fb"; // 36 Stellen auch mit Bindestrichen
-        /// <summary>
-        /// Gamemode short term
-        /// </summary>
-        public string gamemode;
-        /// <summary>
-        /// Name of the server - same name as in ingame server browser
-        /// </summary>
-        public string serverName;
-        /// <summary>
-        /// Dictionary of all players currently on the server
-        /// </summary>
-        public Dictionary<string, Player> players = new Dictionary<string, Player>();
-
-        /// <summary>
-        /// Creates a new match
-        /// </summary>
-        /// <param name="_mapName">Name of map</param>
-        /// <param name="_matchId">Id of map given by the backend</param>
-        /// <param name="_serverName">Name of the northstar server</param>
-        /// <param name="_dontAskServer">Backend wont be notified - for initial named pipe connection</param>
-        public Match(string _mapName, string _gamemode, string _serverName, bool _dontAskServer = false)
-        {
-            mapName = _mapName;
-            gamemode = _gamemode;
-            if (!_dontAskServer)
-            {
-                Task t1 = Task.Run(() => AssignMatchId(_mapName, _gamemode, _serverName).Wait());
-            }
-        }
-
-        /// <summary>
-        /// Assins a match id
-        /// </summary>
-        /// <param name="_mapName">Name of the current map</param>
-        /// <param name="_gamemode">Gamemode short term</param>
-        /// <returns></returns>
-        /// <exception cref="WrongAnswerException">Thrown when the data is for a different server</exception>
-        public async Task AssignMatchId(string _mapName, string _gamemode, string _serverName)
-        {
-            NewMatchRequest newResponse = new NewMatchRequest() { map = _mapName, ns_server_name = _serverName, gamemode = _gamemode };
-            if (PipeReader.argUseHttp)
-            {
-                string answer = await UpDownData.PostJsonHttpClient(PipeReader.argUrl + "/match/new", JsonConvert.SerializeObject(newResponse)); // "localhost:8081/api/v1/match/new"
-                                                                                                                                                 //string answer = await client.GetStringAsync(url + "/new?map=" + _mapName);
-                if (!String.IsNullOrWhiteSpace(answer))
-                {
-                    // TODO: create object to serialze to
-                    try
-                    {
-                        NewMatchResponse result = JsonConvert.DeserializeObject<NewMatchResponse>(answer);
-
-                        if (result.data.map == _mapName && result.data.nsServerName == _serverName)
-                        {
-                            matchId = result.data.id;
-                        }
-                        else
-                        {
-                            throw new WrongAnswerException("GetMatchId info for wrong match");
-                        }
-                    }
-                    catch (JsonException _ex)
-                    {
-                        Console.WriteLine(_ex.ToString());
-                    }
-                }
-            }
-            else
-            {
-#pragma warning disable CS0162 // Unreachable code detected - Will be use when debuging
-                matchId = "01234567-89ab-cdef-0123-456789abcdef";
-#pragma warning restore CS0162 // Unreachable code detected
-            }
-        }
-
-        /// <summary>
-        /// Ends the match and sends this info to the backend
-        /// </summary>
-        /// <returns></returns>
-        public async Task EndMatch()
-        {
-            if (PipeReader.argUseHttp)
-                await UpDownData.PutJsonHttpClient(PipeReader.argUrl + "/match/end/" + matchId, String.Empty);
-        }
-    }
-
-    public class NewMatchResponse
-    {
-        public string apiVersion;
-        public NewMatchResponseData data;
-        public string context;
-        public string status;
-    }
-
-    public class NewMatchResponseData
-    {
-        public bool isRunning;
-        public string nsServerName;
-        public string id;
-        public string map;
-    }
-
-    public class NewMatchRequest
-    {
-        public string map;
-        public string ns_server_name;
-        public string gamemode;
-    }
-
-    /// <summary>
-    /// Throw when getting data meant for a different server
-    /// </summary>
-    public class WrongAnswerException : Exception
-    {
-        public WrongAnswerException() { }
-
-        public WrongAnswerException(string _message) : base(_message) { }
-
-        public WrongAnswerException(string _message, Exception _inner) : base(_message, _inner) { }
     }
 }

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace CSNamedPipeServer
 {
-    public static class UpDownData
+    public static class Output
     {
         static readonly HttpClient client = new HttpClient();
 

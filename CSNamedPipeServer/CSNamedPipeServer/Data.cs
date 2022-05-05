@@ -58,4 +58,27 @@
         /// </summary>
         public int timePassed;
     }
+
+    public class NewMatchResponse
+    {
+        public string apiVersion;
+        public NewMatchResponseData data;
+        public string context;
+        public string status;
+    }
+
+    public class NewMatchResponseData
+    {
+        public bool isRunning;
+        public string nsServerName;
+        public string id;
+        public string map;
+    }
+
+    public class NewMatchRequest
+    {
+        public string map;
+        public string ns_server_name;
+        public string gamemode;
+    }
 }
