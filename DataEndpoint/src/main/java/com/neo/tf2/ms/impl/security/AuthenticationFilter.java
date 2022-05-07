@@ -1,10 +1,6 @@
 package com.neo.tf2.ms.impl.security;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.common.impl.StringUtils;
-import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
-import com.neo.javax.api.persitence.entity.EntityQuery;
-import com.neo.javax.api.persitence.entity.EntityRepository;
 import com.neo.tf2.ms.impl.persistence.entity.UserToken;
 import com.neo.util.javax.impl.rest.DefaultResponse;
 import com.neo.util.javax.impl.rest.HttpMethod;
@@ -19,7 +15,6 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
-import java.util.List;
 import java.util.Optional;
 
 @Secured
@@ -34,10 +29,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     protected static final String AUTHENTICATION_SCHEME = "Bearer";
 
     @Inject
-    EntityRepository entityRepository;
+    RequestContext requestContext;
 
     @Inject
-    RequestContext requestContext;
+    AuthenticationService authenticationService;
 
     @Override
     public void filter(ContainerRequestContext containerRequest) {
@@ -70,17 +65,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     private boolean validateToken(String token) {
-        if (StringUtils.isAlphaNumeric(token)) {
-            EntityQuery<UserToken> entityQuery = new EntityQuery<>(UserToken.class, 1,
-                    List.of(new ExplicitSearchCriteria(UserToken.C_KEY,token,false)));
-
-            Optional<UserToken> optionalToken = entityRepository.find(entityQuery).getFirst();
-            if (optionalToken.isPresent()) {
-                UserToken userToken = optionalToken.get();
-                requestContext.setUser(userToken.getOwner());
-                requestContext.setRoles(userToken.getRoles());
-                return true;
-            }
+        Optional<UserToken> optionalToken = authenticationService.retrieveToken(token);
+        if (optionalToken.isPresent()) {
+            UserToken userToken = optionalToken.get();
+            requestContext.setUser(userToken.getOwner());
+            requestContext.setRoles(userToken.getRoles());
+            return true;
         }
         return false;
     }
