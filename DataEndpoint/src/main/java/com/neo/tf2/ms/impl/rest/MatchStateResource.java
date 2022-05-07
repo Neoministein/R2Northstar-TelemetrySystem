@@ -6,6 +6,7 @@ import com.neo.common.impl.json.JsonUtil;
 import com.neo.javax.api.persitence.search.SearchRepository;
 import com.neo.tf2.ms.impl.persistence.GlobalGameState;
 import com.neo.tf2.ms.impl.persistence.searchable.MatchState;
+import com.neo.tf2.ms.impl.security.Secured;
 import com.neo.util.javax.api.rest.RestAction;
 import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
 import com.neo.util.javax.impl.rest.DefaultResponse;
@@ -37,6 +38,7 @@ public class MatchStateResource extends AbstractRestEndpoint {
     GlobalGameState globalGameState;
 
     @PUT
+    @Secured
     public Response put(String x) {
         RequestContext requestContext = getContext(HttpMethod.PUT,"");
         RestAction restAction = () -> {
