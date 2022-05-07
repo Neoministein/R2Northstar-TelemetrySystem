@@ -10,6 +10,7 @@
 
         <class>com.neo.javax.impl.persistence.entity.EntityAuditTrail</class>
         <class>com.neo.tf2.ms.impl.persistence.entity.Match</class>
+        <class>com.neo.tf2.ms.impl.persistence.entity.UserToken</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>

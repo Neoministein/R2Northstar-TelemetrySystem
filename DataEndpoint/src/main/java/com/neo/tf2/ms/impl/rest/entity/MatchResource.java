@@ -1,4 +1,4 @@
-package com.neo.tf2.ms.impl.rest;
+package com.neo.tf2.ms.impl.rest.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.common.api.action.Action;
@@ -10,8 +10,8 @@ import com.neo.common.impl.json.JsonUtil;
 import com.neo.common.impl.lazy.LazyAction;
 import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
 import com.neo.javax.api.persitence.entity.EntityQuery;
-import com.neo.javax.api.persitence.entity.EntityRepository;
 import com.neo.tf2.ms.impl.persistence.entity.Match;
+import com.neo.tf2.ms.impl.security.Secured;
 import com.neo.util.javax.api.rest.RestAction;
 import com.neo.util.javax.impl.rest.DefaultResponse;
 import com.neo.util.javax.impl.rest.HttpMethod;
@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 import javax.transaction.RollbackException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -51,6 +50,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     public static final String P_PLAYING = "/playing";
 
     @POST
+    @Secured
     @Path(P_NEW)
     public Response newGame(String x) {
         RequestContext requestContext = getContext(HttpMethod.POST, P_NEW);
@@ -78,6 +78,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     }
 
     @PUT
+    @Secured
     @Path(P_END + "/{id}")
     public Response endGame(@PathParam("id") String id) {
         RequestContext requestContext = getContext(HttpMethod.PUT, P_END + "/" + id);
