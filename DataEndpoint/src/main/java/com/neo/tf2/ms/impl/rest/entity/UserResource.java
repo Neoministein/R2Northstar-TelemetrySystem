@@ -32,7 +32,7 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
     @Secured
     public Response create(String x) {
         RequestContext requestContext = new RequestContext(HttpMethod.POST, getClassURI(), "");
-        return super.restCall(create(x, requestContext), requestContext, List.of(E_INTERNAL));
+        return super.restCall(create(x, requestContext), requestContext, List.of(PERM_INTERNAL));
     }
 
     @GET
@@ -40,7 +40,7 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
     @Path("/{owner}")
     public Response get(@PathParam("owner") String owner) {
         RequestContext requestContext = new RequestContext(HttpMethod.GET, getClassURI(), "");
-        return super.restCall(getByValue(UserToken.C_OWNER, owner, requestContext), requestContext, List.of(E_INTERNAL));
+        return super.restCall(getByValue(UserToken.C_OWNER, owner, requestContext), requestContext, List.of(PERM_INTERNAL));
     }
 
     @PUT
@@ -48,14 +48,14 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
     @Path("/{owner}")
     public Response edit(@PathParam("owner") String owner, String x) {
         RequestContext requestContext = new RequestContext(HttpMethod.PUT, getClassURI(), "");
-        return super.restCall(edit(x, requestContext), requestContext, List.of(E_INTERNAL));
+        return super.restCall(edit(x, requestContext), requestContext, List.of(PERM_INTERNAL));
     }
 
     @DELETE
     @Secured
     public Response delete(String x) {
         RequestContext requestContext = new RequestContext(HttpMethod.POST, getClassURI(), "");
-        return super.restCall(delete(x, requestContext), requestContext, List.of(E_INTERNAL));
+        return super.restCall(delete(x, requestContext), requestContext, List.of(PERM_INTERNAL));
     }
 
     @POST
@@ -67,6 +67,7 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
             if (result.getHitSize() == 0) {
                 UserToken userToken = new UserToken();
                 userToken.setDescription("Admin token");
+                userToken.getRoles().add(PERM_INTERNAL);
                 try {
                     entityRepository.create(userToken);
                 } catch (RollbackException e) {

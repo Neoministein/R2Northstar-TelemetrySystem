@@ -7,6 +7,7 @@ import com.neo.javax.api.persitence.entity.DataBaseEntity;
 import com.neo.javax.impl.persistence.entity.AbstractDataBaseEntity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -52,7 +53,7 @@ public class UserToken extends AbstractDataBaseEntity implements DataBaseEntity 
     @CollectionTable(name = T_ROLE, joinColumns = @JoinColumn(name = DataBaseEntity.C_ID))
     @Column(name = C_ROLE)
         @JsonView(Views.Owner.class)
-    private List<String> roles;
+    private List<String> roles = new ArrayList<>();
 
     public Long getId() {
         return id;
