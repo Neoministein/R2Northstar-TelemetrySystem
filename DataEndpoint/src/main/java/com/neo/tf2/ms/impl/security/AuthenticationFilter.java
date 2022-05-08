@@ -15,6 +15,7 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Secured
@@ -46,9 +47,14 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
 
-        if (!validateToken(token)) {
-            abortWithUnauthorized(containerRequest);
+        try {
+            if (validateToken(token)) {
+                return;
+            }
+        } catch (Exception ex) {
+            LOGGER.error("An error occurred when trying to authenticate the user", ex);
         }
+        abortWithUnauthorized(containerRequest);
     }
 
     private boolean validateAuthorizationHeader(String authorizationHeader) {
@@ -69,7 +75,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         if (optionalToken.isPresent()) {
             UserToken userToken = optionalToken.get();
             requestContext.setUser(userToken.getOwner());
-            requestContext.setRoles(userToken.getRoles());
+            requestContext.setRoles(new ArrayList<>(userToken.getRoles()));
             return true;
         }
         return false;

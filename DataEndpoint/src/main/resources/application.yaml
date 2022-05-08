@@ -2,6 +2,7 @@ elastic:
     nodes:
         - ${org.elastic.node.0}
     prefix: tfms
+    enabled: ${org.elastic.enabled}
 server:
     port: 8090
 javax:
