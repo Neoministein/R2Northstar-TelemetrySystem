@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.neo.common.api.json.Views;
 import com.neo.common.impl.RandomString;
 import com.neo.javax.api.persitence.entity.DataBaseEntity;
-import com.neo.javax.impl.persistence.entity.AbstractDataBaseEntity;
+import com.neo.javax.impl.persistence.entity.AuditableDataBaseEntity;
 
 import javax.persistence.*;
 import java.util.*;
@@ -12,7 +12,7 @@ import java.util.*;
 @Entity
 @Table(name = UserToken.TABLE_NAME, indexes = {
         @Index(name = "key", columnList = UserToken.C_KEY, unique = true)})
-public class UserToken extends AbstractDataBaseEntity implements DataBaseEntity {
+public class UserToken extends AuditableDataBaseEntity implements DataBaseEntity {
 
     public static final String TABLE_NAME = "user_token";
 
