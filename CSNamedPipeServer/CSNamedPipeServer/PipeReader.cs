@@ -26,26 +26,18 @@ namespace CSNamedPipeServer
         /// <summary>
         /// Main Loop that executes the named pipe as well as handling http and json
         /// </summary>
-        public void MainLoop()
+        public int MainLoop()
         {
-            // TODO: Accept multiple pipes
-            m_namedPipeServer = new NamedPipeServerStream("GameDataPipe", PipeDirection.In, 1, PipeTransmissionMode.Byte);
-            m_namedPipeServer.WaitForConnection(); // TODO: Timeout
-            Console.WriteLine("Connection: " + (m_namedPipeServer.IsConnected ? "connected" : "failed"));
-            if (!m_namedPipeServer.IsConnected)
-            {
-                Console.WriteLine("Error, closing server, no connection established!");
-                return;
-            }
+            m_namedPipeServer = OpenNewPipe(m_namedPipeServer /*TODO change name dynamically*/);
 
             byte[] readBuffer = new byte[BUFFER_SIZE * TCHAR_SIZE];
 
-
+            Task t1 = Task.Run(() => Output.Init().Wait());
 
             while (m_namedPipeServer.IsConnected && 0 < m_namedPipeServer.Read(readBuffer, 0, BUFFER_SIZE * TCHAR_SIZE)) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
             {
                 // TODO: Multithreading/Coroutine
-                
+
                 string readString = Encoding.Unicode.GetString(readBuffer);
                 if (argLogMode >= LogMode.Most)
                     Console.WriteLine("NamedPipe read: " + readString);
@@ -77,6 +69,22 @@ namespace CSNamedPipeServer
             }
             m_namedPipeServer.Dispose();
             //Console.WriteLine("Exit: 0");
+
+            return 0;
+        }
+
+        public NamedPipeServerStream OpenNewPipe(NamedPipeServerStream _server, string _pipeName = "GameDataPipe")
+        {
+            // TODO: Accept multiple pipes
+            _server = new NamedPipeServerStream("GameDataPipe", PipeDirection.In, 1, PipeTransmissionMode.Byte);
+            _server.WaitForConnection(); // TODO: Timeout
+            Console.WriteLine("Connection: " + (_server.IsConnected ? "connected" : "failed"));
+            if (!_server.IsConnected)
+            {
+                Console.WriteLine("Error, closing server, no connection established!");
+                throw new ServerCreationException();
+            }
+            return _server;
         }
 
         /// <summary>
@@ -104,7 +112,7 @@ namespace CSNamedPipeServer
                             EndMatch();
                         }
                         if (argLogMode >= LogMode.Event)
-                            Console.Write("Event: WaitingForPlayers: gamemode: " + cmd[2]+ ", mapName: " + cmd[1]);
+                            Console.Write("Event: WaitingForPlayers: gamemode: " + cmd[2] + ", mapName: " + cmd[1]);
                         m_currentMatch = new Match(cmd[1], cmd[2], cmd[3]);
                         m_startTime = DateTime.Now;
                         if (argLogMode >= LogMode.Event)
@@ -113,7 +121,7 @@ namespace CSNamedPipeServer
                     case EventType.GameFinished: // 2
                         // |2|
                         if (argLogMode >= LogMode.Event)
-                            Console.WriteLine("Event: GameFinished");
+                            Console.WriteLine("Event: GameFinished: matchId: " + m_currentMatch.matchId);
                         EndMatch();
                         break;
                     case EventType.PlayerConnect: // 3
