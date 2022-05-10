@@ -8,9 +8,16 @@ using Newtonsoft.Json;
 
 namespace CSNamedPipeServer
 {
+    // TODO: Header send token
+    // "Bearer" vor dem token
     public static class Output
     {
         static readonly HttpClient client = new HttpClient();
+
+        public static async Task Init()
+        {
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", "Bearer " + "it5PMdFnb63RZ9yN1QYCuVko7Ry3Or0hNHDeCWKNKdu4Z5Z");
+        }
 
         // TODO: Use queue instead
         /// <summary>
