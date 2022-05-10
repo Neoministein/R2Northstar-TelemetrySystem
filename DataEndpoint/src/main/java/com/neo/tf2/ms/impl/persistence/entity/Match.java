@@ -4,19 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.neo.common.api.json.Views;
 import com.neo.javax.api.persitence.entity.DataBaseEntity;
-import com.neo.javax.impl.persistence.entity.AbstractDataBaseEntity;
+import com.neo.javax.impl.persistence.entity.AuditableDataBaseEntity;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
 @Entity
 @Table(name = Match.TABLE_NAME)
-public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
+public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
 
     public static final String TABLE_NAME = "match";
     public static final String C_IS_PLAYING = "isRunning";
@@ -27,9 +24,10 @@ public class Match extends AbstractDataBaseEntity implements DataBaseEntity {
 
     @Id
     @Type(type = "uuid-char")
+    @GeneratedValue
     @Column(name = DataBaseEntity.C_ID)
         @JsonView(Views.Public.class)
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
     @Column(name = C_IS_PLAYING, nullable = false)
         @JsonView(Views.Internal.class)

@@ -57,21 +57,17 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
         RestAction restAction = () -> {
             JsonNode json = JsonUtil.fromJson(x);
             JsonSchemaUtil.isValidOrThrow(json, JSON_SCHEMA);
-            Action<Response> createEntity = () -> {
-                Match match = new Match();
-                match.setMap(json.get("map").asText());
-                match.setNsServerName(json.get("ns_server_name").asText());
-                match.setGamemode(json.get("gamemode").asText());
-                try {
-                    entityRepository.create(match);
-                } catch (RollbackException ex) {
-                    throw new InternalLogicException(ex);
-                }
-				LOGGER.info("New game with id {}", match.getId());
-                return parseEntityToResponse(match, requestContext, Views.Public.class);
-            };
-
-            return LazyAction.call(createEntity,3);
+            Match match = new Match();
+            match.setMap(json.get("map").asText());
+            match.setNsServerName(json.get("ns_server_name").asText());
+            match.setGamemode(json.get("gamemode").asText());
+            try {
+                entityRepository.create(match);
+            } catch (RollbackException ex) {
+                throw new InternalLogicException(ex);
+            }
+            LOGGER.info("New game with id {}", match.getId());
+            return parseEntityToResponse(match, requestContext, Views.Public.class);
         };
 
         return super.restCall(restAction, requestContext);

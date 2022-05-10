@@ -44,10 +44,11 @@ public class MatchStateResource extends AbstractRestEndpoint {
         RestAction restAction = () -> {
             JsonNode jsonNode = JsonUtil.fromJson(x);
             JsonSchemaUtil.isValidOrThrow(jsonNode, MatchState.JSON_SCHEMA);
-            MatchState matchState = new MatchState(jsonNode.deepCopy());
-
-            //searchRepository.index(matchState);
             globalGameState.setCurrentMatchState(jsonNode);
+            if (searchRepository.enabled()) {
+                MatchState matchState = new MatchState(jsonNode.deepCopy());
+                searchRepository.index(matchState);
+            }
             return DefaultResponse.success(requestContext);
         };
 
