@@ -36,6 +36,6 @@ WORKDIR /dataEndpoint
 COPY --from=build /dataEndpoint/target/mapsystem-data-endpoint.jar ./
 COPY --from=build /dataEndpoint/target/libs ./libs
 
-CMD ["java", "-jar", "mapsystem-data-endpoint.jar"]
+CMD ["java", "-Djdk.serialFilter=org.elasticsearch.*;com.neo.*;io.helidon.*", "-jar", "mapsystem-data-endpoint.jar" ]
 
 EXPOSE 8080
