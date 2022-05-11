@@ -143,6 +143,7 @@ namespace CSNamedPipeServer
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerKilled: attackerId: " + cmd[1] + ", victimId: " + cmd[2] + ", weapon: " + cmd[3]);
                         m_currentMatch.players[cmd[2]].isAlive = false;
+                        m_currentMatch.players[cmd[2]].isTitan = false;
                         m_currentInfo.events.eventPlayerKilled.Add(new Event_PlayerKilled(cmd[1], cmd[2], cmd[3]));
                         break;
                     case EventType.PlayerRespawned: // 6
