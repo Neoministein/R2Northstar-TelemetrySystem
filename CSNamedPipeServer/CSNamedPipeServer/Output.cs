@@ -16,7 +16,7 @@ namespace CSNamedPipeServer
 
         public static async Task Init()
         {
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", "Bearer " + "it5PMdFnb63RZ9yN1QYCuVko7Ry3Or0hNHDeCWKNKdu4Z5Z");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "it5PMdFnb63RZ9yN1QYCuVko7Ry3Or0hNHDeCWKNKdu4Z5Z");
         }
 
         // TODO: Use queue instead
