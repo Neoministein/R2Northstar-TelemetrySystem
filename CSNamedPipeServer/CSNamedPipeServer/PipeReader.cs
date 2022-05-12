@@ -33,7 +33,7 @@ namespace CSNamedPipeServer
         /// <summary>
         /// Main Loop that executes the named pipe as well as handling http and json
         /// </summary>
-        public int RunPipe()
+        public async Task<int> RunPipe()
         {
             byte[] readBuffer = new byte[BUFFER_SIZE * TCHAR_SIZE];
             m_namedPipeServer.WaitForConnection();
@@ -109,7 +109,7 @@ namespace CSNamedPipeServer
                             Console.WriteLine(", matchId: " + m_currentMatch.matchId);
                         break;
                     case EventType.GameFinished: // 2
-                        // |2|
+                        // |2
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: GameFinished: matchId: " + m_currentMatch.matchId);
                         EndMatch();
@@ -326,34 +326,34 @@ namespace CSNamedPipeServer
         /// </summary>
         public int MainLoop()
         {
-            m_generalPipe = OpenNewPipe("GameDataPipe", PipeDirection.Out);
-            m_generalPipe.WaitForConnection();
-            Console.WriteLine("General Pipe Connection: " + (m_generalPipe.IsConnected ? "connected" : "failed"));
-            if (!m_generalPipe.IsConnected)
-            {
-                Console.WriteLine("Error, closing server, no connection established!");
-                throw new ServerCreationException();
-            }
-
             Output.Init();
-            string localNewPipeName = GenerateId();
-            string newPipeName = "\\\\.\\pipe\\" + localNewPipeName;
-            Console.WriteLine("New Pipe id: " + localNewPipeName);
-            byte[] generalWriteBuffer = Encoding.Unicode.GetBytes(newPipeName);
-            Array.Resize(ref generalWriteBuffer, BUFFER_SIZE * TCHAR_SIZE);
-            PipeInstance m_matchPipe = new PipeInstance(OpenNewPipe(localNewPipeName, PipeDirection.In));
-            do
+
+            while (true)
             {
+                m_generalPipe = OpenNewPipe("GameDataPipe", PipeDirection.Out);
+                m_generalPipe.WaitForConnection();
+                Console.WriteLine("General Pipe Connection: " + (m_generalPipe.IsConnected ? "connected" : "failed"));
+                if (!m_generalPipe.IsConnected)
+                {
+                    Console.WriteLine("Error, closing server, no connection established!");
+                    throw new ServerCreationException();
+                }
+
+                string localNewPipeName = GenerateId();
+                string newPipeName = "\\\\.\\pipe\\" + localNewPipeName;
+                Console.WriteLine("New Pipe id: " + localNewPipeName);
+                byte[] generalWriteBuffer = Encoding.Unicode.GetBytes(newPipeName);
+                Array.Resize(ref generalWriteBuffer, BUFFER_SIZE * TCHAR_SIZE);
+                PipeInstance m_matchPipe = new PipeInstance(OpenNewPipe(localNewPipeName, PipeDirection.In));
                 if (m_generalPipe.IsConnected) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
                 {
                     m_generalPipe.Write(generalWriteBuffer);
-                    m_matchPipe.RunPipe(); // TODO: Async
                     m_runningGamePipes.Add(m_matchPipe);
-                    // Close to allow connection of new client for new match
+                    Task t1 = Task.Run(() => m_matchPipe.RunPipe()); // TODO: Async
+                                                                     // Close to allow connection of new client for new match
                     m_generalPipe.Close();
                 }
             }
-            while (/*m_runningGamePipes.Count > 0*/ true);
 
             return 0;
         }
