@@ -5,6 +5,8 @@ struct {
     bool isThreadRunning = false
 } file
 
+bool isMatchRunning = false
+
 void function MapSystem_Init()
 {
     AddCallback_GameStateEnter( eGameState.WaitingForPlayers, OnWaitingForPlayers )
@@ -27,7 +29,12 @@ void function MapSystem_Init()
 
 void function OnWaitingForPlayers() 
 {
+    if ( isMatchRunning ) {
+        NSEndMatch( "|2" )
+        isMatchRunning = false
+    }
     NSStartNewMatch( "|1|" + GetMapName() + "|" + GameRules_GetGameMode() )
+    isMatchRunning = true
 }
 
 
@@ -43,7 +50,8 @@ void function OnGameFinished()
 {
     file.isThreadRunning = false
     wait 0.1
-    NSSendToNamedPipe( "|2" )
+    NSEndMatch( "|2" )
+    isMatchRunning = false
 }
 
 void function Map_PlayerConnect( entity player ) 

@@ -336,11 +336,12 @@ namespace CSNamedPipeServer
             }
 
             Output.Init();
-            string newPipeName = GenerateId();
-            Console.WriteLine(newPipeName);
+            string localNewPipeName = GenerateId();
+            string newPipeName = "\\\\.\\pipe\\" + localNewPipeName;
+            Console.WriteLine("New Pipe id: " + localNewPipeName);
             byte[] generalWriteBuffer = Encoding.Unicode.GetBytes(newPipeName);
             Array.Resize(ref generalWriteBuffer, BUFFER_SIZE * TCHAR_SIZE);
-            PipeInstance m_matchPipe = new PipeInstance(OpenNewPipe(newPipeName, PipeDirection.In));
+            PipeInstance m_matchPipe = new PipeInstance(OpenNewPipe(localNewPipeName, PipeDirection.In));
             do
             {
                 if (m_generalPipe.IsConnected) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
