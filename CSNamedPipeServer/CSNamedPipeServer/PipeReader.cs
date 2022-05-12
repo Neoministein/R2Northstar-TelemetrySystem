@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace CSNamedPipeServer
 {
-    internal class PipeReader
+    public class PipeInstance
     {
         // Http post erstellen
         // Http put schließen
@@ -15,7 +15,7 @@ namespace CSNamedPipeServer
         private const int TCHAR_SIZE = 2; // Same as northstar.dll
         private Match m_currentMatch = new Match("empty0", "empty1", "empty2", false, true); // Needed, because its assigned outside of the constructor
         private DynamicInfos m_currentInfo = new DynamicInfos();
-        private DateTime m_startTime = DateTime.Now;
+        private DateTime m_startTime;
         private bool m_closed = false;
 
         public const string argUrl = "http://localhost:8090/api/v1";
@@ -23,17 +23,20 @@ namespace CSNamedPipeServer
         public const bool argUseHttp = true;
         public const LogMode argLogMode = LogMode.Event;
 
+        public PipeInstance(NamedPipeServerStream _pipe)
+        {
+            m_namedPipeServer = _pipe;
+            m_startTime = DateTime.Now;
+            //Task t1 = Task.Run(() => RunPipe());
+        }
+
         /// <summary>
         /// Main Loop that executes the named pipe as well as handling http and json
         /// </summary>
-        public int MainLoop()
+        public int RunPipe()
         {
-            m_namedPipeServer = OpenNewPipe(m_namedPipeServer /*TODO change name dynamically*/);
-
             byte[] readBuffer = new byte[BUFFER_SIZE * TCHAR_SIZE];
-
-            Task t1 = Task.Run(() => Output.Init().Wait());
-
+            m_namedPipeServer.WaitForConnection();
             while (m_namedPipeServer.IsConnected && 0 < m_namedPipeServer.Read(readBuffer, 0, BUFFER_SIZE * TCHAR_SIZE)) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
             {
                 // TODO: Multithreading/Coroutine
@@ -73,20 +76,7 @@ namespace CSNamedPipeServer
             return 0;
         }
 
-        public NamedPipeServerStream OpenNewPipe(NamedPipeServerStream _server, string _pipeName = "GameDataPipe")
-        {
-            // TODO: Accept multiple pipes
-            _server = new NamedPipeServerStream("GameDataPipe", PipeDirection.In, 1, PipeTransmissionMode.Byte);
-            _server.WaitForConnection(); // TODO: Timeout
-            Console.WriteLine("Connection: " + (_server.IsConnected ? "connected" : "failed"));
-            if (!_server.IsConnected)
-            {
-                Console.WriteLine("Error, closing server, no connection established!");
-                throw new ServerCreationException();
-            }
-            return _server;
-        }
-
+        #region UtilizeCommand
         /// <summary>
         /// Processes a given command depending of command type
         /// </summary>
@@ -261,6 +251,7 @@ namespace CSNamedPipeServer
                 m_currentMatch.players[_cmd[(i * 5)]].health = (byte)Math.Clamp(double.Parse(_cmd[4 + (i * 5)]), 0, 100); // Not sure how accurate health is saved in squirrel
             }
         }
+        #endregion
 
         /// <summary>
         /// Ends the match
@@ -271,6 +262,7 @@ namespace CSNamedPipeServer
             Task t1 = Task.Run(() => m_currentMatch.EndMatch().Wait());
         }
 
+        #region Json
         /// <summary>
         /// Sends the current update info to the server - doesnt wait for send completion
         /// </summary>
@@ -291,7 +283,9 @@ namespace CSNamedPipeServer
             // nTODO: Add to queue - might not be neccesary anymore since its done in tasks which s result arent waited for
             m_currentInfo = new DynamicInfos();
         }
+        #endregion
 
+        #region Helper
         /// <summary>
         /// Gets the data of a vector in int given a string with exact matching format
         /// </summary>
@@ -308,5 +302,82 @@ namespace CSNamedPipeServer
             }
             return result;
         }
+        #endregion
+    }
+
+    public class PipeReader
+    {
+        // Http post erstellen
+        // Http put schließen
+        private NamedPipeServerStream m_generalPipe;
+        private const int BUFFER_SIZE = 512; // Same as northstar.dll
+        private const int TCHAR_SIZE = 2; // Same as northstar.dll
+        private bool m_closed = false;
+
+        public const string argUrl = "http://localhost:8090/api/v1";
+
+        public const bool argUseHttp = true;
+        public const LogMode argLogMode = LogMode.Event;
+
+        public List<PipeInstance> m_runningGamePipes = new List<PipeInstance>();
+
+        /// <summary>
+        /// Main Loop that executes the named pipe as well as handling http and json
+        /// </summary>
+        public int MainLoop()
+        {
+            m_generalPipe = OpenNewPipe("GameDataPipe", PipeDirection.Out);
+            m_generalPipe.WaitForConnection();
+            Console.WriteLine("General Pipe Connection: " + (m_generalPipe.IsConnected ? "connected" : "failed"));
+            if (!m_generalPipe.IsConnected)
+            {
+                Console.WriteLine("Error, closing server, no connection established!");
+                throw new ServerCreationException();
+            }
+
+            Output.Init();
+            string newPipeName = GenerateId();
+            Console.WriteLine(newPipeName);
+            byte[] generalWriteBuffer = Encoding.Unicode.GetBytes(newPipeName);
+            Array.Resize(ref generalWriteBuffer, BUFFER_SIZE * TCHAR_SIZE);
+            PipeInstance m_matchPipe = new PipeInstance(OpenNewPipe(newPipeName, PipeDirection.In));
+            do
+            {
+                if (m_generalPipe.IsConnected) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
+                {
+                    m_generalPipe.Write(generalWriteBuffer);
+                    m_matchPipe.RunPipe(); // TODO: Async
+                    m_runningGamePipes.Add(m_matchPipe);
+                    // Close to allow connection of new client for new match
+                    m_generalPipe.Close();
+                }
+            }
+            while (/*m_runningGamePipes.Count > 0*/ true);
+
+            return 0;
+        }
+
+        #region PipeConnection
+        public static NamedPipeServerStream OpenNewPipe(string _pipeName, PipeDirection _direction)
+        {
+            // TODO: Accept multiple pipes
+            NamedPipeServerStream server = new NamedPipeServerStream(_pipeName, _direction, 1, PipeTransmissionMode.Byte);
+            //server.WaitForConnection(); // TODO: Timeout
+            //Console.WriteLine("Connection: " + (server.IsConnected ? "connected" : "failed"));
+            //if (!server.IsConnected)
+            //{
+            //    Console.WriteLine("Error, closing server, no connection established!");
+            //    throw new ServerCreationException();
+            //}
+            return server;
+        }
+
+        public static string GenerateId()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
+        #endregion
+
+
     }
 }
