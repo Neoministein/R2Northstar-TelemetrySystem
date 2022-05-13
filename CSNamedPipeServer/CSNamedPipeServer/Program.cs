@@ -4,16 +4,16 @@ namespace CSNamedPipeServer
 {
     public static class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            do
-            {
-                Console.WriteLine("Starting NamedPipeServer");
-                PipeReader pipeReader = new PipeReader();
-                pipeReader.MainLoop();
-                Console.WriteLine("Server will restart in 5 sec.\nPress any key to cancel...");
-            }
-            while (!Reader.KeyPressed(5000));
+            //do
+            //{
+            Console.WriteLine("Starting NamedPipeServer");
+            PipeReader pipeReader = new PipeReader();
+            pipeReader.MainLoop();
+            //    Console.WriteLine("Server will restart in 5 sec.\nPress any key to cancel...");
+            //}
+            //while (!Reader.KeyPressed(5000));
         }
     }
 
