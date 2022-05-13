@@ -5,8 +5,6 @@ import com.neo.common.impl.json.JsonUtil;
 import com.neo.util.javax.api.rest.RestAction;
 import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
 import com.neo.util.javax.impl.rest.DefaultResponse;
-import com.neo.util.javax.impl.rest.HttpMethod;
-import com.neo.util.javax.impl.rest.RequestContext;
 
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.GET;
@@ -24,19 +22,13 @@ public class GameClientResource extends AbstractRestEndpoint {
 
     @GET
     public Response get() {
-        RequestContext requestContext = getContext(HttpMethod.GET, "");
         RestAction restAction = () -> {
             ObjectNode node =  JsonUtil.emptyObjectNode();
             node.put("newestVersion","1.0");
             node.put("requiredVersion","1.0");
-            return DefaultResponse.success(requestContext, node);
+            return DefaultResponse.success(requestDetails.getRequestContext(), node);
         };
 
-        return super.restCall(restAction,requestContext);
-    }
-
-    @Override
-    protected String getClassURI() {
-        return RESOURCE_LOCATION;
+        return super.restCall(restAction);
     }
 }

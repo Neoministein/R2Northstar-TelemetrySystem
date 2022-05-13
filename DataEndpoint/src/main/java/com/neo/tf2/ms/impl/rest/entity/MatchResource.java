@@ -1,21 +1,18 @@
 package com.neo.tf2.ms.impl.rest.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.neo.common.api.action.Action;
 import com.neo.common.api.json.Views;
 import com.neo.common.impl.StringUtils;
 import com.neo.common.impl.exception.InternalLogicException;
 import com.neo.common.impl.json.JsonSchemaUtil;
 import com.neo.common.impl.json.JsonUtil;
-import com.neo.common.impl.lazy.LazyAction;
 import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
 import com.neo.javax.api.persitence.entity.EntityQuery;
+import com.neo.tf2.ms.impl.persistence.GlobalGameState;
 import com.neo.tf2.ms.impl.persistence.entity.Match;
 import com.neo.tf2.ms.impl.security.Secured;
 import com.neo.util.javax.api.rest.RestAction;
 import com.neo.util.javax.impl.rest.DefaultResponse;
-import com.neo.util.javax.impl.rest.HttpMethod;
-import com.neo.util.javax.impl.rest.RequestContext;
 
 import com.neo.util.javax.impl.rest.entity.AbstractEntityRestEndpoint;
 import com.networknt.schema.JsonSchema;
@@ -23,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.transaction.RollbackException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -49,11 +47,13 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
     public static final String P_PLAYING = "/playing";
 
+    @Inject
+    GlobalGameState globalGameState;
+
     @POST
     @Secured
     @Path(P_NEW)
     public Response newGame(String x) {
-        RequestContext requestContext = getContext(HttpMethod.POST, P_NEW);
         RestAction restAction = () -> {
             JsonNode json = JsonUtil.fromJson(x);
             JsonSchemaUtil.isValidOrThrow(json, JSON_SCHEMA);
@@ -61,61 +61,57 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
             match.setMap(json.get("map").asText());
             match.setNsServerName(json.get("ns_server_name").asText());
             match.setGamemode(json.get("gamemode").asText());
+            match.setOwner(requestDetails.getUUId().orElse(null));
             try {
                 entityRepository.create(match);
             } catch (RollbackException ex) {
                 throw new InternalLogicException(ex);
             }
-            LOGGER.info("New game with id {}", match.getId());
-            return parseEntityToResponse(match, requestContext, Views.Public.class);
+            LOGGER.info("New match registered {}", match.getId());
+            return parseEntityToResponse(match, Views.Public.class);
         };
 
-        return super.restCall(restAction, requestContext);
+        return super.restCall(restAction);
     }
 
     @PUT
     @Secured
     @Path(P_END + "/{id}")
     public Response endGame(@PathParam("id") String id) {
-        RequestContext requestContext = getContext(HttpMethod.PUT, P_END + "/" + id);
         RestAction restAction = () -> {
             if (StringUtils.isEmpty(id)) {
-                return DefaultResponse.error(404, E_NOT_FOUND, requestContext);
+                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
             }
             try {
-                Optional<Match> optGame = entityRepository.find(UUID.fromString(id), Match.class);
-                if (optGame.isEmpty()) {
-                    return DefaultResponse.error(404, E_NOT_FOUND, requestContext);
+                Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
+                if (optMatch.isEmpty()) {
+                    return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
                 }
-                Match game = optGame.get();
-                game.setIsRunning(false);
+                Match match = optMatch.get();
+                match.setIsRunning(false);
 
-                entityRepository.edit(game);
-                return parseEntityToResponse(game, requestContext, Views.Public.class);
+                entityRepository.edit(match);
+                globalGameState.removeGameState(match.getId());
+                LOGGER.info("Match finished {}", match.getId());
+                return parseEntityToResponse(match, Views.Public.class);
             } catch (RollbackException ex) {
                 throw new InternalLogicException(ex);
             } catch (IllegalArgumentException ex) {
-                return DefaultResponse.error(404, E_NOT_FOUND, getContext(HttpMethod.PUT, P_END + "/" + id));
+                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
             }
         };
 
-        return super.restCall(restAction, requestContext);
+        return super.restCall(restAction);
     }
 
     @GET
     @Path(P_PLAYING)
     public Response playing(){
-        RequestContext requestContext = new RequestContext(HttpMethod.GET, getClassURI(), P_PLAYING);
         RestAction restAction = () -> {
             String result = JsonUtil.toJson(entityRepository.find(Q_ARE_PLAYING), Views.Public.class);
-            return DefaultResponse.success(requestContext, JsonUtil.fromJson(result));
+            return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(result));
         };
-        return super.restCall(restAction, requestContext);
-    }
-
-    @Override
-    protected String getClassURI() {
-        return RESOURCE_LOCATION;
+        return super.restCall(restAction);
     }
 
     @Override

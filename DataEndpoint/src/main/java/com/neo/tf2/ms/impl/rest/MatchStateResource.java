@@ -10,8 +10,6 @@ import com.neo.tf2.ms.impl.security.Secured;
 import com.neo.util.javax.api.rest.RestAction;
 import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
 import com.neo.util.javax.impl.rest.DefaultResponse;
-import com.neo.util.javax.impl.rest.HttpMethod;
-import com.neo.util.javax.impl.rest.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +38,6 @@ public class MatchStateResource extends AbstractRestEndpoint {
     @PUT
     @Secured
     public Response put(String x) {
-        RequestContext requestContext = getContext(HttpMethod.PUT,"");
         RestAction restAction = () -> {
             JsonNode jsonNode = JsonUtil.fromJson(x);
             JsonSchemaUtil.isValidOrThrow(jsonNode, MatchState.JSON_SCHEMA);
@@ -49,25 +46,19 @@ public class MatchStateResource extends AbstractRestEndpoint {
                 MatchState matchState = new MatchState(jsonNode.deepCopy());
                 searchRepository.index(matchState);
             }
-            return DefaultResponse.success(requestContext);
+            return DefaultResponse.success(requestDetails.getRequestContext());
         };
 
-        return super.restCall(restAction,requestContext);
+        return super.restCall(restAction);
     }
 
     @GET
     @Path("/{id}")
     public Response get(@PathParam("id") String id) {
-        RequestContext requestContext = getContext(HttpMethod.GET,"/" + id);
         RestAction restAction = () -> {
             JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id));
-            return DefaultResponse.success(requestContext, state);
+            return DefaultResponse.success(requestDetails.getRequestContext(), state);
         };
-        return super.restCall(restAction, requestContext);
-    }
-
-    @Override
-    protected String getClassURI() {
-        return RESOURCE_LOCATION;
+        return super.restCall(restAction);
     }
 }
