@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RequestScoped
-public class RequestContext {
+public class RequestUser {
 
     private UUID user;
 

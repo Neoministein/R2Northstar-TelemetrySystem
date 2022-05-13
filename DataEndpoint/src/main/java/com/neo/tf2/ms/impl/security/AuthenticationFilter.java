@@ -1,9 +1,9 @@
 package com.neo.tf2.ms.impl.security;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.neo.javax.api.connection.RequestDetails;
 import com.neo.tf2.ms.impl.persistence.entity.UserToken;
 import com.neo.util.javax.impl.rest.DefaultResponse;
-import com.neo.util.javax.impl.rest.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,17 +30,22 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     protected static final String AUTHENTICATION_SCHEME = "Bearer";
 
     @Inject
-    RequestContext requestContext;
+    RequestUser requestContext;
 
     @Inject
     AuthenticationService authenticationService;
 
+    @Inject
+    RequestDetails requestDetails;
+
     @Override
     public void filter(ContainerRequestContext containerRequest) {
+        LOGGER.debug("Authentication attempt");
         String authorizationHeader = containerRequest.getHeaderString(HttpHeaders.AUTHORIZATION);
 
 
         if (!validateAuthorizationHeader(authorizationHeader)) {
+            LOGGER.debug("Invalid authorization header");
             abortWithUnauthorized(containerRequest);
             return;
         }
@@ -66,22 +71,19 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     private void abortWithUnauthorized(ContainerRequestContext containerRequest) {
-        com.neo.util.javax.impl.rest.RequestContext requestContext = new com.neo.util.javax.impl.rest.RequestContext(HttpMethod.valueOf(containerRequest.getMethod()), getClassUri(containerRequest.getUriInfo()),"");
-        containerRequest.abortWith(DefaultResponse.error(401,E_UNAUTHORIZED, requestContext));
+        containerRequest.abortWith(DefaultResponse.error(401,E_UNAUTHORIZED, requestDetails.getRequestContext()));
     }
 
     private boolean validateToken(String token) {
         Optional<UserToken> optionalToken = authenticationService.retrieveToken(token);
         if (optionalToken.isPresent()) {
+            LOGGER.debug("Authentication success");
             UserToken userToken = optionalToken.get();
             requestContext.setUser(userToken.getOwner());
             requestContext.setRoles(new ArrayList<>(userToken.getRoles()));
             return true;
         }
+        LOGGER.debug("Authentication failure");
         return false;
-    }
-
-    protected String getClassUri(UriInfo uriInfo) {
-        return uriInfo.getRequestUri().toString().substring(uriInfo.getBaseUri().toString().length());
     }
 }

@@ -1,7 +1,8 @@
 package com.neo.tf2.ms.impl.connection;
 
+import com.neo.javax.api.connection.RequestContext;
 import com.neo.javax.api.connection.RequestDetails;
-import com.neo.tf2.ms.impl.security.RequestContext;
+import com.neo.tf2.ms.impl.security.RequestUser;
 import io.helidon.security.SecurityContext;
 import io.helidon.webserver.ServerRequest;
 
@@ -15,8 +16,10 @@ import java.util.UUID;
 @RequestScoped
 public class RequestDetailsImpl implements RequestDetails {
 
+    protected RequestContext requestContext;
+
     @Inject
-    RequestContext requestContext;
+    RequestUser requestUser;
 
     @Context
     ServerRequest serverRequest;
@@ -36,16 +39,26 @@ public class RequestDetailsImpl implements RequestDetails {
 
     @Override
     public Optional<UUID> getUUId() {
-        return requestContext.getUser();
+        return requestUser.getUser();
     }
 
     @Override
     public boolean isInRole(String role) {
-        return requestContext.getRoles().contains(role);
+        return requestUser.getRoles().contains(role);
     }
 
     @Override
     public boolean isInRoles(List<String> list) {
-        return requestContext.getRoles().containsAll(list);
+        return requestUser.getRoles().containsAll(list);
+    }
+
+    @Override
+    public RequestContext getRequestContext() {
+        return requestContext;
+    }
+
+    @Override
+    public void setRequestContext(RequestContext requestContext) {
+        this.requestContext = requestContext;
     }
 }

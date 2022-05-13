@@ -21,6 +21,7 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
     public static final String C_GAMEMODE = "gamemode";
     public static final String C_MAP = "map";
     public static final String C_START_DATE = "startDate";
+    public static final String C_OWNER = "owner";
 
     @Id
     @Type(type = "uuid-char")
@@ -48,6 +49,10 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
     @Column(name = C_START_DATE, nullable = false, updatable = false)
         @JsonView(Views.Public.class)
     private Date startDate = new Date();
+
+    @Column(name = C_OWNER)
+        @JsonView(Views.Owner.class)
+    private UUID owner;
 
     public UUID getId() {
         return id;
@@ -95,6 +100,10 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
 
     public void setStartDate(Date startDate) {
         this.startDate = startDate;
+    }
+
+    public void setOwner(UUID matchOwner) {
+        this.owner = matchOwner;
     }
 
     @Override
