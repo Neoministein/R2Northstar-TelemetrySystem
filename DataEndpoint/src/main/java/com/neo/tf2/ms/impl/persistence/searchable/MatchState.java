@@ -15,7 +15,7 @@ public class MatchState extends GenericSearchable implements Searchable {
 
     public MatchState(ObjectNode objectNode) {
         setJsonNode(objectNode);
-        businessId = objectNode.get("matchId").asText() + ":" + getCreationDate().getTime();
+        businessId = objectNode.get("matchId").asText() + ":" + objectNode.get("timePassed").asInt();
     }
 
     @Override

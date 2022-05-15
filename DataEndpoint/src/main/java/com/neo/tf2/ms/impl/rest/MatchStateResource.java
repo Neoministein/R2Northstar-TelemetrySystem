@@ -1,8 +1,12 @@
 package com.neo.tf2.ms.impl.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.neo.common.api.json.Views;
 import com.neo.common.impl.json.JsonSchemaUtil;
 import com.neo.common.impl.json.JsonUtil;
+import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
+import com.neo.javax.api.persitence.search.SearchQuery;
 import com.neo.javax.api.persitence.search.SearchRepository;
 import com.neo.tf2.ms.impl.persistence.GlobalGameState;
 import com.neo.tf2.ms.impl.persistence.searchable.MatchState;
@@ -18,6 +22,8 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RequestScoped
@@ -26,6 +32,8 @@ import java.util.UUID;
 public class MatchStateResource extends AbstractRestEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchStateResource.class);
+
+    public static final ObjectNode E_SERVICE = DefaultResponse.errorObject("svc/000", "Internal service not available");
 
     public static final String RESOURCE_LOCATION = "api/v1/matchstate";
 
@@ -58,6 +66,24 @@ public class MatchStateResource extends AbstractRestEndpoint {
         RestAction restAction = () -> {
             JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id));
             return DefaultResponse.success(requestDetails.getRequestContext(), state);
+        };
+        return super.restCall(restAction);
+    }
+
+    @GET
+    @Path("/{id}/{offset}")
+    public Response replayData(@PathParam("id") String id, @PathParam("offset") int offset) {
+        RestAction restAction = () -> {
+            if (searchRepository.enabled()) {
+                SearchQuery searchQuery = new SearchQuery(100, List.of(new ExplicitSearchCriteria("matchId", id,false)));
+                searchQuery.setFields(null);
+                searchQuery.setOnlySource(true);
+                searchQuery.setSorting(Map.of("timePassed",true));
+                searchQuery.setOffset(offset);
+                String searchResponse = JsonUtil.toJson(searchRepository.fetch("tfms-match-state-*",searchQuery), Views.Public.class);
+                return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(searchResponse));
+            }
+            return DefaultResponse.error(503, E_SERVICE,requestDetails.getRequestContext());
         };
         return super.restCall(restAction);
     }
