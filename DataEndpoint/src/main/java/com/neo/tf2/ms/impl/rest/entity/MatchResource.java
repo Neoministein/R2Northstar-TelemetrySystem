@@ -40,12 +40,17 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
             List.of(new ExplicitSearchCriteria(Match.C_IS_PLAYING,true)),
             Map.of(Match.C_START_DATE, false));
 
+    protected static final EntityQuery<Match> Q_STOPPLED_PLAYING = new EntityQuery<>(Match.class, 0,null,
+            List.of(new ExplicitSearchCriteria(Match.C_IS_PLAYING,false)),
+            Map.of(Match.C_START_DATE, false));
+
     public static final String RESOURCE_LOCATION = "api/v1/match";
 
     public static final String P_NEW = "/new";
     public static final String P_END = "/end";
 
     public static final String P_PLAYING = "/playing";
+    public static final String P_STOPPED = "/stopped";
 
     @Inject
     GlobalGameState globalGameState;
@@ -106,9 +111,19 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
     @GET
     @Path(P_PLAYING)
-    public Response playing(){
+    public Response playing() {
         RestAction restAction = () -> {
             String result = JsonUtil.toJson(entityRepository.find(Q_ARE_PLAYING), Views.Public.class);
+            return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(result));
+        };
+        return super.restCall(restAction);
+    }
+
+    @GET
+    @Path(P_STOPPED)
+    public Response stopped() {
+        RestAction restAction = () -> {
+            String result = JsonUtil.toJson(entityRepository.find(Q_STOPPLED_PLAYING), Views.Public.class);
             return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(result));
         };
         return super.restCall(restAction);
