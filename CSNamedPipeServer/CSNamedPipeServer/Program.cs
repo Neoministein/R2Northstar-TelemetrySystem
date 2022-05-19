@@ -1,57 +1,57 @@
 ﻿using System;
+using System.Configuration;
 
 namespace CSNamedPipeServer
 {
     public static class Program
     {
+        private static PipeReader m_pipeReader;
+        private static bool m_keepRunning = true;
         static void Main(string[] args)
         {
-            //do
-            //{
-            Console.WriteLine("Starting NamedPipeServer");
-            PipeReader pipeReader = new PipeReader();
-            pipeReader.MainLoop();
-            //    Console.WriteLine("Server will restart in 5 sec.\nPress any key to cancel...");
-            //}
-            //while (!Reader.KeyPressed(5000));
-        }
-    }
-
-    // Based on: https://stackoverflow.com/questions/57615/how-to-add-a-timeout-to-console-readline
-    class Reader
-    {
-        private static Thread inputThread;
-        private static AutoResetEvent getInput, gotInput;
-        private static ConsoleKeyInfo input;
-
-        static Reader()
-        {
-            getInput = new AutoResetEvent(false);
-            gotInput = new AutoResetEvent(false);
-            inputThread = new Thread(reader);
-            inputThread.IsBackground = true;
-            inputThread.Start();
-        }
-
-        private static void reader()
-        {
-            while (true)
+            foreach (string arg in args)
             {
-                getInput.WaitOne();
-                input = Console.ReadKey();
-                gotInput.Set();
+                if (arg == "-h" || arg == "-help")
+                {
+                    ShowHelp();
+                    return;
+                }
             }
+            try
+            {
+                if (args.Length == 2)
+                    GloVars.LoadSettings(args[0], args[1]);
+                else if (args.Length == 0)
+                    GloVars.LoadSettings();
+                else
+                    throw new InvalidArgumentsException("Invalid amount of arguments");
+            }
+            catch (InvalidArgumentsException _ex)
+            {
+                Console.WriteLine(_ex.Message);
+                ShowHelp();
+                return;
+            }
+            Console.WriteLine("Starting NamedPipeServer");
+            m_pipeReader = new PipeReader();
+            // TODO: ConsoleKeyPress for clean closior of tasks
+            //Console.CancelKeyPress += delegate (object? _sender, ConsoleCancelEventArgs _e) // TODO: On windows close
+            //{
+            //    m_keepRunning = false;
+            //    m_pipeReader.OnCloseApplication();
+            //};
+            Output.Init();
+            while (m_keepRunning)
+                m_pipeReader.MainLoop();
         }
 
-        // omit the parameter to read a line without a timeout
-        public static bool KeyPressed(int timeOutMillisecs = Timeout.Infinite)
+        private static void ShowHelp()
         {
-            getInput.Set();
-            bool success = gotInput.WaitOne(timeOutMillisecs);
-            if (success)
-                return true;
-            else
-                return false;
+            Console.WriteLine("Syntax: filename.exe [userKey apiUrl]");
+            Console.WriteLine("userKey: authentification key for the db server");
+            Console.WriteLine("apiUrl: url of the db server");
+            Console.WriteLine("Example if not started before or want to change settings: ThisServer.exe 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789A http://localhost:8090/api/v1");
+            Console.WriteLine("Example if started before: ThisServer.exe");
         }
     }
 }

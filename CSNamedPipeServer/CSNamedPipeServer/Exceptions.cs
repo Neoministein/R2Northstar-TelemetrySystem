@@ -25,4 +25,11 @@ namespace CSNamedPipeServer
         public ServerCreationException(string _message) : base(_message) { }
         public ServerCreationException(string _message, Exception _inner) : base(_message, _inner) { }
     }
+
+    public class InvalidArgumentsException : Exception
+    {
+        public InvalidArgumentsException() { }
+        public InvalidArgumentsException(string _message) : base(_message) { }
+        public InvalidArgumentsException(string _message, Exception _inner) : base(_message, _inner) { }
+    }
 }

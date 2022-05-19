@@ -65,7 +65,7 @@ namespace CSNamedPipeServer
             NewMatchRequest newResponse = new NewMatchRequest() { map = _mapName, ns_server_name = _serverName, gamemode = _gamemode };
             if (PipeReader.argUseHttp)
             {
-                string answer = await Output.PostJsonHttpClient(PipeReader.argUrl + "/match/new", JsonConvert.SerializeObject(newResponse)); // "localhost:8081/api/v1/match/new"
+                string answer = await Output.PostJsonHttpClient(GloVars.argUrl + "/match/new", JsonConvert.SerializeObject(newResponse)); // "localhost:8081/api/v1/match/new"
                                                                                                                                                  //string answer = await client.GetStringAsync(url + "/new?map=" + _mapName);
                 if (!String.IsNullOrWhiteSpace(answer))
                 {
@@ -104,7 +104,7 @@ namespace CSNamedPipeServer
         public async Task EndMatch()
         {
             if (PipeReader.argUseHttp)
-                await Output.PutJsonHttpClient(PipeReader.argUrl + "/match/end/" + matchId, String.Empty);
+                await Output.PutJsonHttpClient(GloVars.argUrl + "/match/end/" + matchId, String.Empty);
         }
     }
 }
