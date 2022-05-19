@@ -12,48 +12,24 @@
     "mappings": {
       "properties": {
         "businessId": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
+          "type": "keyword"
         },
         "events": {
           "properties": {
             "eventPilotBecomesTitan": {
               "properties": {
                 "playerId": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "titanClass": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 }
               }
             },
             "eventPlayerConnect": {
               "properties": {
                 "playerId": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "team": {
                   "type": "long"
@@ -63,154 +39,70 @@
             "eventPlayerDoubleJump": {
               "properties": {
                 "playerId": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 }
               }
             },
             "eventPlayerGetsNewPilotLoadout": {
               "properties": {
                 "playerId": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "primary": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "secondary": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "special": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "weapon3": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 }
               }
             },
             "eventPlayerJump": {
               "properties": {
                 "playerId": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 }
               }
             },
             "eventPlayerKilled": {
               "properties": {
                 "attackerId": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "victimId": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "weapon": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 }
               }
             },
             "eventPlayerRespawned": {
               "properties": {
                 "playerId": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 }
               }
             },
             "eventTitanBecomesPilot": {
               "properties": {
                 "playerId": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 }
               }
             }
           }
         },
         "map": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
+          "type": "keyword"
         },
         "matchId": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
+          "type": "keyword"
         },
         "players": {
           "properties": {
@@ -239,13 +131,7 @@
               "type": "boolean"
             },
             "playerId": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             },
             "position": {
               "properties": {
@@ -261,13 +147,7 @@
               }
             },
             "primary": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             },
             "rotation": {
               "properties": {
@@ -283,34 +163,16 @@
               }
             },
             "secondary": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             },
             "special": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             },
             "team": {
               "type": "byte"
             },
             "titanClass": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             },
             "velocity": {
               "properties": {
@@ -326,13 +188,7 @@
               }
             },
             "weapon3": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
+              "type": "keyword"
             }
           }
         },
@@ -340,13 +196,7 @@
           "type": "long"
         },
         "type": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
+          "type": "keyword"
         }
       }
     },
