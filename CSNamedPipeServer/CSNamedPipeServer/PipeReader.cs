@@ -18,8 +18,6 @@ namespace CSNamedPipeServer
         private DateTime m_startTime;
         private bool m_closed = false;
 
-        public const string argUrl = "http://localhost:8090/api/v1";
-
         public const bool argUseHttp = true;
         public const LogMode argLogMode = LogMode.Event;
 
@@ -28,6 +26,13 @@ namespace CSNamedPipeServer
             m_namedPipeServer = _pipe;
             m_startTime = DateTime.Now;
             //Task t1 = Task.Run(() => RunPipe());
+        }
+
+        public void OnCloseApplication()
+        {
+            if (m_currentMatch.isRunning)
+                EndMatch();
+            m_namedPipeServer.Close();
         }
 
         /// <summary>
@@ -70,7 +75,7 @@ namespace CSNamedPipeServer
                 Console.WriteLine("Pipe connection lost. Ending current match");
                 EndMatch();
             }
-            m_namedPipeServer.Dispose();
+            m_namedPipeServer.Close();
             //Console.WriteLine("Exit: 0");
 
             return 0;
@@ -276,7 +281,7 @@ namespace CSNamedPipeServer
             //Console.WriteLine(json);
             if (argUseHttp)
             {
-                Task dontAwaite = Output.PutJsonHttpClient(argUrl + "/matchstate", json); // Exceptions here will be lost since there is not await
+                Task dontAwaite = Output.PutJsonHttpClient(GloVars.argUrl + "/matchstate", json); // Exceptions here will be lost since there is not await
             }
             if (argLogMode >= LogMode.All)
                 Console.WriteLine("Send: " + JValue.Parse(json).ToString(Formatting.Indented));
@@ -309,29 +314,57 @@ namespace CSNamedPipeServer
     {
         // Http post erstellen
         // Http put schließen
+        private bool closeApp = false;
         private NamedPipeServerStream m_generalPipe;
         private const int BUFFER_SIZE = 512; // Same as northstar.dll
         private const int TCHAR_SIZE = 2; // Same as northstar.dll
         private bool m_closed = false;
-
-        public const string argUrl = "http://localhost:8090/api/v1";
 
         public const bool argUseHttp = true;
         public const LogMode argLogMode = LogMode.Event;
 
         public List<PipeInstance> m_runningGamePipes = new List<PipeInstance>();
 
+        public void OnCloseApplication()
+        {
+            foreach (PipeInstance instance in m_runningGamePipes)
+            {
+                instance.OnCloseApplication();
+            }
+            closeApp = true;
+            m_generalPipe.Dispose();
+            //m_generalPipe = null;
+
+            using (NamedPipeClientStream npcs = new NamedPipeClientStream("GameDataPipe"))
+            {
+                npcs.Connect(1000);
+            }
+        }
+
         /// <summary>
         /// Main Loop that executes the named pipe as well as handling http and json
         /// </summary>
         public int MainLoop()
         {
-            Output.Init();
-
-            while (true)
+            m_generalPipe = OpenNewPipe("GameDataPipe", PipeDirection.Out);
+            try
             {
-                m_generalPipe = OpenNewPipe("GameDataPipe", PipeDirection.Out);
                 m_generalPipe.WaitForConnection();
+            }
+            catch (Exception ex)
+            {
+                if (ex is IOException)
+                {
+                    Console.WriteLine("General pipe closed");
+                }
+                else
+                {
+                    Console.Write(ex.ToString());
+                }
+                return 1;
+            }
+            if (!closeApp)
+            {
                 Console.WriteLine("General Pipe Connection: " + (m_generalPipe.IsConnected ? "connected" : "failed"));
                 if (!m_generalPipe.IsConnected)
                 {
@@ -353,8 +386,8 @@ namespace CSNamedPipeServer
                                                                      // Close to allow connection of new client for new match
                     m_generalPipe.Close();
                 }
+                //}
             }
-
             return 0;
         }
 
@@ -362,7 +395,7 @@ namespace CSNamedPipeServer
         public static NamedPipeServerStream OpenNewPipe(string _pipeName, PipeDirection _direction)
         {
             // TODO: Accept multiple pipes
-            NamedPipeServerStream server = new NamedPipeServerStream(_pipeName, _direction, 1, PipeTransmissionMode.Byte);
+            NamedPipeServerStream server = new NamedPipeServerStream(_pipeName, _direction, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
             //server.WaitForConnection(); // TODO: Timeout
             //Console.WriteLine("Connection: " + (server.IsConnected ? "connected" : "failed"));
             //if (!server.IsConnected)
