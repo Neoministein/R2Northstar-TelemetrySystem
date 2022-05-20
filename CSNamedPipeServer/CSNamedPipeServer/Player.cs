@@ -65,7 +65,7 @@
         /// <summary>
         /// Currently hanging on a ledge
         /// </summary>
-        public bool isHanging = true;
+        public bool isHanging = false;
         /// <summary>
         /// Currently crouching
         /// </summary>
