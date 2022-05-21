@@ -17,7 +17,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "identification": {
+          "entityId": {
             "type": "string"
           },
           "team": {
@@ -129,7 +129,7 @@
           }
         },
         "required": [
-          "identification",
+          "entityId",
           "team",
           "titanClass",
           "position",
@@ -154,7 +154,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               },
               "team": {
@@ -162,7 +162,7 @@
               }
             },
             "required": [
-              "playerId",
+              "entityId",
               "team"
             ]
           }
@@ -172,12 +172,12 @@
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
@@ -208,12 +208,12 @@
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
@@ -222,7 +222,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               },
               "titanClass": {
@@ -230,7 +230,7 @@
               }
             },
             "required": [
-              "playerId",
+              "entityId",
               "titanClass"
             ]
           }
@@ -240,12 +240,12 @@
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
@@ -254,7 +254,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               },
               "primary": {
@@ -271,7 +271,7 @@
               }
             },
             "required": [
-              "playerId",
+              "entityId",
               "primary",
               "secondary",
               "weapon3",
@@ -284,12 +284,12 @@
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
@@ -298,12 +298,12 @@
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
@@ -312,12 +312,12 @@
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         }

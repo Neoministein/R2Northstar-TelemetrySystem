@@ -28,7 +28,7 @@
       },
       "entity": {
         "properties": {
-          "identification": {
+          "entityId": {
             "type": "keyword"
           },
           "team": {
