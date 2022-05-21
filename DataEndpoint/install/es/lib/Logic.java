@@ -24,7 +24,7 @@ class Scratch {
     }
 
     static void postTemplateName(String body, String templateName) throws IOException {
-        URL url = new URL ("http://192.168.1.125:9200/_template/" + templateName);
+        URL url = new URL ("http://localhost:9200/_template/" + templateName);
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json; utf-8");
