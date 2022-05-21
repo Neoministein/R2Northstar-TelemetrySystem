@@ -17,7 +17,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "playerId": {
+          "identification": {
             "type": "string"
           },
           "team": {
@@ -128,8 +128,9 @@
           }
         },
         "required": [
-          "playerId",
+          "identification",
           "team",
+          "titanClass",
           "position",
           "rotation",
           "velocity",
