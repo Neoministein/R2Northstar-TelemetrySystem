@@ -1,0 +1,218 @@
+{
+  "index_patterns": [
+    "tfms-match-event-*"
+  ],
+  "settings": {
+    "number_of_shards": "1",
+    "auto_expand_replicas": "0-1"
+  },
+  "mappings": {
+    "properties": {
+      "businessId": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "map": {
+        "type": "keyword"
+      },
+      "matchId": {
+        "type": "keyword"
+      },
+      "eventType": {
+        "type": "long"
+      },
+      "timePassed": {
+        "type": "long"
+      },
+      "players": {
+        "properties": {
+          "health": {
+            "type": "byte"
+          },
+          "isAlive": {
+            "type": "boolean"
+          },
+          "isCrouching": {
+            "type": "boolean"
+          },
+          "isGrounded": {
+            "type": "boolean"
+          },
+          "isHanging": {
+            "type": "boolean"
+          },
+          "isShooting": {
+            "type": "boolean"
+          },
+          "isTitan": {
+            "type": "boolean"
+          },
+          "isWallRunning": {
+            "type": "boolean"
+          },
+          "playerId": {
+            "type": "keyword"
+          },
+          "position": {
+            "properties": {
+              "x": {
+                "type": "long"
+              },
+              "y": {
+                "type": "long"
+              },
+              "z": {
+                "type": "long"
+              }
+            }
+          },
+          "primary": {
+            "type": "keyword"
+          },
+          "rotation": {
+            "properties": {
+              "x": {
+                "type": "short"
+              },
+              "y": {
+                "type": "short"
+              },
+              "z": {
+                "type": "short"
+              }
+            }
+          },
+          "secondary": {
+            "type": "keyword"
+          },
+          "special": {
+            "type": "keyword"
+          },
+          "team": {
+            "type": "byte"
+          },
+          "titanClass": {
+            "type": "keyword"
+          },
+          "velocity": {
+            "properties": {
+              "x": {
+                "type": "short"
+              },
+              "y": {
+                "type": "short"
+              },
+              "z": {
+                "type": "short"
+              }
+            }
+          },
+          "weapon3": {
+            "type": "keyword"
+          }
+        }
+      },
+      "data": {
+        "properties": {
+          "victim":  {
+            "properties": {
+              "health": {
+                "type": "byte"
+              },
+              "isAlive": {
+                "type": "boolean"
+              },
+              "isCrouching": {
+                "type": "boolean"
+              },
+              "isGrounded": {
+                "type": "boolean"
+              },
+              "isHanging": {
+                "type": "boolean"
+              },
+              "isShooting": {
+                "type": "boolean"
+              },
+              "isTitan": {
+                "type": "boolean"
+              },
+              "isWallRunning": {
+                "type": "boolean"
+              },
+              "playerId": {
+                "type": "keyword"
+              },
+              "position": {
+                "properties": {
+                  "x": {
+                    "type": "long"
+                  },
+                  "y": {
+                    "type": "long"
+                  },
+                  "z": {
+                    "type": "long"
+                  }
+                }
+              },
+              "primary": {
+                "type": "keyword"
+              },
+              "rotation": {
+                "properties": {
+                  "x": {
+                    "type": "short"
+                  },
+                  "y": {
+                    "type": "short"
+                  },
+                  "z": {
+                    "type": "short"
+                  }
+                }
+              },
+              "secondary": {
+                "type": "keyword"
+              },
+              "special": {
+                "type": "keyword"
+              },
+              "team": {
+                "type": "byte"
+              },
+              "titanClass": {
+                "type": "keyword"
+              },
+              "velocity": {
+                "properties": {
+                  "x": {
+                    "type": "short"
+                  },
+                  "y": {
+                    "type": "short"
+                  },
+                  "z": {
+                    "type": "short"
+                  }
+                }
+              },
+              "weapon3": {
+                "type": "keyword"
+              }
+            }
+          },
+          "damageType": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  },
+  "aliases": {
+      "tfms-match-event": {}
+  },
+  "version": 3
+}
