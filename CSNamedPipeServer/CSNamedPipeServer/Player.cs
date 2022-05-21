@@ -25,23 +25,11 @@
         /// <summary>
         /// Unique player id
         /// </summary>
-        public string playerId = "";
+        public string entityId = "";
         /// <summary>
-        /// Primary weapon
+        /// Players equipment
         /// </summary>
-        public string primary = "none";
-        /// <summary>
-        /// Secondary weapon
-        /// </summary>
-        public string secondary = "none";
-        /// <summary>
-        /// Third weapon
-        /// </summary>
-        public string weapon3 = "none";
-        /// <summary>
-        /// Pilot ability
-        /// </summary>
-        public string special = "none";
+        public Equipment equipment = new Equipment();
         /// <summary>
         /// Type of titan
         /// </summary>
@@ -82,8 +70,28 @@
         /// <param name="_team">Team id</param>
         public Player(string _id, byte _team)
         {
-            playerId = _id;
+            entityId = _id;
             team = _team;
+        }
+
+        public class Equipment
+        {
+            /// <summary>
+            /// Primary weapon
+            /// </summary>
+            public string primary = "none";
+            /// <summary>
+            /// Secondary weapon
+            /// </summary>
+            public string secondary = "none";
+            /// <summary>
+            /// Third weapon
+            /// </summary>
+            public string weapon3 = "none";
+            /// <summary>
+            /// Pilot ability
+            /// </summary>
+            public string special = "none";
         }
     }
 }
