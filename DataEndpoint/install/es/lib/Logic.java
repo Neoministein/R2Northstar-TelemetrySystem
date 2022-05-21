@@ -14,7 +14,7 @@ class Scratch {
 
         for (final File fileEntry : folder.listFiles()) {
             String content = readFile(fileEntry.toPath(), StandardCharsets.UTF_8);
-            postTemplateName(content);
+            postTemplateName(content, fileEntry.getName());
         }
     }
 
@@ -23,8 +23,8 @@ class Scratch {
         return new String(encoded, encoding);
     }
 
-    static void postTemplateName(String body) throws IOException {
-        URL url = new URL ("http://localhost:9200/index_template/template_1");
+    static void postTemplateName(String body, String templateName) throws IOException {
+        URL url = new URL ("http://192.168.1.125:9200/_template/" + templateName);
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -35,6 +35,6 @@ class Scratch {
             os.write(input, 0, input.length);
         }
 
-        System.out.println(con.getResponseCode());
+        System.out.println(con.getResponseCode() + " " + templateName);
     }
 }
