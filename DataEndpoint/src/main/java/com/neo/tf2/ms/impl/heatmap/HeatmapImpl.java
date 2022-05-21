@@ -1,15 +1,20 @@
 package com.neo.tf2.ms.impl.heatmap;
 
+import com.neo.common.impl.StopWatch;
 import com.neo.common.impl.exception.InternalJsonException;
 import com.neo.javax.api.persitence.aggregation.SearchAggregation;
 import com.neo.javax.api.persitence.aggregation.SimpleAggregationResult;
 import com.neo.javax.api.persitence.aggregation.SimpleFieldAggregation;
 import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
+import com.neo.javax.api.persitence.criteria.LongRangeSearchCriteria;
 import com.neo.javax.api.persitence.criteria.SearchCriteria;
 import com.neo.javax.api.persitence.search.SearchQuery;
 import com.neo.javax.api.persitence.search.SearchRepository;
 import com.neo.javax.api.persitence.search.SearchResult;
 import com.neo.tf2.ms.impl.persistence.searchable.MatchEvent;
+import com.neo.tf2.ms.impl.rest.MatchStateResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -19,6 +24,8 @@ import java.util.Map;
 
 @RequestScoped
 public class HeatmapImpl {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchStateResource.class);
 
     @Inject
     SearchRepository searchRepository;
@@ -30,17 +37,24 @@ public class HeatmapImpl {
             SearchCriteria mapFilter = new ExplicitSearchCriteria("map", map);
             SearchAggregation countAggregation = new SimpleFieldAggregation("count", MatchEvent.F_MATCH_ID, SearchAggregation.AggregationType.COUNT);
             int[] bounds = getMapBounds(mapFilter);
-            for (int x = bounds[0]; x < bounds[1]; x++) {
-                for (int y = bounds[2]; y < bounds[3]; y++) {
+            for (long x = bounds[0]; x < bounds[1]; x = x + 19) {
+                for (long y = bounds[2]; y < bounds[3]; y = y + 19) {
+                    StopWatch stopWatch = new StopWatch();
+                    stopWatch.start();
                     SearchQuery searchQuery = new SearchQuery(0);
                     searchQuery.setFilters(List.of(
                             mapFilter,
-                            new ExplicitSearchCriteria("players.position.x",x),
-                            new ExplicitSearchCriteria("players.position.y", y)));
+                            new LongRangeSearchCriteria("entity.position.x",x,x + 19, false),
+                            new LongRangeSearchCriteria("entity.position.y",y,y + 19, false)));
                     searchQuery.setAggregations(List.of(countAggregation));
 
                     SearchResult searchResult = searchRepository.fetch("tfms-match-event",searchQuery);
-                    resultMap.put(x + "|" + y, getIntFromResult(searchResult, "count"));
+                    int amount = getIntFromResult(searchResult, "count");
+                    resultMap.put(x + "|" + y, amount);
+                    stopWatch.stop();
+                    if (amount != 0) {
+                        LOGGER.info("amount: {} coordinate: {}|{} ms: {}", amount, x, y, stopWatch.getElapsedTimeMs());
+                    }
                 }
             }
             System.out.println();
@@ -55,10 +69,10 @@ public class HeatmapImpl {
         SearchQuery searchQuery = new SearchQuery(0);
         searchQuery.setFilters(List.of(mapName));
         searchQuery.setAggregations(List.of(
-                        new SimpleFieldAggregation("xMin","players.position.x", SearchAggregation.AggregationType.MIN),
-                        new SimpleFieldAggregation("xMax","players.position.x", SearchAggregation.AggregationType.MAX),
-                        new SimpleFieldAggregation("yMin","players.position.y", SearchAggregation.AggregationType.MIN),
-                        new SimpleFieldAggregation("yMax","players.position.y", SearchAggregation.AggregationType.MAX)));
+                        new SimpleFieldAggregation("xMin","entity.position.x", SearchAggregation.AggregationType.MIN),
+                        new SimpleFieldAggregation("xMax","entity.position.x", SearchAggregation.AggregationType.MAX),
+                        new SimpleFieldAggregation("yMin","entity.position.y", SearchAggregation.AggregationType.MIN),
+                        new SimpleFieldAggregation("yMax","entity.position.y", SearchAggregation.AggregationType.MAX)));
 
         SearchResult searchResult = searchRepository.fetch("tfms-match-event",searchQuery);
         bounds[0] = getIntFromResult(searchResult,"xMin");

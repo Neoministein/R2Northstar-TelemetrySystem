@@ -113,7 +113,7 @@ public class MatchStateResource extends AbstractRestEndpoint {
         for (JsonNode p: state.get(MatchState.F_PLAYERS)) {
             ObjectNode player = p.deepCopy();
             player.put(MatchEvent.F_IS_PLAYER,false);
-            players.put(player.get(MatchState.F_PLAYER_ID).asText(), player);
+            players.put(player.get(MatchState.F_ENTITY_ID).asText(), player);
             MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_POSTION);
             matchEvent.setEntity(player);
             matchEventList.add(matchEvent);
@@ -132,7 +132,7 @@ public class MatchStateResource extends AbstractRestEndpoint {
 
         for (JsonNode event: state.get(MatchState.F_EVENTS).get(MatchState.F_KILLED)) {
             MatchEvent matchEvent = new MatchEvent(state, MatchState.F_KILLED);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
+            matchEvent.setEntity(players.get(event.get(MatchState.F_ENTITY_ID).asText()));
             ObjectNode data = JsonUtil.emptyObjectNode();
             data.set(MatchEvent.F_VICTIM, players.get(event.get(MatchState.F_VICTIM).asText()));
             data.put(MatchEvent.F_DAMAGE_TYPE, event.get(MatchState.F_WEAPON).asText());
@@ -143,9 +143,10 @@ public class MatchStateResource extends AbstractRestEndpoint {
 
     public void addBasicEvents(List<String> basicEvents, Map<String, JsonNode> players, JsonNode state, List<MatchEvent> toAddTo) {
         for (String basicEvent : basicEvents) {
+
             for (JsonNode event: state.get(MatchState.F_EVENTS).get(basicEvent)) {
                 MatchEvent matchEvent = new MatchEvent(state, basicEvent);
-                matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
+                matchEvent.setEntity(players.get(event.get(MatchState.F_ENTITY_ID).asText()));
                 toAddTo.add(matchEvent);
             }
         }

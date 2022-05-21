@@ -11,7 +11,7 @@ public class MatchState extends GenericSearchable implements Searchable {
 
     public static final JsonSchema JSON_SCHEMA = JsonSchemaUtil.generateSchemaFromResource("schemas/MatchState.json");
 
-    public static final String F_PLAYER_ID = "playerId";
+    public static final String F_ENTITY_ID = "entityId";
 
     public static final String F_PLAYERS = "players";
     public static final String F_MATCH = "matchId";

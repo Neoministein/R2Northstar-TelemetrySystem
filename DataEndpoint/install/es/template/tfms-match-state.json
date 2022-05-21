@@ -25,7 +25,7 @@
       },
       "players": {
         "properties": {
-          "identification": {
+          "entityId": {
             "type": "keyword"
           },
           "team": {
