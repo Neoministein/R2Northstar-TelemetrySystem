@@ -110,72 +110,44 @@ public class MatchStateResource extends AbstractRestEndpoint {
     protected List<MatchEvent> parseStateToEvents(JsonNode state) {
         Map<String, JsonNode> players = new HashMap<>();
         List<MatchEvent> matchEventList = new ArrayList<>();
-        for (JsonNode player: state.get(MatchState.F_PLAYERS)) {
+        for (JsonNode p: state.get(MatchState.F_PLAYERS)) {
+            ObjectNode player = p.deepCopy();
+            player.put(MatchEvent.F_IS_PLAYER,false);
             players.put(player.get(MatchState.F_PLAYER_ID).asText(), player);
             MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_POSTION);
             matchEvent.setEntity(player);
             matchEventList.add(matchEvent);
         }
-        JsonNode events = state.get(MatchState.F_EVENTS);
+        List<String> basicEvents = List.of(
+                MatchState.F_CONNECT,
+                MatchState.F_DISCONNECT,
+                MatchState.F_RESPAWNED,
+                MatchState.F_PILOT_BECOMES_TITAN,
+                MatchState.F_TITAN_BECOMES_PILOT,
+                MatchState.F_JUMP,
+                MatchState.F_DOUBLE_JUMP,
+                MatchState.F_MANTLE,
+                MatchState.F_NEW_LOADOUT);
+        addBasicEvents(basicEvents,players, state,matchEventList);
 
-        for (JsonNode event: events.get(MatchState.F_CONNECT)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_CONNECT);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
-        for (JsonNode event: events.get(MatchState.F_DISCONNECT)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_DISCONNECT);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
-        for (JsonNode event: events.get(MatchState.F_KILLED)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_KILL);
+        for (JsonNode event: state.get(MatchState.F_EVENTS).get(MatchState.F_KILLED)) {
+            MatchEvent matchEvent = new MatchEvent(state, MatchState.F_KILLED);
             matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
             ObjectNode data = JsonUtil.emptyObjectNode();
             data.set(MatchEvent.F_VICTIM, players.get(event.get(MatchState.F_VICTIM).asText()));
             data.put(MatchEvent.F_DAMAGE_TYPE, event.get(MatchState.F_WEAPON).asText());
             matchEventList.add(matchEvent);
         }
-        for (JsonNode event: events.get(MatchState.F_RESPAWNED)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_RESPAWNED);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
-        for (JsonNode event: events.get(MatchState.F_PILOT_BECOMES_TITAN)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_PILOT_BECOMES_TITAN);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
-        for (JsonNode event: events.get(MatchState.F_TITAN_BECOMES_PILOT)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_TITAN_BECOMES_PILOT);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
-        for (JsonNode event: events.get(MatchState.F_TITAN_BECOMES_PILOT)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_TITAN_BECOMES_PILOT);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
-        for (JsonNode event: events.get(MatchState.F_JUMP)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_JUMP);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
-        for (JsonNode event: events.get(MatchState.F_DOUBLE_JUMP)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_DOUBLE_JUMP);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
-        for (JsonNode event: events.get(MatchState.F_MANTLE)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_NEW_LOADOUT);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
-        for (JsonNode event: events.get(MatchState.F_NEW_LOADOUT)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_MANTLE);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
-            matchEventList.add(matchEvent);
-        }
         return matchEventList;
+    }
+
+    public void addBasicEvents(List<String> basicEvents, Map<String, JsonNode> players, JsonNode state, List<MatchEvent> toAddTo) {
+        for (String basicEvent : basicEvents) {
+            for (JsonNode event: state.get(MatchState.F_EVENTS).get(basicEvent)) {
+                MatchEvent matchEvent = new MatchEvent(state, basicEvent);
+                matchEvent.setEntity(players.get(event.get(MatchState.F_PLAYER_ID).asText()));
+                toAddTo.add(matchEvent);
+            }
+        }
     }
 }

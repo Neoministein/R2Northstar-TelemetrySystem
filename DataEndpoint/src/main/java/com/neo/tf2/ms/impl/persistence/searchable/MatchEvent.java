@@ -11,20 +11,12 @@ public class MatchEvent extends GenericSearchable implements Searchable {
 
     public static final String F_MATCH_ID = "matchId";
 
+    public static final String F_IS_PLAYER = "isPlayer";
+
     public static final String F_VICTIM = "victim";
     public static final String F_DAMAGE_TYPE = "damageType";
 
     public static final String T_POSTION = "postion";
-    public static final String T_CONNECT = "connect";
-    public static final String T_DISCONNECT = "disconnect";
-    public static final String T_KILL = "kill";
-    public static final String T_RESPAWNED = "respawned";
-    public static final String T_PILOT_BECOMES_TITAN = "pilotBecomesTitan";
-    public static final String T_TITAN_BECOMES_PILOT = "titanBecomesPilot";
-    public static final String T_NEW_LOADOUT = "newLoadout";
-    public static final String T_JUMP = "jump";
-    public static final String T_DOUBLE_JUMP = "doubleJump";
-    public static final String T_MANTLE = "mantle";
 
     private String matchId;
     private String map;
