@@ -20,21 +20,21 @@ public class MatchState extends GenericSearchable implements Searchable {
 
     public static final String F_EVENTS = "events";
 
-    public static final String F_CONNECT = "eventPlayerConnect";
+    public static final String F_CONNECT = "playerConnect";
 
-    public static final String F_DISCONNECT = "eventPlayerDisconnect";
+    public static final String F_DISCONNECT = "playerDisconnect";
 
-    public static final String F_KILLED = "eventPlayerKilled";
+    public static final String F_KILLED = "playerKilled";
     public static final String F_VICTIM = "victimId";
     public static final String F_WEAPON = "weapon";
 
-    public static final String F_RESPAWNED = "eventPlayerRespawned";
-    public static final String F_PILOT_BECOMES_TITAN = "eventPilotBecomesTitan";
-    public static final String F_TITAN_BECOMES_PILOT = "eventTitanBecomesPilot";
-    public static final String F_NEW_LOADOUT = "eventPlayerGetsNewPilotLoadout";
-    public static final String F_JUMP = "eventPlayerJump";
-    public static final String F_DOUBLE_JUMP = "eventPlayerDoubleJump";
-    public static final String F_MANTLE = "eventPlayerMantle";
+    public static final String F_RESPAWNED = "playerRespawned";
+    public static final String F_PILOT_BECOMES_TITAN = "pilotBecomesTitan";
+    public static final String F_TITAN_BECOMES_PILOT = "titanBecomesPilot";
+    public static final String F_NEW_LOADOUT = "playerGetsNewPilotLoadout";
+    public static final String F_JUMP = "playerJump";
+    public static final String F_DOUBLE_JUMP = "playerDoubleJump";
+    public static final String F_MANTLE = "playerMantle";
 
     public MatchState(ObjectNode objectNode) {
         setJsonNode(objectNode);

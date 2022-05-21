@@ -11,7 +11,7 @@
       "businessId": {
         "type": "keyword"
       },
-      "type": {
+      "searchable": {
         "type": "keyword"
       },
       "map": {
@@ -21,15 +21,27 @@
         "type": "keyword"
       },
       "eventType": {
-        "type": "long"
+        "type": "keyword"
       },
       "timePassed": {
         "type": "long"
       },
-      "players": {
+      "entity": {
         "properties": {
+          "identification": {
+            "type": "keyword"
+          },
+          "team": {
+            "type": "byte"
+          },
           "health": {
             "type": "byte"
+          },
+          "titanClass": {
+            "type": "keyword"
+          },
+          "isPlayer": {
+            "type": "boolean"
           },
           "isAlive": {
             "type": "boolean"
@@ -52,8 +64,21 @@
           "isWallRunning": {
             "type": "boolean"
           },
-          "playerId": {
-            "type": "keyword"
+          "equipment": {
+            "properties": {
+              "primary": {
+                "type": "keyword"
+              },
+              "secondary": {
+                "type": "keyword"
+              },
+              "weapon3": {
+                "type": "keyword"
+              },
+              "special": {
+                "type": "keyword"
+              }
+            }
           },
           "position": {
             "properties": {
@@ -68,9 +93,6 @@
               }
             }
           },
-          "primary": {
-            "type": "keyword"
-          },
           "rotation": {
             "properties": {
               "x": {
@@ -84,18 +106,6 @@
               }
             }
           },
-          "secondary": {
-            "type": "keyword"
-          },
-          "special": {
-            "type": "keyword"
-          },
-          "team": {
-            "type": "byte"
-          },
-          "titanClass": {
-            "type": "keyword"
-          },
           "velocity": {
             "properties": {
               "x": {
@@ -108,106 +118,11 @@
                 "type": "short"
               }
             }
-          },
-          "weapon3": {
-            "type": "keyword"
           }
         }
       },
       "data": {
-        "properties": {
-          "victim":  {
-            "properties": {
-              "health": {
-                "type": "byte"
-              },
-              "isAlive": {
-                "type": "boolean"
-              },
-              "isCrouching": {
-                "type": "boolean"
-              },
-              "isGrounded": {
-                "type": "boolean"
-              },
-              "isHanging": {
-                "type": "boolean"
-              },
-              "isShooting": {
-                "type": "boolean"
-              },
-              "isTitan": {
-                "type": "boolean"
-              },
-              "isWallRunning": {
-                "type": "boolean"
-              },
-              "playerId": {
-                "type": "keyword"
-              },
-              "position": {
-                "properties": {
-                  "x": {
-                    "type": "long"
-                  },
-                  "y": {
-                    "type": "long"
-                  },
-                  "z": {
-                    "type": "long"
-                  }
-                }
-              },
-              "primary": {
-                "type": "keyword"
-              },
-              "rotation": {
-                "properties": {
-                  "x": {
-                    "type": "short"
-                  },
-                  "y": {
-                    "type": "short"
-                  },
-                  "z": {
-                    "type": "short"
-                  }
-                }
-              },
-              "secondary": {
-                "type": "keyword"
-              },
-              "special": {
-                "type": "keyword"
-              },
-              "team": {
-                "type": "byte"
-              },
-              "titanClass": {
-                "type": "keyword"
-              },
-              "velocity": {
-                "properties": {
-                  "x": {
-                    "type": "short"
-                  },
-                  "y": {
-                    "type": "short"
-                  },
-                  "z": {
-                    "type": "short"
-                  }
-                }
-              },
-              "weapon3": {
-                "type": "keyword"
-              }
-            }
-          },
-          "damageType": {
-            "type": "keyword"
-          }
-        }
+
       }
     }
   },
