@@ -98,8 +98,8 @@ public class MatchStateResource extends AbstractRestEndpoint {
     public Response heatmapData(@PathParam("map") String map) {
         RestAction restAction = () -> {
             try {
-                heatmap.calculate(map);
-                return DefaultResponse.success(requestDetails.getRequestContext());
+                JsonNode result = heatmap.calculate(map);
+                return DefaultResponse.success(requestDetails.getRequestContext(), result);
             } catch (InternalLogicException ex) {
                 return DefaultResponse.error(503, E_SERVICE,requestDetails.getRequestContext());
             }
