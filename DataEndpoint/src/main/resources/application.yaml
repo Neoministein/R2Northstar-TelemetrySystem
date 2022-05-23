@@ -1,7 +1,7 @@
 elastic:
     nodes:
         - ${org.elastic.node.0}
-    prefix: tfms
+    prefix: r2ts
     enabled: ${org.elastic.enabled}
 server:
     port: 8090

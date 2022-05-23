@@ -9,9 +9,9 @@
         <version>2.4.0</version>
     </parent>
     
-    <groupId>com.neo.tf2</groupId>
-    <artifactId>mapsystem-data-endpoint</artifactId>
-    <name>MapSystem Data Endpoint</name>
+    <groupId>com.neo.r2</groupId>
+    <artifactId>r2-telemetry-system-endpoint</artifactId>
+    <name>R2 Telemetry System Data Endpoint</name>
     <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
