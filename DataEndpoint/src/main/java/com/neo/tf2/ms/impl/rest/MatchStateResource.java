@@ -3,13 +3,11 @@ package com.neo.tf2.ms.impl.rest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.common.api.json.Views;
-import com.neo.common.impl.exception.InternalLogicException;
 import com.neo.common.impl.json.JsonSchemaUtil;
 import com.neo.common.impl.json.JsonUtil;
 import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
 import com.neo.javax.api.persitence.search.SearchQuery;
 import com.neo.javax.api.persitence.search.SearchRepository;
-import com.neo.tf2.ms.impl.heatmap.HeatmapImpl;
 import com.neo.tf2.ms.impl.persistence.GlobalGameState;
 import com.neo.tf2.ms.impl.persistence.searchable.MatchEvent;
 import com.neo.tf2.ms.impl.persistence.searchable.MatchState;
@@ -34,8 +32,6 @@ public class MatchStateResource extends AbstractRestEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchStateResource.class);
 
-    public static final ObjectNode E_SERVICE = DefaultResponse.errorObject("svc/000", "Internal service not available");
-
     public static final String RESOURCE_LOCATION = "api/v1/matchstate";
 
     @Inject
@@ -44,8 +40,6 @@ public class MatchStateResource extends AbstractRestEndpoint {
     @Inject
     GlobalGameState globalGameState;
 
-    @Inject
-    HeatmapImpl heatmap;
 
     @PUT
     @Secured
@@ -88,21 +82,7 @@ public class MatchStateResource extends AbstractRestEndpoint {
                 String searchResponse = JsonUtil.toJson(searchRepository.fetch("tfms-match-state-*",searchQuery), Views.Public.class);
                 return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(searchResponse));
             }
-            return DefaultResponse.error(503, E_SERVICE,requestDetails.getRequestContext());
-        };
-        return super.restCall(restAction);
-    }
-
-    @GET
-    @Path("map/{map}")
-    public Response heatmapData(@PathParam("map") String map) {
-        RestAction restAction = () -> {
-            try {
-                JsonNode result = heatmap.calculate(map);
-                return DefaultResponse.success(requestDetails.getRequestContext(), result);
-            } catch (InternalLogicException ex) {
-                return DefaultResponse.error(503, E_SERVICE,requestDetails.getRequestContext());
-            }
+            return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
         };
         return super.restCall(restAction);
     }
