@@ -1,16 +1,16 @@
-package com.neo.tf2.ms.impl.minimap;
+package com.neo.tf2.ms.impl.map.scaling;
 
 public class MapScale {
 
     private final String map;
-    private final long posX;
-    private final long posY;
+    private final long xOffset;
+    private final long yOffset;
     private final double scale;
 
     public MapScale(String map, long posX, long posY, double scale) {
         this.map = map;
-        this.posX = posX;
-        this.posY = posY;
+        this.xOffset = posX;
+        this.yOffset = posY;
         this.scale = scale;
     }
 
@@ -18,12 +18,12 @@ public class MapScale {
         return map;
     }
 
-    public long getPosX() {
-        return posX;
+    public long getxOffset() {
+        return xOffset;
     }
 
-    public long getPosY() {
-        return posY;
+    public long getyOffset() {
+        return yOffset;
     }
 
     public double getScale() {
@@ -31,26 +31,26 @@ public class MapScale {
     }
 
     public long toMinimapScaleX(long gameX) {
-        return Math.round((gameX + posX) / scale);
+        return Math.round((gameX + xOffset) / scale);
     }
 
     public long toMinimapScaleY(long gameY) {
-        return Math.round((gameY + posY) / scale);
+        return Math.round((gameY + yOffset) / scale);
     }
 
     public long toGameScaleX(long minimapX) {
-        return Math.round(minimapX * scale - posX);
+        return Math.round(minimapX * scale - xOffset);
     }
 
     public long toGameScaleY(long minimapY) {
-        return Math.round(minimapY * scale - posX);
+        return Math.round(minimapY * scale - xOffset);
     }
 
     public long toMinimapFormatX(long gameX) {
-        return Math.round((gameX + posX) / scale);
+        return Math.round((gameX + xOffset) / scale);
     }
 
     public long toMinimapFormatY(long gameY) {
-        return Math.round((gameY * -1 + posY) / scale);
+        return Math.round((gameY * -1 + yOffset) / scale);
     }
 }

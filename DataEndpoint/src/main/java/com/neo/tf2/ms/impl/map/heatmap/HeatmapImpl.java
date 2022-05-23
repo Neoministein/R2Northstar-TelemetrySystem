@@ -1,4 +1,4 @@
-package com.neo.tf2.ms.impl.heatmap;
+package com.neo.tf2.ms.impl.map.heatmap;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -13,8 +13,8 @@ import com.neo.javax.api.persitence.criteria.SearchCriteria;
 import com.neo.javax.api.persitence.search.SearchQuery;
 import com.neo.javax.api.persitence.search.SearchRepository;
 import com.neo.javax.api.persitence.search.SearchResult;
-import com.neo.tf2.ms.impl.minimap.MapScale;
-import com.neo.tf2.ms.impl.minimap.MapScalingService;
+import com.neo.tf2.ms.impl.map.scaling.MapScale;
+import com.neo.tf2.ms.impl.map.scaling.MapScalingService;
 import com.neo.tf2.ms.impl.persistence.searchable.MatchEvent;
 import com.neo.tf2.ms.impl.rest.MatchStateResource;
 import org.slf4j.Logger;

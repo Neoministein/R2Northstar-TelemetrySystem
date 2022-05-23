@@ -1,4 +1,4 @@
-package com.neo.tf2.ms.impl.minimap;
+package com.neo.tf2.ms.impl.map.scaling;
 
 import com.neo.common.impl.exception.InternalLogicException;
 
