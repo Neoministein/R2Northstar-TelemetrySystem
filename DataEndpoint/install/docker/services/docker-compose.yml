@@ -1,6 +1,6 @@
 version: '3.9'
 
-r2-ts-services:
+services:
   r2-ts-database:
     image: postgres:12-alpine
     environment:
