@@ -2,20 +2,14 @@ package com.neo.r2.ts.impl.map.scaling;
 
 public class MapScale {
 
-    private final String map;
     private final long xOffset;
     private final long yOffset;
     private final double scale;
 
-    public MapScale(String map, long posX, long posY, double scale) {
-        this.map = map;
+    public MapScale(long posX, long posY, double scale) {
         this.xOffset = posX;
         this.yOffset = posY;
         this.scale = scale;
-    }
-
-    public String getMap() {
-        return map;
     }
 
     public long getxOffset() {

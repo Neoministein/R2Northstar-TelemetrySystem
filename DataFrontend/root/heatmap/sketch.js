@@ -2,8 +2,7 @@ let bg;
 
 
 function preload() {
-  let mapName = 'mp_forwardbase_kodai';
-  bg = loadImage('/img/map/' + mapName + '.png');
+  bg = loadImage('/img/map/' + params.map + '.png');
 }
 
 function setup() {
