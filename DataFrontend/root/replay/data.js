@@ -2,8 +2,8 @@ const params = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(prop),
 });
 
-
 let json;
+let currentIndex;
 
 function httpGetI(theUrl) {
     fetch(theUrl, {
@@ -11,10 +11,10 @@ function httpGetI(theUrl) {
     }).then(function(response) {
         return response.json();
     }).then(function(data) {
+        //response = data;
+        //console.log(data);
         if(data.status == 200) {
         json = data.data;
-        } else {
-            document.getElementById('body').innerHTML = 'Invalid map'
         }
     }).catch(function(err) {
         console.log(err);
@@ -22,8 +22,11 @@ function httpGetI(theUrl) {
 }
 
 function doLogic() {
-	httpGetI('http://localhost:8090/api/v1/map/heatmap/' + params.map);
+	httpGetI('http://localhost:8090/api/v1/matchstate/' + params.id + '/' + currentIndex );
 }
 
+function setupInterval() {
+	setInterval(doLogic, 10)
+}
 
-addEventListener('load', doLogic)
+addEventListener('load', setupInterval)
