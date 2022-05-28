@@ -9,6 +9,7 @@ import io.helidon.webserver.ServerRequest;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Context;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +18,8 @@ import java.util.UUID;
 public class RequestDetailsImpl implements RequestDetails {
 
     protected RequestContext requestContext;
+
+    protected Date receiveDate;
 
     @Inject
     RequestUser requestUser;
@@ -61,4 +64,15 @@ public class RequestDetailsImpl implements RequestDetails {
     public void setRequestContext(RequestContext requestContext) {
         this.requestContext = requestContext;
     }
+
+    @Override
+    public void setRequestReceiveDate(Date date) {
+        this.receiveDate = date;
+    }
+
+    @Override
+    public Date getRequestReceiveDate() {
+        return receiveDate;
+    }
+
 }
