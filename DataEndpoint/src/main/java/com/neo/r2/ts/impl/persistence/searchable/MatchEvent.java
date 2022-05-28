@@ -35,7 +35,7 @@ public class MatchEvent extends GenericSearchable implements Searchable {
 
     @Override
     public ObjectNode getJsonNode() {
-        return JsonUtil.toObjectNode(this);
+        return JsonUtil.fromPojo(this);
     }
 
     @Override

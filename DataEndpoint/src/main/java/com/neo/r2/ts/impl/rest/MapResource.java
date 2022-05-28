@@ -41,7 +41,7 @@ public class MapResource extends AbstractRestEndpoint {
             try {
                 List<GameMap> gameMaps = mapScalingService.getMaps();
                 ObjectNode resultData = JsonUtil.emptyObjectNode();
-                resultData.set("hits",JsonUtil.toArrayNode(gameMaps));
+                resultData.set("hits",JsonUtil.fromPojo(gameMaps));
                 resultData.put("hitCount", gameMaps.size());
 
                 return DefaultResponse.success(requestDetails.getRequestContext(),resultData);
@@ -57,7 +57,7 @@ public class MapResource extends AbstractRestEndpoint {
     public Response get(@PathParam("map") String map) {
         RestAction restAction = () -> {
             try {
-                return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.toObjectNode(mapScalingService.getMap(map)));
+                return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromPojo(mapScalingService.getMap(map)));
             } catch (InternalLogicException ex) {
                 return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
             }
@@ -70,7 +70,7 @@ public class MapResource extends AbstractRestEndpoint {
     public Response getScaling(@PathParam("map") String map) {
         RestAction restAction = () -> {
             try {
-                return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.toObjectNode(mapScalingService.getMapScale(map)));
+                return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromPojo(mapScalingService.getMapScale(map)));
             } catch (InternalLogicException ex) {
                 return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
             }
