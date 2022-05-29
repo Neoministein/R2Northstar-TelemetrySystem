@@ -10,7 +10,7 @@ import java.nio.file.Path;
 
 class Scratch {
     public static void main(String[] args) throws IOException {
-        File folder = new File(System.getProperty("user.dir") + "\\template");
+        File folder = new File(System.getProperty("user.dir") + "\\elastic\\template");
 
         for (final File fileEntry : folder.listFiles()) {
             String content = readFile(fileEntry.toPath(), StandardCharsets.UTF_8);
