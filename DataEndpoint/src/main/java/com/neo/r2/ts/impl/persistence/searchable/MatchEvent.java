@@ -16,7 +16,7 @@ public class MatchEvent extends GenericSearchable implements Searchable {
     public static final String F_VICTIM = "victim";
     public static final String F_DAMAGE_TYPE = "damageType";
 
-    public static final String T_POSTION = "postion";
+    public static final String T_POSITION = "position";
 
     private String matchId;
     private String map;

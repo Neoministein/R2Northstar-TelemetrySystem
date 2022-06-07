@@ -8,6 +8,9 @@ import com.neo.common.impl.json.JsonSchemaUtil;
 import com.neo.common.impl.json.JsonUtil;
 import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
 import com.neo.javax.api.persitence.entity.EntityQuery;
+import com.neo.r2.ts.impl.map.heatmap.HeatmapGeneratorImpl;
+import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
+import com.neo.r2.ts.impl.rest.CustomRestRestResponse;
 import com.neo.r2.ts.impl.security.Secured;
 import com.neo.r2.ts.impl.persistence.GlobalGameState;
 import com.neo.r2.ts.impl.persistence.entity.Match;
@@ -22,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.transaction.RollbackException;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,8 +56,13 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     public static final String P_PLAYING = "/playing";
     public static final String P_STOPPED = "/stopped";
 
+    public static final String P_HEATMAP = "/heatmap";
+
     @Inject
     GlobalGameState globalGameState;
+
+    @Inject
+    HeatmapGeneratorImpl heatmapGenerator;
 
     @POST
     @Secured
@@ -93,6 +102,9 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
                     return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
                 }
                 Match match = optMatch.get();
+                if (!match.getIsRunning()) {
+                    return DefaultResponse.error(400, CustomRestRestResponse.E_MATCH_ALREADY_ENDED, requestDetails.getRequestContext());
+                }
                 match.setIsRunning(false);
 
                 entityRepository.edit(match);
@@ -125,6 +137,52 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
         RestAction restAction = () -> {
             String result = JsonUtil.toJson(entityRepository.find(Q_STOPPLED_PLAYING), Views.Public.class);
             return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(result));
+        };
+        return super.restCall(restAction);
+    }
+
+    @POST
+    @Path(P_HEATMAP + "/{id}")
+    @Secured
+    @Transactional
+    public Response generateHeatmap(@PathParam("id") String id) {
+        RestAction restAction = () -> {
+            if (StringUtils.isEmpty(id)) {
+                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
+            }
+            try {
+                heatmapGenerator.calculateMatch(id, HeatmapType.PLAYER_POSITION);
+                Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
+                if (optMatch.isEmpty()) {
+                    return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
+                }
+
+                return parseEntityToResponse(optMatch.get(), Views.Public.class);
+            } catch (IllegalArgumentException | InternalLogicException ex) {
+                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
+            }
+        };
+        return super.restCall(restAction);
+    }
+
+    @GET
+    @Path(P_HEATMAP + "/{id}")
+    @Transactional
+    public Response getHeatmap(@PathParam("id") String id) {
+        RestAction restAction = () -> {
+            if (StringUtils.isEmpty(id)) {
+                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
+            }
+            try {
+                Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
+                if (optMatch.isEmpty()) {
+                    return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
+                }
+
+                return parseEntityToResponse(optMatch.get(), Views.Public.class);
+            } catch (IllegalArgumentException ex) {
+                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
+            }
         };
         return super.restCall(restAction);
     }

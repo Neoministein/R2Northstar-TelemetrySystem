@@ -15,8 +15,6 @@ import com.neo.r2.ts.impl.persistence.searchable.MatchState;
 import com.neo.util.javax.api.rest.RestAction;
 import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
 import com.neo.util.javax.impl.rest.DefaultResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -29,8 +27,6 @@ import java.util.*;
 @Path(MatchStateResource.RESOURCE_LOCATION)
 @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
 public class MatchStateResource extends AbstractRestEndpoint {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchStateResource.class);
 
     public static final String RESOURCE_LOCATION = "api/v1/matchstate";
 
@@ -79,7 +75,7 @@ public class MatchStateResource extends AbstractRestEndpoint {
                 searchQuery.setOnlySource(true);
                 searchQuery.setSorting(Map.of("timePassed",true));
                 searchQuery.setOffset(offset);
-                String searchResponse = JsonUtil.toJson(searchRepository.fetch("tfms-match-state-*",searchQuery), Views.Public.class);
+                String searchResponse = JsonUtil.toJson(searchRepository.fetch("r2ts-match-state",searchQuery), Views.Public.class);
                 return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(searchResponse));
             }
             return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
@@ -94,7 +90,7 @@ public class MatchStateResource extends AbstractRestEndpoint {
             ObjectNode player = p.deepCopy();
             player.put(MatchEvent.F_IS_PLAYER,false);
             players.put(player.get(MatchState.F_ENTITY_ID).asText(), player);
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_POSTION);
+            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_POSITION);
             matchEvent.setEntity(player);
             matchEventList.add(matchEvent);
         }
