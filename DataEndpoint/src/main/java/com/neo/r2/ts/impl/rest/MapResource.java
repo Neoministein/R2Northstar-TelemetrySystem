@@ -1,25 +1,29 @@
 package com.neo.r2.ts.impl.rest;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.neo.common.api.json.Views;
 import com.neo.common.impl.exception.InternalLogicException;
 import com.neo.common.impl.json.JsonUtil;
-import com.neo.r2.ts.impl.map.heatmap.HeatmapImpl;
+import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
+import com.neo.javax.api.persitence.entity.EntityQuery;
+import com.neo.javax.api.persitence.entity.EntityRepository;
+import com.neo.javax.impl.persistence.entity.AuditableDataBaseEntity;
+import com.neo.r2.ts.impl.map.heatmap.HeatmapGeneratorImpl;
 import com.neo.r2.ts.impl.map.scaling.GameMap;
 import com.neo.r2.ts.impl.map.scaling.MapScalingService;
+import com.neo.r2.ts.impl.persistence.entity.Heatmap;
+import com.neo.r2.ts.impl.security.Secured;
 import com.neo.util.javax.api.rest.RestAction;
 import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
 import com.neo.util.javax.impl.rest.DefaultResponse;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
 
 @RequestScoped
 @Path(MapResource.RESOURCE_LOCATION)
@@ -29,13 +33,15 @@ public class MapResource extends AbstractRestEndpoint {
     public static final String RESOURCE_LOCATION = "api/v1/map/";
 
     @Inject
+    EntityRepository entityRepository;
+
+    @Inject
     MapScalingService mapScalingService;
 
     @Inject
-    HeatmapImpl heatmap;
+    HeatmapGeneratorImpl heatmapGenerator;
 
     @GET
-    @Path("")
     public Response get() {
         RestAction restAction = () -> {
             try {
@@ -80,11 +86,33 @@ public class MapResource extends AbstractRestEndpoint {
 
     @GET
     @Path("heatmap/{map}")
-    public Response heatmapData(@PathParam("map") String map) {
+    public Response getHeatmapData(@PathParam("map") String map) {
         RestAction restAction = () -> {
             try {
-                JsonNode result = heatmap.calculate(map);
-                return DefaultResponse.success(requestDetails.getRequestContext(), result);
+                EntityQuery<Heatmap> heatmapEntityQuery = new EntityQuery<>(
+                        Heatmap.class,
+                        0,
+                        1,
+                        List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map)),
+                        Map.of(AuditableDataBaseEntity.C_UPDATED_ON, false));
+
+                String result = JsonUtil.toJson(heatmapEntityQuery, Views.Public.class);
+                return DefaultResponse.success(this.requestDetails.getRequestContext(), JsonUtil.fromJson(result));
+            } catch (InternalLogicException ex) {
+                return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
+            }
+        };
+        return super.restCall(restAction);
+    }
+
+    @POST
+    @Secured
+    @Path("heatmap/{map}")
+    public Response createHeatmapData(@PathParam("map") String map) {
+        RestAction restAction = () -> {
+            try {
+                String result = JsonUtil.toJson(heatmapGenerator.calculateMap(map), Views.Public.class);
+                return DefaultResponse.success(this.requestDetails.getRequestContext(), JsonUtil.fromJson(result));
             } catch (InternalLogicException ex) {
                 return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
             }

@@ -8,7 +8,9 @@ import com.neo.javax.impl.persistence.entity.AuditableDataBaseEntity;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -53,6 +55,10 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
     @Column(name = C_OWNER)
         @JsonView(Views.Owner.class)
     private UUID owner;
+
+    @OneToMany(mappedBy = TABLE_NAME, orphanRemoval = true)
+        @JsonView(Views.Public.class)
+    private List<Heatmap> heatmaps = new ArrayList<>();
 
     public UUID getId() {
         return id;
