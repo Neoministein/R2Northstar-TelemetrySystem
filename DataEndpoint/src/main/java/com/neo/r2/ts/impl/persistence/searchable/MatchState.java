@@ -26,6 +26,7 @@ public class MatchState extends GenericSearchable implements Searchable {
 
     public static final String F_KILLED = "playerKilled";
     public static final String F_VICTIM = "victimId";
+    public static final String F_ATTACKER = "attackerId";
     public static final String F_WEAPON = "weapon";
 
     public static final String F_RESPAWNED = "playerRespawned";

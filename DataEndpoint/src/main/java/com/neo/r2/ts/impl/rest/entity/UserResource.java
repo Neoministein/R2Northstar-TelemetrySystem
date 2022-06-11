@@ -52,7 +52,7 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
         return super.restCall(editAction(x), List.of(PERM_INTERNAL));
     }
 
-    @POST
+    @GET
     @Path(P_INIT)
     public Response init() {
         RestAction restAction = () -> {

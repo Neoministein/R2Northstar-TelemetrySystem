@@ -108,7 +108,10 @@ public class MatchStateResource extends AbstractRestEndpoint {
 
         for (JsonNode event: state.get(MatchState.F_EVENTS).get(MatchState.F_KILLED)) {
             MatchEvent matchEvent = new MatchEvent(state, MatchState.F_KILLED);
-            matchEvent.setEntity(players.get(event.get(MatchState.F_ENTITY_ID).asText()));
+            if (!event.has(MatchState.F_ATTACKER)) {
+                break;
+            }
+            matchEvent.setEntity(players.get(event.get(MatchState.F_ATTACKER).asText()));
             ObjectNode data = JsonUtil.emptyObjectNode();
             data.set(MatchEvent.F_VICTIM, players.get(event.get(MatchState.F_VICTIM).asText()));
             data.put(MatchEvent.F_DAMAGE_TYPE, event.get(MatchState.F_WEAPON).asText());

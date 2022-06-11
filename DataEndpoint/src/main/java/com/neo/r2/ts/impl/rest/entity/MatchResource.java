@@ -123,6 +123,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
     @GET
     @Path(P_PLAYING)
+    @Transactional
     public Response playing() {
         RestAction restAction = () -> {
             String result = JsonUtil.toJson(entityRepository.find(Q_ARE_PLAYING), Views.Public.class);
@@ -133,6 +134,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
     @GET
     @Path(P_STOPPED)
+    @Transactional
     public Response stopped() {
         RestAction restAction = () -> {
             String result = JsonUtil.toJson(entityRepository.find(Q_STOPPLED_PLAYING), Views.Public.class);
