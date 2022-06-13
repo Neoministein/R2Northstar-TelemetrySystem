@@ -39,7 +39,7 @@
           },
           "timestamp": {
             "type": "date",
-            "format": "yyyy-MM-dd HH:mm:ss.SSS"
+            "format": "epoch_millis||yyyy-MM-dd HH:mm:ss.SSS"
           }
         }
       }
