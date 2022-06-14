@@ -1,23 +1,22 @@
 package com.neo.r2.ts.impl.rest.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.neo.common.api.json.Views;
-import com.neo.common.impl.StringUtils;
-import com.neo.common.impl.exception.InternalLogicException;
-import com.neo.common.impl.json.JsonSchemaUtil;
-import com.neo.common.impl.json.JsonUtil;
-import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
-import com.neo.javax.api.persitence.entity.EntityQuery;
 import com.neo.r2.ts.impl.map.heatmap.HeatmapGeneratorImpl;
 import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.r2.ts.impl.rest.CustomRestRestResponse;
 import com.neo.r2.ts.impl.security.Secured;
 import com.neo.r2.ts.impl.persistence.GlobalGameState;
 import com.neo.r2.ts.impl.persistence.entity.Match;
-import com.neo.util.javax.api.rest.RestAction;
-import com.neo.util.javax.impl.rest.DefaultResponse;
-
-import com.neo.util.javax.impl.rest.entity.AbstractEntityRestEndpoint;
+import com.neo.util.common.api.json.Views;
+import com.neo.util.common.impl.StringUtils;
+import com.neo.util.common.impl.exception.InternalLogicException;
+import com.neo.util.common.impl.json.JsonSchemaUtil;
+import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.api.persitence.criteria.ExplicitSearchCriteria;
+import com.neo.util.framework.api.persitence.entity.EntityQuery;
+import com.neo.util.framework.rest.api.RestAction;
+import com.neo.util.framework.rest.impl.DefaultResponse;
+import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 import com.networknt.schema.JsonSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

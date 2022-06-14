@@ -1,6 +1,6 @@
 package com.neo.r2.ts.impl.persistence.repository;
 
-import com.neo.javax.api.persistence.entity.PersistenceContextService;
+import com.neo.util.framework.persistence.api.PersistenceContextService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;

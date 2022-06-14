@@ -1,8 +1,8 @@
 package com.neo.r2.ts.impl.connection;
 
-import com.neo.javax.api.connection.RequestContext;
-import com.neo.javax.api.connection.RequestDetails;
 import com.neo.r2.ts.impl.security.RequestUser;
+import com.neo.util.framework.api.connection.RequestContext;
+import com.neo.util.framework.api.connection.RequestDetails;
 import io.helidon.security.SecurityContext;
 import io.helidon.webserver.ServerRequest;
 

@@ -1,10 +1,10 @@
 package com.neo.r2.ts.impl.persistence.searchable;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.common.impl.json.JsonUtil;
-import com.neo.javax.api.persitence.search.GenericSearchable;
-import com.neo.javax.api.persitence.search.IndexPeriod;
-import com.neo.javax.api.persitence.search.Searchable;
+import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.api.persitence.search.GenericSearchable;
+import com.neo.util.framework.api.persitence.search.IndexPeriod;
+import com.neo.util.framework.api.persitence.search.Searchable;
 
 import java.io.Serializable;
 import java.util.Date;
