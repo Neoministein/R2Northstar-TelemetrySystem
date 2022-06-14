@@ -1,15 +1,15 @@
 package com.neo.r2.ts.impl.rest.entity;
 
-import com.neo.common.api.json.Views;
-import com.neo.common.impl.exception.InternalJsonException;
-import com.neo.javax.api.persitence.entity.EntityQuery;
-import com.neo.javax.api.persitence.entity.EntityResult;
 import com.neo.r2.ts.impl.persistence.entity.UserToken;
 import com.neo.r2.ts.impl.security.AuthenticationService;
 import com.neo.r2.ts.impl.security.Secured;
-import com.neo.util.javax.api.rest.RestAction;
-import com.neo.util.javax.impl.rest.DefaultResponse;
-import com.neo.util.javax.impl.rest.entity.AbstractEntityRestEndpoint;
+import com.neo.util.common.api.json.Views;
+import com.neo.util.common.impl.exception.InternalJsonException;
+import com.neo.util.framework.api.persitence.entity.EntityQuery;
+import com.neo.util.framework.api.persitence.entity.EntityResult;
+import com.neo.util.framework.rest.api.RestAction;
+import com.neo.util.framework.rest.impl.DefaultResponse;
+import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;

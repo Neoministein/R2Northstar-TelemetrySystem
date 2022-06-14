@@ -2,19 +2,19 @@ package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.common.api.json.Views;
-import com.neo.common.impl.json.JsonSchemaUtil;
-import com.neo.common.impl.json.JsonUtil;
-import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
-import com.neo.javax.api.persitence.search.SearchQuery;
-import com.neo.javax.api.persitence.search.SearchRepository;
 import com.neo.r2.ts.impl.persistence.searchable.MatchEvent;
 import com.neo.r2.ts.impl.security.Secured;
 import com.neo.r2.ts.impl.persistence.GlobalGameState;
 import com.neo.r2.ts.impl.persistence.searchable.MatchState;
-import com.neo.util.javax.api.rest.RestAction;
-import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
-import com.neo.util.javax.impl.rest.DefaultResponse;
+import com.neo.util.common.api.json.Views;
+import com.neo.util.common.impl.json.JsonSchemaUtil;
+import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.api.persitence.criteria.ExplicitSearchCriteria;
+import com.neo.util.framework.api.persitence.search.SearchQuery;
+import com.neo.util.framework.api.persitence.search.SearchRepository;
+import com.neo.util.framework.rest.api.RestAction;
+import com.neo.util.framework.rest.impl.AbstractRestEndpoint;
+import com.neo.util.framework.rest.impl.DefaultResponse;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;

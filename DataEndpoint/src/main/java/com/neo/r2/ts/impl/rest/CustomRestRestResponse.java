@@ -1,7 +1,7 @@
 package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.util.javax.impl.rest.DefaultResponse;
+import com.neo.util.framework.rest.impl.DefaultResponse;
 
 public final class CustomRestRestResponse {
 

@@ -1,10 +1,10 @@
 package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.common.impl.json.JsonUtil;
-import com.neo.util.javax.api.rest.RestAction;
-import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
-import com.neo.util.javax.impl.rest.DefaultResponse;
+import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.rest.api.RestAction;
+import com.neo.util.framework.rest.impl.AbstractRestEndpoint;
+import com.neo.util.framework.rest.impl.DefaultResponse;
 
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.GET;
