@@ -9,12 +9,13 @@ import com.neo.r2.ts.impl.persistence.searchable.MatchState;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.json.JsonSchemaUtil;
 import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.api.connection.RequestDetails;
 import com.neo.util.framework.api.persitence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persitence.search.SearchQuery;
 import com.neo.util.framework.api.persitence.search.SearchRepository;
 import com.neo.util.framework.rest.api.RestAction;
-import com.neo.util.framework.rest.impl.AbstractRestEndpoint;
 import com.neo.util.framework.rest.impl.DefaultResponse;
+import com.neo.util.framework.rest.impl.RestActionProcessor;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -26,9 +27,12 @@ import java.util.*;
 @RequestScoped
 @Path(MatchStateResource.RESOURCE_LOCATION)
 @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
-public class MatchStateResource extends AbstractRestEndpoint {
+public class MatchStateResource {
 
     public static final String RESOURCE_LOCATION = "api/v1/matchstate";
+
+    @Inject
+    RequestDetails requestDetails;
 
     @Inject
     SearchRepository searchRepository;
@@ -36,6 +40,8 @@ public class MatchStateResource extends AbstractRestEndpoint {
     @Inject
     GlobalGameState globalGameState;
 
+    @Inject
+    RestActionProcessor actionProcessor;
 
     @PUT
     @Secured
@@ -52,7 +58,7 @@ public class MatchStateResource extends AbstractRestEndpoint {
             return DefaultResponse.success(requestDetails.getRequestContext());
         };
 
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -62,7 +68,7 @@ public class MatchStateResource extends AbstractRestEndpoint {
             JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id));
             return DefaultResponse.success(requestDetails.getRequestContext(), state);
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -80,7 +86,7 @@ public class MatchStateResource extends AbstractRestEndpoint {
             }
             return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     protected List<MatchEvent> parseStateToEvents(JsonNode state) {

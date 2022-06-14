@@ -9,13 +9,13 @@ import com.neo.r2.ts.impl.map.scaling.GameMap;
 import com.neo.r2.ts.impl.map.scaling.MapScalingService;
 import com.neo.r2.ts.impl.persistence.entity.Heatmap;
 import com.neo.r2.ts.impl.security.Secured;
+import com.neo.util.framework.api.connection.RequestDetails;
 import com.neo.util.framework.api.persitence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persitence.entity.EntityQuery;
-import com.neo.util.framework.api.persitence.entity.EntityRepository;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 import com.neo.util.framework.rest.api.RestAction;
-import com.neo.util.framework.rest.impl.AbstractRestEndpoint;
 import com.neo.util.framework.rest.impl.DefaultResponse;
+import com.neo.util.framework.rest.impl.RestActionProcessor;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -28,18 +28,21 @@ import java.util.Map;
 @RequestScoped
 @Path(MapResource.RESOURCE_LOCATION)
 @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
-public class MapResource extends AbstractRestEndpoint {
+public class MapResource {
 
     public static final String RESOURCE_LOCATION = "api/v1/map/";
 
     @Inject
-    EntityRepository entityRepository;
+    RequestDetails requestDetails;
 
     @Inject
     MapScalingService mapScalingService;
 
     @Inject
     HeatmapGeneratorImpl heatmapGenerator;
+
+    @Inject
+    RestActionProcessor actionProcessor;
 
     @GET
     public Response get() {
@@ -55,7 +58,7 @@ public class MapResource extends AbstractRestEndpoint {
                 return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -68,7 +71,7 @@ public class MapResource extends AbstractRestEndpoint {
                 return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -81,7 +84,7 @@ public class MapResource extends AbstractRestEndpoint {
                 return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -102,7 +105,7 @@ public class MapResource extends AbstractRestEndpoint {
                 return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @POST
@@ -117,6 +120,6 @@ public class MapResource extends AbstractRestEndpoint {
                 return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 }
