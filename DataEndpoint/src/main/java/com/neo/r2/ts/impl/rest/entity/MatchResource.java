@@ -16,6 +16,7 @@ import com.neo.util.framework.api.persitence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persitence.entity.EntityQuery;
 import com.neo.util.framework.rest.api.RestAction;
 import com.neo.util.framework.rest.impl.DefaultResponse;
+import com.neo.util.framework.rest.impl.RestActionProcessor;
 import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 import com.networknt.schema.JsonSchema;
 import org.slf4j.Logger;
@@ -63,6 +64,9 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     @Inject
     HeatmapGeneratorImpl heatmapGenerator;
 
+    @Inject
+    RestActionProcessor actionProcessor;
+
     @POST
     @Secured
     @Path(P_NEW)
@@ -84,7 +88,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
             return parseEntityToResponse(match, Views.Public.class);
         };
 
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @PUT
@@ -117,7 +121,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
             }
         };
 
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -128,7 +132,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
             String result = JsonUtil.toJson(entityRepository.find(Q_ARE_PLAYING), Views.Public.class);
             return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(result));
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -139,7 +143,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
             String result = JsonUtil.toJson(entityRepository.find(Q_STOPPLED_PLAYING), Views.Public.class);
             return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(result));
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @POST
@@ -163,7 +167,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
                 return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -185,7 +189,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
                 return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @Override

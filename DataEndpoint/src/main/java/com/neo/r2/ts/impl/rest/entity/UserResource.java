@@ -9,6 +9,7 @@ import com.neo.util.framework.api.persitence.entity.EntityQuery;
 import com.neo.util.framework.api.persitence.entity.EntityResult;
 import com.neo.util.framework.rest.api.RestAction;
 import com.neo.util.framework.rest.impl.DefaultResponse;
+import com.neo.util.framework.rest.impl.RestActionProcessor;
 import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 
 import javax.enterprise.context.RequestScoped;
@@ -18,6 +19,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+
+import static com.neo.util.framework.rest.impl.RestActionProcessor.E_FORBIDDEN;
 
 @RequestScoped
 @Path(UserResource.RESOURCE_LOCATION)
@@ -31,25 +34,28 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
     @Inject
     AuthenticationService authenticationService;
 
+    @Inject
+    RestActionProcessor actionProcessor;
+
     @POST
     @Secured
     public Response create(String x) {
         authenticationService.init();
-        return super.restCall(createAction(x), List.of(PERM_INTERNAL));
+        return actionProcessor.process(createAction(x), List.of(PERM_INTERNAL));
     }
 
     @GET
     @Secured
     @Path("/{owner}")
     public Response get(@PathParam("owner") String owner) {
-        return super.restCall(getByValueAction(UserToken.C_OWNER, owner), List.of(PERM_INTERNAL));
+        return actionProcessor.process(getByValueAction(UserToken.C_OWNER, owner), List.of(PERM_INTERNAL));
     }
 
     @PUT
     @Secured
     public Response edit(String x) {
         authenticationService.init();
-        return super.restCall(editAction(x), List.of(PERM_INTERNAL));
+        return actionProcessor.process(editAction(x), List.of(PERM_INTERNAL));
     }
 
     @GET
@@ -70,7 +76,7 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
             }
             return DefaultResponse.error(403, E_FORBIDDEN, requestDetails.getRequestContext());
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
 
