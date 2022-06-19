@@ -12,6 +12,7 @@ import com.neo.r2.ts.impl.security.Secured;
 import com.neo.util.framework.api.connection.RequestDetails;
 import com.neo.util.framework.api.persitence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persitence.entity.EntityQuery;
+import com.neo.util.framework.api.persitence.entity.EntityRepository;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 import com.neo.util.framework.rest.api.RestAction;
 import com.neo.util.framework.rest.impl.DefaultResponse;
@@ -34,6 +35,9 @@ public class MapResource {
 
     @Inject
     RequestDetails requestDetails;
+
+    @Inject
+    EntityRepository entityRepository;
 
     @Inject
     MapScalingService mapScalingService;
@@ -99,7 +103,7 @@ public class MapResource {
                         List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map)),
                         Map.of(AuditableDataBaseEntity.C_UPDATED_ON, false));
 
-                String result = JsonUtil.toJson(heatmapEntityQuery, Views.Public.class);
+                String result = JsonUtil.toJson(entityRepository.find(heatmapEntityQuery), Views.Public.class);
                 return DefaultResponse.success(this.requestDetails.getRequestContext(), JsonUtil.fromJson(result));
             } catch (InternalLogicException ex) {
                 return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());

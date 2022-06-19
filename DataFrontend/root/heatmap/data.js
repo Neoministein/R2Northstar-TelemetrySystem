@@ -10,9 +10,14 @@ function httpGetI(theUrl) {
         method: "GET",
     }).then(function(response) {
         return response.json();
-    }).then(function(data) {
-        if(data.status == 200) {
-        json = data.data;
+    }).then(function(response) {
+        if(response.status === 200) {
+            if (response.data.hitCount > 0) {
+                json = response.data.hits[0];
+                return
+            } else {
+                document.getElementById('body').innerHTML = 'No heatmap found'
+            }
         } else {
             document.getElementById('body').innerHTML = 'Invalid map'
         }
