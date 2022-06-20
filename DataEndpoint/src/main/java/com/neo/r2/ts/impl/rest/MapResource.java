@@ -1,6 +1,7 @@
 package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.exception.InternalLogicException;
 import com.neo.util.common.impl.json.JsonUtil;
@@ -100,7 +101,8 @@ public class MapResource {
                         Heatmap.class,
                         0,
                         1,
-                        List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map)),
+                        List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map),
+                                new ExplicitSearchCriteria(Heatmap.C_TYPE, HeatmapType.FULL_MAP_AGGREGATION)),
                         Map.of(AuditableDataBaseEntity.C_UPDATED_ON, false));
 
                 String result = JsonUtil.toJson(entityRepository.find(heatmapEntityQuery), Views.Public.class);
