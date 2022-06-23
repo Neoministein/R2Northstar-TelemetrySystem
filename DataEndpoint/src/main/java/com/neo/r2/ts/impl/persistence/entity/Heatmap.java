@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.persistence.entity.mapper.JsonNodeStringType;
 import com.neo.util.common.api.json.Views;
-import com.neo.util.framework.api.persitence.entity.DataBaseEntity;
+import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;

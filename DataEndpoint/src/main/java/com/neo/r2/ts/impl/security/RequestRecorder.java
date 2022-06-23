@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.persistence.searchable.RequestLog;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.connection.RequestDetails;
-import com.neo.util.framework.api.persitence.search.SearchRepository;
+import com.neo.util.framework.api.persistence.search.SearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
