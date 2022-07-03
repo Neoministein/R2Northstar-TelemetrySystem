@@ -40,7 +40,7 @@ public class RequestRecorder implements ContainerResponseFilter {
                 requestSegment.setStatus(responseBody.get("status").asText());
                 requestSegment.setError(responseBody.has("error") ? responseBody.get("error").get("code").asText() : "");
                 requestSegment.setProcessTime(System.currentTimeMillis() - requestDetails.getRequestReceiveDate().getTime());
-                requestSegment.setAgent(containerRequest.getHeaders().get("User-Agent").toString());
+                requestSegment.setAgent(containerRequest.getHeaders().get("User-Agent") != null ? containerRequest.getHeaders().get("User-Agent").toString() : "");
                 if (searchRepository.enabled()) {
                     searchResolver(requestSegment);
                 } else {
