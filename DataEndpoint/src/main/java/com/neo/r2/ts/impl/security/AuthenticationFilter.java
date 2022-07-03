@@ -70,6 +70,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     private void abortWithUnauthorized(ContainerRequestContext containerRequest) {
+        LOGGER.info("Aborting request with unauthorized");
         containerRequest.abortWith(DefaultResponse.error(401,E_UNAUTHORIZED, requestDetails.getRequestContext()));
     }
 
