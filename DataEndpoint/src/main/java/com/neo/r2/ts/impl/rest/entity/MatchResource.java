@@ -1,7 +1,8 @@
 package com.neo.r2.ts.impl.rest.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.neo.r2.ts.impl.map.heatmap.HeatmapGeneratorImpl;
+import com.neo.r2.ts.impl.map.heatmap.HeatmapQueueService;
+import com.neo.r2.ts.impl.map.heatmap.QueueableHeatmapInstruction;
 import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.r2.ts.impl.rest.CustomRestRestResponse;
 import com.neo.r2.ts.impl.security.Secured;
@@ -14,6 +15,7 @@ import com.neo.util.common.impl.json.JsonSchemaUtil;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.entity.EntityQuery;
+import com.neo.util.framework.api.queue.QueueMessage;
 import com.neo.util.framework.rest.api.RestAction;
 import com.neo.util.framework.rest.impl.DefaultResponse;
 import com.neo.util.framework.rest.impl.RestActionProcessor;
@@ -62,10 +64,10 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     GlobalGameState globalGameState;
 
     @Inject
-    HeatmapGeneratorImpl heatmapGenerator;
+    RestActionProcessor actionProcessor;
 
     @Inject
-    RestActionProcessor actionProcessor;
+    HeatmapQueueService heatmapQueueService;
 
     @POST
     @Secured
@@ -112,7 +114,13 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
                 entityRepository.edit(match);
                 globalGameState.removeGameState(match.getId());
+
                 LOGGER.info("Match finished {}", match.getId());
+                QueueableHeatmapInstruction queueableHeatmapInstruction = new QueueableHeatmapInstruction();
+                queueableHeatmapInstruction.setMatchId(id);
+                queueableHeatmapInstruction.setType(HeatmapType.PLAYER_POSITION);
+                LOGGER.info("Add match {} to queue for heatmap generation", match.getId());
+                heatmapQueueService.addToQueue(new QueueMessage(QueueableHeatmapInstruction.QUEUE_MESSAGE_TYPE, queueableHeatmapInstruction));
                 return parseEntityToResponse(match, Views.Public.class);
             } catch (RollbackException ex) {
                 throw new InternalLogicException(ex);
@@ -142,30 +150,6 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
         RestAction restAction = () -> {
             String result = JsonUtil.toJson(entityRepository.find(Q_STOPPLED_PLAYING), Views.Public.class);
             return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(result));
-        };
-        return actionProcessor.process(restAction);
-    }
-
-    @POST
-    @Path(P_HEATMAP + "/{id}")
-    @Secured
-    @Transactional
-    public Response generateHeatmap(@PathParam("id") String id) {
-        RestAction restAction = () -> {
-            if (StringUtils.isEmpty(id)) {
-                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
-            }
-            try {
-                heatmapGenerator.calculateMatch(id, HeatmapType.PLAYER_POSITION);
-                Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
-                if (optMatch.isEmpty()) {
-                    return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
-                }
-
-                return parseEntityToResponse(optMatch.get(), Views.Public.class);
-            } catch (IllegalArgumentException | InternalLogicException ex) {
-                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
-            }
         };
         return actionProcessor.process(restAction);
     }
