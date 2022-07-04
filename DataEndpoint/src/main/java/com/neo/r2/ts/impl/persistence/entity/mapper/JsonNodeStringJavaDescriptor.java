@@ -1,8 +1,8 @@
 package com.neo.r2.ts.impl.persistence.entity.mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.neo.common.impl.exception.InternalJsonException;
-import com.neo.common.impl.json.JsonUtil;
+import com.neo.util.common.impl.exception.InternalJsonException;
+import com.neo.util.common.impl.json.JsonUtil;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.AbstractTypeDescriptor;
 import org.hibernate.type.descriptor.java.ImmutableMutabilityPlan;

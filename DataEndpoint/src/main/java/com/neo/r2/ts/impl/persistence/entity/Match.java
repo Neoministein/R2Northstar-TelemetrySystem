@@ -2,9 +2,9 @@ package com.neo.r2.ts.impl.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.neo.common.api.json.Views;
-import com.neo.javax.api.persitence.entity.DataBaseEntity;
-import com.neo.javax.impl.persistence.entity.AuditableDataBaseEntity;
+import com.neo.util.common.api.json.Views;
+import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
+import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;

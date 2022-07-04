@@ -1,9 +1,9 @@
 package com.neo.r2.ts.impl.security;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.javax.api.connection.RequestDetails;
+import com.neo.util.framework.api.connection.RequestDetails;
 import com.neo.r2.ts.impl.persistence.entity.UserToken;
-import com.neo.util.javax.impl.rest.DefaultResponse;
+import com.neo.util.framework.rest.impl.DefaultResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +70,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     private void abortWithUnauthorized(ContainerRequestContext containerRequest) {
+        LOGGER.info("Aborting request with unauthorized");
         containerRequest.abortWith(DefaultResponse.error(401,E_UNAUTHORIZED, requestDetails.getRequestContext()));
     }
 

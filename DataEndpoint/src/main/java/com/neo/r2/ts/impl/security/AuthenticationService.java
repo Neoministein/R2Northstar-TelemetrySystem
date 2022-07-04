@@ -1,10 +1,10 @@
 package com.neo.r2.ts.impl.security;
 
-import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
-import com.neo.javax.api.persitence.entity.EntityQuery;
-import com.neo.javax.api.persitence.entity.EntityRepository;
-import com.neo.javax.api.persitence.entity.EntityResult;
 import com.neo.r2.ts.impl.persistence.entity.UserToken;
+import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
+import com.neo.util.framework.api.persistence.entity.EntityQuery;
+import com.neo.util.framework.api.persistence.entity.EntityRepository;
+import com.neo.util.framework.api.persistence.entity.EntityResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,21 +1,23 @@
 package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.common.api.json.Views;
-import com.neo.common.impl.exception.InternalLogicException;
-import com.neo.common.impl.json.JsonUtil;
-import com.neo.javax.api.persitence.criteria.ExplicitSearchCriteria;
-import com.neo.javax.api.persitence.entity.EntityQuery;
-import com.neo.javax.api.persitence.entity.EntityRepository;
-import com.neo.javax.impl.persistence.entity.AuditableDataBaseEntity;
+import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
+import com.neo.util.common.api.json.Views;
+import com.neo.util.common.impl.exception.InternalLogicException;
+import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.r2.ts.impl.map.heatmap.HeatmapGeneratorImpl;
 import com.neo.r2.ts.impl.map.scaling.GameMap;
 import com.neo.r2.ts.impl.map.scaling.MapScalingService;
 import com.neo.r2.ts.impl.persistence.entity.Heatmap;
 import com.neo.r2.ts.impl.security.Secured;
-import com.neo.util.javax.api.rest.RestAction;
-import com.neo.util.javax.impl.rest.AbstractRestEndpoint;
-import com.neo.util.javax.impl.rest.DefaultResponse;
+import com.neo.util.framework.api.connection.RequestDetails;
+import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
+import com.neo.util.framework.api.persistence.entity.EntityQuery;
+import com.neo.util.framework.api.persistence.entity.EntityRepository;
+import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
+import com.neo.util.framework.rest.api.RestAction;
+import com.neo.util.framework.rest.impl.DefaultResponse;
+import com.neo.util.framework.rest.impl.RestActionProcessor;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -28,9 +30,12 @@ import java.util.Map;
 @RequestScoped
 @Path(MapResource.RESOURCE_LOCATION)
 @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
-public class MapResource extends AbstractRestEndpoint {
+public class MapResource {
 
     public static final String RESOURCE_LOCATION = "api/v1/map/";
+
+    @Inject
+    RequestDetails requestDetails;
 
     @Inject
     EntityRepository entityRepository;
@@ -40,6 +45,9 @@ public class MapResource extends AbstractRestEndpoint {
 
     @Inject
     HeatmapGeneratorImpl heatmapGenerator;
+
+    @Inject
+    RestActionProcessor actionProcessor;
 
     @GET
     public Response get() {
@@ -55,7 +63,7 @@ public class MapResource extends AbstractRestEndpoint {
                 return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -68,7 +76,7 @@ public class MapResource extends AbstractRestEndpoint {
                 return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -81,7 +89,7 @@ public class MapResource extends AbstractRestEndpoint {
                 return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @GET
@@ -93,16 +101,17 @@ public class MapResource extends AbstractRestEndpoint {
                         Heatmap.class,
                         0,
                         1,
-                        List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map)),
+                        List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map),
+                                new ExplicitSearchCriteria(Heatmap.C_TYPE, HeatmapType.FULL_MAP_AGGREGATION)),
                         Map.of(AuditableDataBaseEntity.C_UPDATED_ON, false));
 
-                String result = JsonUtil.toJson(heatmapEntityQuery, Views.Public.class);
+                String result = JsonUtil.toJson(entityRepository.find(heatmapEntityQuery), Views.Public.class);
                 return DefaultResponse.success(this.requestDetails.getRequestContext(), JsonUtil.fromJson(result));
             } catch (InternalLogicException ex) {
                 return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
     @POST
@@ -117,6 +126,6 @@ public class MapResource extends AbstractRestEndpoint {
                 return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
             }
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 }

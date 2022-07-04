@@ -1,6 +1,6 @@
 package com.neo.r2.ts.impl.map.scaling;
 
-import com.neo.common.impl.exception.InternalLogicException;
+import com.neo.util.common.impl.exception.InternalLogicException;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;

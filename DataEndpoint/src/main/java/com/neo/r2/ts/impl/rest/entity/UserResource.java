@@ -1,15 +1,16 @@
 package com.neo.r2.ts.impl.rest.entity;
 
-import com.neo.common.api.json.Views;
-import com.neo.common.impl.exception.InternalJsonException;
-import com.neo.javax.api.persitence.entity.EntityQuery;
-import com.neo.javax.api.persitence.entity.EntityResult;
 import com.neo.r2.ts.impl.persistence.entity.UserToken;
 import com.neo.r2.ts.impl.security.AuthenticationService;
 import com.neo.r2.ts.impl.security.Secured;
-import com.neo.util.javax.api.rest.RestAction;
-import com.neo.util.javax.impl.rest.DefaultResponse;
-import com.neo.util.javax.impl.rest.entity.AbstractEntityRestEndpoint;
+import com.neo.util.common.api.json.Views;
+import com.neo.util.common.impl.exception.InternalJsonException;
+import com.neo.util.framework.api.persistence.entity.EntityQuery;
+import com.neo.util.framework.api.persistence.entity.EntityResult;
+import com.neo.util.framework.rest.api.RestAction;
+import com.neo.util.framework.rest.impl.DefaultResponse;
+import com.neo.util.framework.rest.impl.RestActionProcessor;
+import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -18,6 +19,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+
+import static com.neo.util.framework.rest.impl.RestActionProcessor.E_FORBIDDEN;
 
 @RequestScoped
 @Path(UserResource.RESOURCE_LOCATION)
@@ -31,28 +34,31 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
     @Inject
     AuthenticationService authenticationService;
 
+    @Inject
+    RestActionProcessor actionProcessor;
+
     @POST
     @Secured
     public Response create(String x) {
         authenticationService.init();
-        return super.restCall(createAction(x), List.of(PERM_INTERNAL));
+        return actionProcessor.process(createAction(x), List.of(PERM_INTERNAL));
     }
 
     @GET
     @Secured
     @Path("/{owner}")
     public Response get(@PathParam("owner") String owner) {
-        return super.restCall(getByValueAction(UserToken.C_OWNER, owner), List.of(PERM_INTERNAL));
+        return actionProcessor.process(getByValueAction(UserToken.C_OWNER, owner), List.of(PERM_INTERNAL));
     }
 
     @PUT
     @Secured
     public Response edit(String x) {
         authenticationService.init();
-        return super.restCall(editAction(x), List.of(PERM_INTERNAL));
+        return actionProcessor.process(editAction(x), List.of(PERM_INTERNAL));
     }
 
-    @POST
+    @GET
     @Path(P_INIT)
     public Response init() {
         RestAction restAction = () -> {
@@ -70,7 +76,7 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
             }
             return DefaultResponse.error(403, E_FORBIDDEN, requestDetails.getRequestContext());
         };
-        return super.restCall(restAction);
+        return actionProcessor.process(restAction);
     }
 
 
