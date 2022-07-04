@@ -17,7 +17,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "playerId": {
+          "entityId": {
             "type": "string"
           },
           "team": {
@@ -83,18 +83,6 @@
               "z"
             ]
           },
-          "primary": {
-            "type": "string"
-          },
-          "secondary": {
-            "type": "string"
-          },
-          "weapon3": {
-            "type": "string"
-          },
-          "special": {
-            "type": "string"
-          },
           "isTitan": {
             "type": "boolean"
           },
@@ -115,37 +103,58 @@
           },
           "isAlive": {
             "type": "boolean"
+          },
+          "equipment": {
+            "type": "object",
+            "properties": {
+              "primary": {
+                "type": "string"
+              },
+              "secondary": {
+                "type": "string"
+              },
+              "weapon3": {
+                "type": "string"
+              },
+              "special": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "primary",
+              "secondary",
+              "weapon3",
+              "special"
+            ]
           }
         },
         "required": [
-          "playerId",
+          "entityId",
           "team",
+          "titanClass",
           "position",
           "rotation",
           "velocity",
-          "primary",
-          "secondary",
-          "weapon3",
-          "special",
           "isTitan",
           "isWallRunning",
           "isShooting",
           "isGrounded",
           "isHanging",
           "isCrouching",
-          "isAlive"
+          "isAlive",
+          "equipment"
         ]
       }
     },
     "events": {
       "type": "object",
       "properties": {
-        "eventPlayerConnect": {
+        "playerConnect": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               },
               "team": {
@@ -153,26 +162,26 @@
               }
             },
             "required": [
-              "playerId",
+              "entityId",
               "team"
             ]
           }
         },
-        "eventPlayerDisconnect": {
+        "playerDisconnect": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
-        "eventPlayerKilled": {
+        "playerKilled": {
           "type": "array",
           "items": {
             "type": "object",
@@ -194,26 +203,26 @@
             ]
           }
         },
-        "eventPlayerRespawned": {
+        "playerRespawned": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
-        "eventPilotBecomesTitan": {
+        "pilotBecomesTitan": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               },
               "titanClass": {
@@ -221,31 +230,31 @@
               }
             },
             "required": [
-              "playerId",
+              "entityId",
               "titanClass"
             ]
           }
         },
-        "eventTitanBecomesPilot": {
+        "titanBecomesPilot": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
-        "eventPlayerGetsNewPilotLoadout": {
+        "playerGetsNewPilotLoadout": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               },
               "primary": {
@@ -262,7 +271,7 @@
               }
             },
             "required": [
-              "playerId",
+              "entityId",
               "primary",
               "secondary",
               "weapon3",
@@ -270,60 +279,60 @@
             ]
           }
         },
-        "eventPlayerJump": {
+        "playerJump": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
-        "eventPlayerDoubleJump": {
+        "playerDoubleJump": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         },
-        "eventPlayerMantle": {
+        "playerMantle": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "playerId": {
+              "entityId": {
                 "type": "string"
               }
             },
             "required": [
-              "playerId"
+              "entityId"
             ]
           }
         }
       },
       "required": [
-        "eventPlayerConnect",
-        "eventPlayerDisconnect",
-        "eventPlayerKilled",
-        "eventPlayerRespawned",
-        "eventPilotBecomesTitan",
-        "eventTitanBecomesPilot",
-        "eventPlayerGetsNewPilotLoadout",
-        "eventPlayerJump",
-        "eventPlayerDoubleJump",
-        "eventPlayerMantle"
+        "playerConnect",
+        "playerDisconnect",
+        "playerKilled",
+        "playerRespawned",
+        "pilotBecomesTitan",
+        "titanBecomesPilot",
+        "playerGetsNewPilotLoadout",
+        "playerJump",
+        "playerDoubleJump",
+        "playerMantle"
       ]
     }
   },

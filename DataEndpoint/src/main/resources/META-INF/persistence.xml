@@ -8,9 +8,10 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <jta-data-source>MainDataSource</jta-data-source>
 
-        <class>com.neo.javax.impl.persistence.entity.EntityAuditTrail</class>
-        <class>com.neo.tf2.ms.impl.persistence.entity.Match</class>
-        <class>com.neo.tf2.ms.impl.persistence.entity.UserToken</class>
+        <class>com.neo.util.framework.persistence.impl.EntityAuditTrail</class>
+        <class>com.neo.r2.ts.impl.persistence.entity.Match</class>
+        <class>com.neo.r2.ts.impl.persistence.entity.UserToken</class>
+        <class>com.neo.r2.ts.impl.persistence.entity.Heatmap</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>

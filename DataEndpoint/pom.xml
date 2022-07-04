@@ -9,9 +9,9 @@
         <version>2.4.0</version>
     </parent>
     
-    <groupId>com.neo.tf2</groupId>
-    <artifactId>mapsystem-data-endpoint</artifactId>
-    <name>MapSystem Data Endpoint</name>
+    <groupId>com.neo.r2</groupId>
+    <artifactId>r2-telemetry-system-endpoint</artifactId>
+    <name>R2 Telemetry System Data Endpoint</name>
     <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -29,38 +29,43 @@
         <!-- NeoUtil -->
 
         <dependency>
-            <groupId>com.neo.util.javax</groupId>
+            <groupId>com.neo.util.framework</groupId>
             <artifactId>api</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.neo.util.javax</groupId>
+            <groupId>com.neo.util.framework</groupId>
             <artifactId>elastic</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.neo.util.javax</groupId>
+            <groupId>com.neo.util.framework</groupId>
             <artifactId>startup</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.neo.util.javax</groupId>
+            <groupId>com.neo.util.framework</groupId>
             <artifactId>persistence</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.neo.util.javax</groupId>
-            <artifactId>ws-rs</artifactId>
+            <groupId>com.neo.util.framework</groupId>
+            <artifactId>rest</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.neo.util.helidon</groupId>
             <artifactId>config</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.neo.util.microprofile</groupId>
+            <artifactId>queue</artifactId>
             <version>1.0.0</version>
         </dependency>
         <!-- Jackson is needed since methods cannot be found otherwise -->
@@ -118,7 +123,21 @@
             <artifactId>helidon-logging-slf4j</artifactId>
             <version>${helidon.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.helidon.microprofile.messaging</groupId>
+            <artifactId>helidon-microprofile-messaging</artifactId>
+            <version>${helidon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.helidon.messaging.jms</groupId>
+            <artifactId>helidon-messaging-jms</artifactId>
+            <version>${helidon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+            <version>5.17.1</version>
+        </dependency>
 
         <!-- Jakarta -->
         <dependency>
@@ -191,7 +210,6 @@
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>2.15.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/log4j/log4j TODO UPDATE THE VERSION TO A ONE WITHOUT EXPLOIT -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>

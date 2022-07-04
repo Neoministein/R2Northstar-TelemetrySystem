@@ -1,15 +1,20 @@
 version: '3.9'
 
 services:
-  ms-database:
+  r2-ts-database:
     image: postgres:12-alpine
     environment:
       POSTGRES_USER: DBACC # The PostgreSQL user (useful to connect to the database)
       POSTGRES_PASSWORD: DBACC # The PostgreSQL password (useful to connect to the database)
-      POSTGRES_DB: TF2-MS # The PostgreSQL default database (automatically created at first launch)
+      POSTGRES_DB: R2-TS # The PostgreSQL default database (automatically created at first launch)
     ports: 
     - 5432:5432
-  ms-es01:
+  r2-ts-active-mq:
+    image: rmohr/activemq:5.10.0
+    ports:
+      - 8161:8161
+      - 61616:61616
+  r2-ts-es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
     container_name: elasticsearch
     environment:

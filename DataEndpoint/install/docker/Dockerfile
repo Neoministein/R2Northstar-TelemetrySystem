@@ -33,9 +33,9 @@ FROM openjdk:11-jre-slim
 WORKDIR /dataEndpoint
 
 # Copy the binary built in the 1st stage
-COPY --from=build /dataEndpoint/target/mapsystem-data-endpoint.jar ./
+COPY --from=build /dataEndpoint/target/r2-telemetry-system-endpoint.jar ./
 COPY --from=build /dataEndpoint/target/libs ./libs
 
-CMD ["java", "-Djdk.serialFilter=org.elasticsearch.*;com.neo.*;io.helidon.*", "-jar", "mapsystem-data-endpoint.jar" ]
+CMD ["java", "-Djdk.serialFilter=org.elasticsearch.*;com.neo.*;io.helidon.*", "-jar", "r2-telemetry-system-endpoint.jar" ]
 
 EXPOSE 8080

@@ -1,0 +1,39 @@
+# ============================== Filebeat inputs ===============================
+
+filebeat.inputs:
+- type: filestream 
+  id: request
+  enabled: true
+  paths:
+    - 'C:\projects\Privat\R2Northstar-MapSystem\log\request.log'
+
+# ============================== Filebeat modules ==============================
+
+# ======================= Elasticsearch template setting =======================
+setup.template.enabled: false
+
+# ================================== General ===================================
+setup.ilm.enabled: false
+
+# ================================= Dashboards =================================
+setup.dashboards.enabled: false
+
+# ================================== Outputs ===================================
+
+# ---------------------------- Elasticsearch Output ----------------------------
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  allow_older_versions: true
+  index: "r2ts-request-log-%{+yyyy.MM.dd}"
+
+# ------------------------------ Logstash Output -------------------------------
+
+# ================================= Processors =================================
+processors:
+  - dissect:
+      tokenizer: "%{timestamp|string}|%{requestId|string}|%{owner|string}|%{remoteAddress|string}|%{context|string}|%{status|integer}|%{error|string}|%{processTime|integer}|%{agent|string}"
+      target_prefix: "segment"
+  - drop_fields:
+      fields: ["agent", "log", "input", "host", "ecs", "message" ]
+
+
