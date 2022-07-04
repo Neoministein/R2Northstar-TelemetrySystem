@@ -40,44 +40,57 @@ namespace CSNamedPipeServer
         /// </summary>
         public async Task<int> RunPipe()
         {
-            byte[] readBuffer = new byte[BUFFER_SIZE * TCHAR_SIZE];
-            m_namedPipeServer.WaitForConnection();
-            while (m_namedPipeServer.IsConnected && 0 < m_namedPipeServer.Read(readBuffer, 0, BUFFER_SIZE * TCHAR_SIZE)) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
+            try
             {
-                // TODO: Multithreading/Coroutine
 
-                string readString = Encoding.Unicode.GetString(readBuffer);
-                if (argLogMode >= LogMode.Most)
-                    Console.WriteLine("NamedPipe read: " + readString);
-                int index = readString.IndexOf('\0');
-                if (index >= 0)
-                    readString = readString.Substring(0, index);
-                if (readString == "Close")
-                    break;
+                byte[] readBuffer = new byte[BUFFER_SIZE * TCHAR_SIZE];
+                m_namedPipeServer.WaitForConnection();
+                while (m_namedPipeServer.IsConnected && 0 < m_namedPipeServer.Read(readBuffer, 0, BUFFER_SIZE * TCHAR_SIZE)) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
+                {
+                    // TODO: Multithreading/Coroutine
+                    try
+                    {
+                        string readString = Encoding.Unicode.GetString(readBuffer);
+                        if (argLogMode >= LogMode.Most)
+                            Console.WriteLine("NamedPipe read: " + readString);
+                        int index = readString.IndexOf('\0');
+                        if (index >= 0)
+                            readString = readString.Substring(0, index);
+                        if (readString == "Close")
+                            break;
 
-                string[] curLog = readString.Split('|');
-                // Remove leading empty string
-                if (curLog[0] == "")
-                    curLog = curLog.Skip(1).ToArray();
-                if (argLogMode >= LogMode.Most)
-                    Console.WriteLine("NamedPipe result: " + String.Join("   ", curLog));
-                try
-                {
-                    ProcessCommand(curLog);
+                        string[] curLog = readString.Split('|');
+                        // Remove leading empty string
+                        if (curLog[0] == "")
+                            curLog = curLog.Skip(1).ToArray();
+                        if (argLogMode >= LogMode.Most)
+                            Console.WriteLine("NamedPipe result: " + String.Join("   ", curLog));
+                        try
+                        {
+                            ProcessCommand(curLog);
+                        }
+                        catch (Exception _ex)
+                        {
+                            Console.WriteLine("RunPipe() command exception: " + _ex);
+                        }
+                    }
+                    catch (Exception _ex)
+                    {
+                        Console.WriteLine("RunPipe() process input exception: " + _ex.ToString());
+                    }
                 }
-                catch (Exception _ex)
+                if (m_currentMatch.isRunning)
                 {
-                    Console.WriteLine(_ex);
+                    Console.WriteLine("Pipe connection lost. Ending current match");
+                    EndMatch();
                 }
+                m_namedPipeServer.Close();
+                //Console.WriteLine("Exit: 0");
             }
-            if (m_currentMatch.isRunning)
+            catch(Exception _ex)
             {
-                Console.WriteLine("Pipe connection lost. Ending current match");
-                EndMatch();
+                Console.WriteLine("RunPipe() complete exception: " + _ex.ToString());
             }
-            m_namedPipeServer.Close();
-            //Console.WriteLine("Exit: 0");
-
             return 0;
         }
 
