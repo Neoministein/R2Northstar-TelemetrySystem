@@ -11,15 +11,13 @@ namespace CSNamedPipeServer
         // Http post erstellen
         // Http put schließen
         private NamedPipeServerStream m_namedPipeServer;
-        private const int BUFFER_SIZE = 512; // Same as northstar.dll
-        private const int TCHAR_SIZE = 2; // Same as northstar.dll
         private Match m_currentMatch = new Match("empty0", "empty1", "empty2", false, true); // Needed, because its assigned outside of the constructor
         private DynamicInfos m_currentInfo = new DynamicInfos();
         private DateTime m_startTime;
         private bool m_closed = false;
 
         public const bool argUseHttp = true;
-        public const LogMode argLogMode = LogMode.Event;
+        public const LogMode argLogMode = LogMode.All;
 
         public PipeInstance(NamedPipeServerStream _pipe)
         {
@@ -43,14 +41,14 @@ namespace CSNamedPipeServer
             try
             {
 
-                byte[] readBuffer = new byte[BUFFER_SIZE * TCHAR_SIZE];
+                byte[] readBuffer = new byte[102400];
                 m_namedPipeServer.WaitForConnection();
-                while (m_namedPipeServer.IsConnected && 0 < m_namedPipeServer.Read(readBuffer, 0, BUFFER_SIZE * TCHAR_SIZE)) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
+                while (m_namedPipeServer.IsConnected && 0 < m_namedPipeServer.Read(readBuffer, 0, 102400)) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
                 {
                     // TODO: Multithreading/Coroutine
                     try
                     {
-                        string readString = Encoding.Unicode.GetString(readBuffer);
+                        string readString = Encoding.UTF8.GetString(readBuffer);
                         if (argLogMode >= LogMode.Most)
                             Console.WriteLine("NamedPipe read: " + readString);
                         int index = readString.IndexOf('\0');
