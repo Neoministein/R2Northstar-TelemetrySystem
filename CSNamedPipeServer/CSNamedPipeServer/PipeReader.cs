@@ -76,6 +76,7 @@ namespace CSNamedPipeServer
                     {
                         Console.WriteLine("RunPipe() process input exception: " + _ex.ToString());
                     }
+                    readBuffer = new byte[102400];
                 }
                 if (m_currentMatch.isRunning)
                 {
