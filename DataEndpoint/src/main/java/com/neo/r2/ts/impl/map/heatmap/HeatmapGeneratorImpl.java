@@ -129,6 +129,7 @@ public class HeatmapGeneratorImpl {
                     }
                 }
             }
+            heatmap.setData(result);
             return heatmap;
 
         }
