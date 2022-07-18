@@ -34,7 +34,7 @@ public class RequestRecorder implements ContainerResponseFilter {
                 JsonNode responseBody = JsonUtil.fromJson((String) containerResponse.getEntity());
                 RequestLog.RequestSegments requestSegment = new RequestLog.RequestSegments();
                 requestSegment.setRequestId(requestSegment.getRequestId());
-                requestSegment.setOwner(requestDetails.getUUId().isPresent() ? requestDetails.getUUId().toString() : "");
+                requestSegment.setOwner(requestDetails.getUser().isPresent() ? requestDetails.getUser().get().getName() : "");
                 requestSegment.setRemoteAddress(requestSegment.getRemoteAddress());
                 requestSegment.setContext(requestDetails.getRequestContext().toString());
                 requestSegment.setStatus(responseBody.get("status").asText());

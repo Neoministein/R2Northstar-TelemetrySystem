@@ -2,20 +2,17 @@ package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.r2.ts.impl.persistence.searchable.MatchEvent;
-import com.neo.r2.ts.impl.security.Secured;
 import com.neo.r2.ts.impl.persistence.GlobalGameState;
+import com.neo.r2.ts.impl.persistence.searchable.MatchEvent;
 import com.neo.r2.ts.impl.persistence.searchable.MatchState;
 import com.neo.util.common.api.json.Views;
-import com.neo.util.common.impl.json.JsonSchemaUtil;
 import com.neo.util.common.impl.json.JsonUtil;
-import com.neo.util.framework.api.connection.RequestDetails;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.search.SearchQuery;
 import com.neo.util.framework.api.persistence.search.SearchRepository;
-import com.neo.util.framework.rest.api.RestAction;
-import com.neo.util.framework.rest.impl.DefaultResponse;
-import com.neo.util.framework.rest.impl.RestActionProcessor;
+import com.neo.util.framework.rest.api.parser.ValidateJsonSchema;
+import com.neo.util.framework.rest.api.response.ResponseGenerator;
+import com.neo.util.framework.rest.api.security.Secured;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -32,61 +29,50 @@ public class MatchStateResource {
     public static final String RESOURCE_LOCATION = "api/v1/matchstate";
 
     @Inject
-    RequestDetails requestDetails;
+    SearchRepository searchRepository;
 
     @Inject
-    SearchRepository searchRepository;
+    ResponseGenerator responseGenerator;
 
     @Inject
     GlobalGameState globalGameState;
 
     @Inject
-    RestActionProcessor actionProcessor;
+    CustomRestRestResponse customRestRestResponse;
 
     @PUT
     @Secured
-    public Response put(String x) {
-        RestAction restAction = () -> {
-            JsonNode jsonNode = JsonUtil.fromJson(x);
-            JsonSchemaUtil.isValidOrThrow(jsonNode, MatchState.JSON_SCHEMA);
-            globalGameState.setCurrentMatchState(jsonNode);
-            if (searchRepository.enabled()) {
-                MatchState matchState = new MatchState(jsonNode.deepCopy());
-                searchRepository.index(matchState);
-                searchRepository.index(parseStateToEvents(jsonNode));
-            }
-            return DefaultResponse.success(requestDetails.getRequestContext());
-        };
-
-        return actionProcessor.process(restAction);
+    @ValidateJsonSchema("schemas/MatchState.json")
+    public Response put(JsonNode jsonNode) {
+        globalGameState.setCurrentMatchState(jsonNode);
+        if (searchRepository.enabled()) {
+            MatchState matchState = new MatchState(jsonNode.deepCopy());
+            searchRepository.index(matchState);
+            searchRepository.index(parseStateToEvents(jsonNode));
+        }
+        return responseGenerator.success();
     }
 
     @GET
     @Path("/{id}")
     public Response get(@PathParam("id") String id) {
-        RestAction restAction = () -> {
-            JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id));
-            return DefaultResponse.success(requestDetails.getRequestContext(), state);
-        };
-        return actionProcessor.process(restAction);
+        JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id));
+        return responseGenerator.success(state);
     }
 
     @GET
     @Path("/{id}/{offset}")
     public Response replayData(@PathParam("id") String id, @PathParam("offset") int offset) {
-        RestAction restAction = () -> {
-            if (searchRepository.enabled()) {
-                SearchQuery searchQuery = new SearchQuery(100, List.of(new ExplicitSearchCriteria("matchId", id,false)));
-                searchQuery.setFields(null);
-                searchQuery.setOnlySource(true);
-                searchQuery.setSorting(Map.of("timePassed",true));
-                searchQuery.setOffset(offset);
-                String searchResponse = JsonUtil.toJson(searchRepository.fetch("r2ts-match-state",searchQuery), Views.Public.class);
-                return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(searchResponse));
-            }
-            return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
-        };
-        return actionProcessor.process(restAction);
+        if (searchRepository.enabled()) {
+            SearchQuery searchQuery = new SearchQuery(100, List.of(new ExplicitSearchCriteria("matchId", id,false)));
+            searchQuery.setFields(null);
+            searchQuery.setOnlySource(true);
+            searchQuery.setSorting(Map.of("timePassed",true));
+            searchQuery.setOffset(offset);
+            String searchResponse = JsonUtil.toJson(searchRepository.fetch("r2ts-match-state",searchQuery), Views.Public.class);
+            return responseGenerator.success(JsonUtil.fromJson(searchResponse));
+        }
+        return responseGenerator.error(503, customRestRestResponse.getService());
     }
 
     protected List<MatchEvent> parseStateToEvents(JsonNode state) {
