@@ -5,11 +5,8 @@ import com.neo.util.common.impl.json.JsonSchemaUtil;
 import com.neo.util.framework.api.persistence.search.GenericSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
 import com.neo.util.framework.api.persistence.search.Searchable;
-import com.networknt.schema.JsonSchema;
 
 public class MatchState extends GenericSearchable implements Searchable {
-
-    public static final JsonSchema JSON_SCHEMA = JsonSchemaUtil.generateSchemaFromResource("schemas/MatchState.json");
 
     public static final String F_ENTITY_ID = "entityId";
 

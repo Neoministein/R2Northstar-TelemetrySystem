@@ -4,15 +4,17 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.RandomString;
 import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
+import com.neo.util.framework.api.security.RolePrincipal;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 
 import javax.persistence.*;
+import javax.security.auth.Subject;
 import java.util.*;
 
 @Entity
 @Table(name = UserToken.TABLE_NAME, indexes = {
         @Index(name = "key", columnList = UserToken.C_KEY, unique = true)})
-public class UserToken extends AuditableDataBaseEntity implements DataBaseEntity {
+public class UserToken extends AuditableDataBaseEntity implements DataBaseEntity, RolePrincipal {
 
     public static final String TABLE_NAME = "user_token";
 
@@ -92,8 +94,8 @@ public class UserToken extends AuditableDataBaseEntity implements DataBaseEntity
         this.disabled = disabled;
     }
 
-    public List<String> getRoles() {
-        return roles;
+    public Set<String> getRoles() {
+        return new HashSet<>(roles);
     }
 
     public void setRoles(List<String> roles) {
@@ -118,5 +120,15 @@ public class UserToken extends AuditableDataBaseEntity implements DataBaseEntity
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String getName() {
+        return getOwner().toString();
+    }
+
+    @Override
+    public boolean implies(Subject subject) {
+        return RolePrincipal.super.implies(subject);
     }
 }

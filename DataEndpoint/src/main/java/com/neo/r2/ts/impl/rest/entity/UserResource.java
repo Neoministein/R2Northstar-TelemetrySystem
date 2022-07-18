@@ -1,17 +1,16 @@
 package com.neo.r2.ts.impl.rest.entity;
 
 import com.neo.r2.ts.impl.persistence.entity.UserToken;
-import com.neo.r2.ts.impl.security.AuthenticationService;
-import com.neo.r2.ts.impl.security.Secured;
+import com.neo.r2.ts.impl.rest.CustomRestRestResponse;
+import com.neo.r2.ts.impl.security.BasicAuthenticationProvider;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.exception.InternalJsonException;
 import com.neo.util.framework.api.persistence.entity.EntityQuery;
 import com.neo.util.framework.api.persistence.entity.EntityResult;
-import com.neo.util.framework.rest.api.RestAction;
-import com.neo.util.framework.rest.impl.DefaultResponse;
-import com.neo.util.framework.rest.impl.RestActionProcessor;
+import com.neo.util.framework.rest.api.security.Secured;
 import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.transaction.RollbackException;
@@ -19,8 +18,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-
-import static com.neo.util.framework.rest.impl.RestActionProcessor.E_FORBIDDEN;
 
 @RequestScoped
 @Path(UserResource.RESOURCE_LOCATION)
@@ -31,52 +28,51 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
 
     public static final String P_INIT = "/init";
 
-    @Inject
-    AuthenticationService authenticationService;
+    @Inject BasicAuthenticationProvider authenticationService;
 
     @Inject
-    RestActionProcessor actionProcessor;
+    CustomRestRestResponse customRestRestResponse;
 
     @POST
     @Secured
+    @Override
     public Response create(String x) {
-        authenticationService.init();
-        return actionProcessor.process(createAction(x), List.of(PERM_INTERNAL));
+        return super.create(x);
     }
 
     @GET
     @Secured
     @Path("/{owner}")
+    @RolesAllowed(PERM_INTERNAL)
     public Response get(@PathParam("owner") String owner) {
-        return actionProcessor.process(getByValueAction(UserToken.C_OWNER, owner), List.of(PERM_INTERNAL));
+        return super.getByValue(UserToken.C_OWNER, owner);
     }
 
     @PUT
     @Secured
+    @RolesAllowed(PERM_INTERNAL)
+    @Override
     public Response edit(String x) {
         authenticationService.init();
-        return actionProcessor.process(editAction(x), List.of(PERM_INTERNAL));
+        return super.edit((x));
     }
 
     @GET
     @Path(P_INIT)
-    public Response init() {
-        RestAction restAction = () -> {
-            EntityResult<UserToken> result = entityRepository.find(new EntityQuery<>(UserToken.class, 0, List.of()));
-            if (result.getHitSize() == 0) {
-                UserToken userToken = new UserToken();
-                userToken.setDescription("Admin token");
-                userToken.getRoles().add(PERM_INTERNAL);
-                try {
-                    entityRepository.create(userToken);
-                } catch (RollbackException e) {
-                    throw new InternalJsonException("Unable to create initial user");
-                }
-                return parseEntityToResponse(userToken, Views.Internal.class);
+    public Response userInit() {
+        EntityResult<UserToken> result = entityRepository.find(new EntityQuery<>(UserToken.class, 0, List.of()));
+        if (result.getHitSize() == 0) {
+            UserToken userToken = new UserToken();
+            userToken.setDescription("Admin token");
+            userToken.getRoles().add(PERM_INTERNAL);
+            try {
+                entityRepository.create(userToken);
+            } catch (RollbackException e) {
+                throw new InternalJsonException("Unable to create initial user");
             }
-            return DefaultResponse.error(403, E_FORBIDDEN, requestDetails.getRequestContext());
-        };
-        return actionProcessor.process(restAction);
+            return parseEntityToResponse(userToken, Views.Internal.class);
+        }
+        return responseGenerator.error(403,customRestRestResponse.getForbidden());
     }
 
 

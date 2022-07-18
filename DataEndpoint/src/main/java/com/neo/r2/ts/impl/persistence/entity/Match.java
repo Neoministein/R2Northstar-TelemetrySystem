@@ -54,7 +54,7 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
 
     @Column(name = C_OWNER)
         @JsonView(Views.Owner.class)
-    private UUID owner;
+    private String owner;
 
     @OneToMany(mappedBy = TABLE_NAME, orphanRemoval = true)
         @JsonView(Views.Public.class)
@@ -108,7 +108,7 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
         this.startDate = startDate;
     }
 
-    public void setOwner(UUID matchOwner) {
+    public void setOwner(String matchOwner) {
         this.owner = matchOwner;
     }
 
