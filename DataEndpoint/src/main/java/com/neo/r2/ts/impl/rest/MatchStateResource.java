@@ -1,10 +1,8 @@
 package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.r2.ts.impl.persistence.GlobalGameState;
-import com.neo.r2.ts.impl.persistence.searchable.MatchEvent;
-import com.neo.r2.ts.impl.persistence.searchable.MatchState;
+import com.neo.r2.ts.impl.match.MatchStateService;
+import com.neo.r2.ts.impl.match.GlobalMatchState;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
@@ -29,35 +27,37 @@ public class MatchStateResource {
     public static final String RESOURCE_LOCATION = "api/v1/matchstate";
 
     @Inject
-    SearchRepository searchRepository;
+    protected SearchRepository searchRepository;
 
     @Inject
-    ResponseGenerator responseGenerator;
+    protected ResponseGenerator responseGenerator;
 
     @Inject
-    GlobalGameState globalGameState;
+    protected GlobalMatchState globalGameState;
 
     @Inject
-    CustomRestRestResponse customRestRestResponse;
+    protected MatchStateService gameStateService;
+
+    @Inject
+    protected CustomRestRestResponse customRestRestResponse;
 
     @PUT
     @Secured
     @ValidateJsonSchema("schemas/MatchState.json")
-    public Response put(JsonNode jsonNode) {
-        globalGameState.setCurrentMatchState(jsonNode);
-        if (searchRepository.enabled()) {
-            MatchState matchState = new MatchState(jsonNode.deepCopy());
-            searchRepository.index(matchState);
-            searchRepository.index(parseStateToEvents(jsonNode));
-        }
+    public Response put(JsonNode matchState) {
+        gameStateService.updateGameState(matchState);
         return responseGenerator.success();
     }
 
     @GET
     @Path("/{id}")
     public Response get(@PathParam("id") String id) {
-        JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id));
-        return responseGenerator.success(state);
+        try {
+            JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id));
+            return responseGenerator.success(state);
+        } catch (IllegalArgumentException ex) {
+            return responseGenerator.error(404, "","");
+        }
     }
 
     @GET
@@ -73,53 +73,5 @@ public class MatchStateResource {
             return responseGenerator.success(JsonUtil.fromJson(searchResponse));
         }
         return responseGenerator.error(503, customRestRestResponse.getService());
-    }
-
-    protected List<MatchEvent> parseStateToEvents(JsonNode state) {
-        Map<String, JsonNode> players = new HashMap<>();
-        List<MatchEvent> matchEventList = new ArrayList<>();
-        for (JsonNode p: state.get(MatchState.F_PLAYERS)) {
-            ObjectNode player = p.deepCopy();
-            player.put(MatchEvent.F_IS_PLAYER,false);
-            players.put(player.get(MatchState.F_ENTITY_ID).asText(), player);
-            MatchEvent matchEvent = new MatchEvent(state, MatchEvent.T_POSITION);
-            matchEvent.setEntity(player);
-            matchEventList.add(matchEvent);
-        }
-        List<String> basicEvents = List.of(
-                MatchState.F_CONNECT,
-                MatchState.F_DISCONNECT,
-                MatchState.F_RESPAWNED,
-                MatchState.F_PILOT_BECOMES_TITAN,
-                MatchState.F_TITAN_BECOMES_PILOT,
-                MatchState.F_JUMP,
-                MatchState.F_DOUBLE_JUMP,
-                MatchState.F_MANTLE,
-                MatchState.F_NEW_LOADOUT);
-        addBasicEvents(basicEvents,players, state,matchEventList);
-
-        for (JsonNode event: state.get(MatchState.F_EVENTS).get(MatchState.F_KILLED)) {
-            MatchEvent matchEvent = new MatchEvent(state, MatchState.F_KILLED);
-            if (!event.has(MatchState.F_ATTACKER)) {
-                break;
-            }
-            matchEvent.setEntity(players.get(event.get(MatchState.F_ATTACKER).asText()));
-            ObjectNode data = JsonUtil.emptyObjectNode();
-            data.set(MatchEvent.F_VICTIM, players.get(event.get(MatchState.F_VICTIM).asText()));
-            data.put(MatchEvent.F_DAMAGE_TYPE, event.get(MatchState.F_WEAPON).asText());
-            matchEventList.add(matchEvent);
-        }
-        return matchEventList;
-    }
-
-    public void addBasicEvents(List<String> basicEvents, Map<String, JsonNode> players, JsonNode state, List<MatchEvent> toAddTo) {
-        for (String basicEvent : basicEvents) {
-
-            for (JsonNode event: state.get(MatchState.F_EVENTS).get(basicEvent)) {
-                MatchEvent matchEvent = new MatchEvent(state, basicEvent);
-                matchEvent.setEntity(players.get(event.get(MatchState.F_ENTITY_ID).asText()));
-                toAddTo.add(matchEvent);
-            }
-        }
     }
 }

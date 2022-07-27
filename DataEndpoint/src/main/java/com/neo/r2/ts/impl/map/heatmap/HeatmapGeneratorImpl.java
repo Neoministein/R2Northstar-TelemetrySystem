@@ -8,7 +8,7 @@ import com.neo.r2.ts.impl.map.scaling.MapScalingService;
 import com.neo.r2.ts.impl.persistence.entity.Heatmap;
 import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.r2.ts.impl.persistence.entity.Match;
-import com.neo.r2.ts.impl.persistence.searchable.MatchEvent;
+import com.neo.r2.ts.impl.persistence.searchable.MatchEventSearchable;
 import com.neo.util.common.impl.exception.InternalJsonException;
 import com.neo.util.common.impl.exception.InternalLogicException;
 import com.neo.util.common.impl.json.JsonUtil;
@@ -35,7 +35,7 @@ public class HeatmapGeneratorImpl {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeatmapGeneratorImpl.class);
 
-    protected static final SearchAggregation COUNT_AGGREGATION = new SimpleFieldAggregation("count", MatchEvent.F_MATCH_ID, SearchAggregation.AggregationType.COUNT);
+    protected static final SearchAggregation COUNT_AGGREGATION = new SimpleFieldAggregation("count", MatchEventSearchable.F_MATCH_ID, SearchAggregation.AggregationType.COUNT);
 
     protected static final String PLAYER_POS_X = "entity.position.x";
     protected static final String PLAYER_POS_Y = "entity.position.y";
@@ -70,7 +70,8 @@ public class HeatmapGeneratorImpl {
             List<SearchCriteria> searchCriteriaList = new ArrayList<>();
             switch (heatmapType) {
                 case PLAYER_POSITION:
-                    searchCriteriaList.add(new ExplicitSearchCriteria(MatchEvent.F_MATCH_ID, match.get().getId().toString()));
+                    searchCriteriaList.add(new ExplicitSearchCriteria(
+                            MatchEventSearchable.F_MATCH_ID, match.get().getId().toString()));
                     break;
                 case FULL_MAP_AGGREGATION:
                 case CUSTOM:

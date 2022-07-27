@@ -5,7 +5,7 @@ import com.neo.r2.ts.impl.map.heatmap.HeatmapQueueService;
 import com.neo.r2.ts.impl.map.heatmap.QueueableHeatmapInstruction;
 import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.r2.ts.impl.rest.CustomRestRestResponse;
-import com.neo.r2.ts.impl.persistence.GlobalGameState;
+import com.neo.r2.ts.impl.match.GlobalMatchState;
 import com.neo.r2.ts.impl.persistence.entity.Match;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.StringUtils;
@@ -59,13 +59,13 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     public static final String P_HEATMAP = "/heatmap";
 
     @Inject
-    GlobalGameState globalGameState;
+    protected GlobalMatchState globalGameState;
 
     @Inject
-    HeatmapQueueService heatmapQueueService;
+    protected HeatmapQueueService heatmapQueueService;
 
     @Inject
-    CustomRestRestResponse customRestRestResponse;
+    protected CustomRestRestResponse customRestRestResponse;
 
     @POST
     @Secured

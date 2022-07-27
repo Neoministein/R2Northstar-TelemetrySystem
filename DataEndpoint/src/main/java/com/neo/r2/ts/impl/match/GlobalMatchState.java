@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.persistence;
+package com.neo.r2.ts.impl.match;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @ApplicationScoped
-public class GlobalGameState {
+public class GlobalMatchState {
 
     protected Map<UUID, JsonNode> currentMatchState = new HashMap<>();
 
