@@ -133,6 +133,13 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     }
 
     @GET
+    @Path("/{id}")
+    @Transactional
+    public Response match(@PathParam("id") String id) {
+        return super.getByPrimaryKey(id);
+    }
+
+    @GET
     @Path(P_STOPPED)
     @Transactional
     public Response stopped() {
