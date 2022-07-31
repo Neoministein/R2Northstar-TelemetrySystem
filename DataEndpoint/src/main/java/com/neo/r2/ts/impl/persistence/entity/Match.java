@@ -33,7 +33,7 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
     private UUID id;
 
     @Column(name = C_IS_PLAYING, nullable = false)
-        @JsonView(Views.Internal.class)
+        @JsonView(Views.Public.class)
     private boolean isRunning = true;
 
     @Column(name = C_NS_SERVER_NAME, nullable = false)
