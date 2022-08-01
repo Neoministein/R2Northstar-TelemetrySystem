@@ -25,9 +25,9 @@ import com.neo.util.framework.api.persistence.search.SearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.RollbackException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.RollbackException;
 import java.util.*;
 
 @ApplicationScoped

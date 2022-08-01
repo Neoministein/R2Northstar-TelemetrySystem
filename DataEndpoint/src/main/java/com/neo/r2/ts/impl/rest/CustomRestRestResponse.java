@@ -3,8 +3,8 @@ package com.neo.r2.ts.impl.rest;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.util.framework.rest.api.response.ResponseGenerator;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class CustomRestRestResponse {

@@ -2,7 +2,7 @@ package com.neo.r2.ts.impl.match;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

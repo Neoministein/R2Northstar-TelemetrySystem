@@ -4,15 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.util.common.impl.exception.InternalJsonException;
 import com.neo.util.common.impl.json.JsonUtil;
 import org.hibernate.type.descriptor.WrapperOptions;
-import org.hibernate.type.descriptor.java.AbstractTypeDescriptor;
-import org.hibernate.type.descriptor.java.ImmutableMutabilityPlan;
+import org.hibernate.type.descriptor.java.AbstractClassJavaType;
 
-public class JsonNodeStringJavaDescriptor extends AbstractTypeDescriptor<JsonNode> {
+public class JsonNodeStringJavaDescriptor extends AbstractClassJavaType<JsonNode> {
 
     public static final JsonNodeStringJavaDescriptor INSTANCE = new JsonNodeStringJavaDescriptor();
 
-    public JsonNodeStringJavaDescriptor() {
-        super(JsonNode.class, ImmutableMutabilityPlan.INSTANCE);
+    protected JsonNodeStringJavaDescriptor() {
+        super(JsonNode.class);
     }
 
     @Override
@@ -24,7 +23,6 @@ public class JsonNodeStringJavaDescriptor extends AbstractTypeDescriptor<JsonNod
         }
     }
 
-    @Override
     public JsonNode fromString(String string) {
         try {
             return JsonUtil.fromJson(string);
