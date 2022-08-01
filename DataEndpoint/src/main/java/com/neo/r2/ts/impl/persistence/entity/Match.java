@@ -5,9 +5,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,9 +25,8 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
     public static final String C_OWNER = "owner";
 
     @Id
-    @Type(type = "uuid-char")
     @GeneratedValue
-    @Column(name = DataBaseEntity.C_ID)
+    @Column(name = DataBaseEntity.C_ID, columnDefinition = "uuid")
         @JsonView(Views.Public.class)
     private UUID id;
 

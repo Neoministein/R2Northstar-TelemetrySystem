@@ -7,7 +7,7 @@ import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 import com.neo.util.framework.api.security.RolePrincipal;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import javax.security.auth.Subject;
 import java.util.*;
 

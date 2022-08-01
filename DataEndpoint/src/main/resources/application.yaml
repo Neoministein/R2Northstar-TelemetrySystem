@@ -20,8 +20,9 @@ mp:
       jndi:
         jms-factory: ConnectionFactory
         env-properties:
-          java.naming.factory.initial: org.apache.activemq.jndi.ActiveMQInitialContextFactory
-          java.naming.provider.url: ${org.apache.activemq.url}
+          java.naming:
+            factory.initial: org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory
+            provider.url: ${org.apache.activemq.url}
     incoming:
       from-indexingQueue:
         connector: helidon-jms

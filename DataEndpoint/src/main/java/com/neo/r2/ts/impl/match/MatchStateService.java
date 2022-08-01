@@ -8,8 +8,8 @@ import com.neo.r2.ts.impl.persistence.searchable.MatchStateSearchable;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.search.SearchRepository;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

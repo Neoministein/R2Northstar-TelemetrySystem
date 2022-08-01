@@ -2,8 +2,8 @@ package com.neo.r2.ts.impl.map.scaling;
 
 import com.neo.util.common.impl.exception.InternalLogicException;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

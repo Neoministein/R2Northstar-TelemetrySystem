@@ -10,13 +10,13 @@ import com.neo.util.framework.api.persistence.entity.EntityResult;
 import com.neo.util.framework.rest.api.security.Secured;
 import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 
-import javax.annotation.security.RolesAllowed;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.transaction.RollbackException;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.RollbackException;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 @RequestScoped
