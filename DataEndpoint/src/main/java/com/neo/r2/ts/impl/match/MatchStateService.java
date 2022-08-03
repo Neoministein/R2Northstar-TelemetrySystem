@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.impl.persistence.searchable.MatchEvent;
 import com.neo.r2.ts.impl.persistence.searchable.MatchEventSearchable;
 import com.neo.r2.ts.impl.persistence.searchable.MatchStateSearchable;
+import com.neo.r2.ts.impl.socket.MatchStateOutputSocket;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.search.SearchRepository;
 
@@ -35,8 +36,13 @@ public class MatchStateService {
     @Inject
     protected GlobalMatchState globalGameState;
 
+    @Inject
+    protected MatchStateOutputSocket matchStateOutputSocket;
+
     public void updateGameState(JsonNode gameSate) {
-        globalGameState.setCurrentMatchState(gameSate);
+        String matchId = gameSate.get("matchId").asText();
+        matchStateOutputSocket.broadcast(matchId, JsonUtil.toJson(gameSate));
+        globalGameState.setCurrentMatchState(matchId, gameSate);
         if (searchRepository.enabled()) {
             MatchStateSearchable matchState = new MatchStateSearchable(gameSate.deepCopy());
             searchRepository.index(matchState);
