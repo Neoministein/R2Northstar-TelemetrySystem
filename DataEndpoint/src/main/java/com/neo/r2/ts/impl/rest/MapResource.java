@@ -72,7 +72,7 @@ public class MapResource {
     }
 
     @GET
-    @Path("scaling/{map}")
+    @Path("{map}/scale")
     public Response getScaling(@PathParam("map") String map) {
         try {
             return responseGenerator.success(JsonUtil.fromPojo(mapScalingService.getMapScale(map)));
@@ -82,7 +82,7 @@ public class MapResource {
     }
 
     @GET
-    @Path("heatmap/{map}")
+    @Path("{map}/heatmap")
     public Response getHeatmapData(@PathParam("map") String map) {
         try {
             EntityQuery<Heatmap> heatmapEntityQuery = new EntityQuery<>(
@@ -102,7 +102,7 @@ public class MapResource {
 
     @POST
     @Secured
-    @Path("heatmap/{map}")
+    @Path("{map}/heatmap")
     public Response createHeatmapData(@PathParam("map") String map) {
         try {
             String result = JsonUtil.toJson(heatmapGenerator.calculateMap(map), Views.Public.class);
