@@ -12,8 +12,8 @@ public class GlobalMatchState {
 
     protected Map<UUID, JsonNode> currentMatchState = new HashMap<>();
 
-    public void setCurrentMatchState(JsonNode state) {
-        currentMatchState.put(UUID.fromString(state.get("matchId").asText()), state);
+    public void setCurrentMatchState(String matchId, JsonNode state) {
+        currentMatchState.put(UUID.fromString(matchId), state);
     }
 
     public JsonNode getCurrentMatchState(UUID uuid) {
