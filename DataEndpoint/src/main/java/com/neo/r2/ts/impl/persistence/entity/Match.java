@@ -7,6 +7,7 @@ import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 
 import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,7 +27,7 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = DataBaseEntity.C_ID, columnDefinition = "uuid")
+    @Column(name = DataBaseEntity.C_ID)
         @JsonView(Views.Public.class)
     private UUID id;
 

@@ -3,6 +3,7 @@ package com.neo.r2.ts.impl.rest.entity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.map.heatmap.HeatmapQueueService;
 import com.neo.r2.ts.impl.map.heatmap.QueueableHeatmapInstruction;
+import com.neo.r2.ts.impl.map.scaling.MapScalingService;
 import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.r2.ts.impl.rest.CustomRestRestResponse;
 import com.neo.r2.ts.impl.match.GlobalMatchState;
@@ -67,6 +68,9 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     @Inject
     protected CustomRestRestResponse customRestRestResponse;
 
+    @Inject
+    protected MapScalingService mapScalingService;
+
     @POST
     @Secured
     @Path(P_NEW)
@@ -78,6 +82,9 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
         match.setGamemode(jsonNode.get("gamemode").asText());
         if (requestDetails.getUser().isPresent()) {
             match.setOwner(requestDetails.getUser().get().getName());
+        }
+        if (mapScalingService.getMap(match.getMap()).isEmpty()) {
+            return responseGenerator.error(400, customRestRestResponse.getUnsupportedMap());
         }
 
         try {
