@@ -23,6 +23,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RequestScoped
 @Path(MapResource.RESOURCE_LOCATION)
@@ -32,19 +33,19 @@ public class MapResource {
     public static final String RESOURCE_LOCATION = "api/v1/map/";
 
     @Inject
-    EntityRepository entityRepository;
+    protected EntityRepository entityRepository;
 
     @Inject
-    ResponseGenerator responseGenerator;
+    protected ResponseGenerator responseGenerator;
 
     @Inject
-    CustomRestRestResponse customRestRestResponse;
+    protected CustomRestRestResponse customRestRestResponse;
 
     @Inject
-    MapScalingService mapScalingService;
+    protected MapScalingService mapScalingService;
 
     @Inject
-    HeatmapGeneratorImpl heatmapGenerator;
+    protected HeatmapGeneratorImpl heatmapGenerator;
 
     @GET
     public Response get() {
@@ -63,11 +64,11 @@ public class MapResource {
     @GET
     @Path("{map}")
     public Response get(@PathParam("map") String map) {
-        try {
-            return responseGenerator.success(JsonUtil.fromPojo(mapScalingService.getMap(map)));
-        } catch (InternalLogicException ex) {
-            return responseGenerator.error(400, customRestRestResponse.getMatchAlreadyEnded());
+        Optional<GameMap> optionalGameMap = mapScalingService.getMap(map);
+        if (optionalGameMap.isPresent()) {
+            return responseGenerator.success(JsonUtil.fromPojo(optionalGameMap.get()));
         }
+        return responseGenerator.error(400, customRestRestResponse.getUnsupportedMap());
     }
 
     @GET
