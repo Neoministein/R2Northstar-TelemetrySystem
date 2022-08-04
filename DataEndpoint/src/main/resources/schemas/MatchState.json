@@ -192,7 +192,7 @@
               "victimId": {
                 "type": "string"
               },
-              "weapon": {
+              "damageType": {
                 "type": "string"
               },
               "isAttackerPlayer": {
@@ -205,7 +205,7 @@
             "required": [
               "attackerId",
               "victimId",
-              "weapon",
+              "damageType",
               "isAttackerPlayer",
               "isVictimPlayer"
             ]
@@ -352,7 +352,7 @@
             "type": "string"
           },
           "team": {
-            "type": "string"
+            "type": "integer"
           },
           "position": {
             "type": "object",
@@ -433,11 +433,8 @@
           "position",
           "rotation",
           "velocity",
-          "titanClass",
           "health",
-          "npcClass",
-          "primary",
-          "secondary"
+          "npcClass"
         ]
       }
     }
