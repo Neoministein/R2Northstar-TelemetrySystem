@@ -9,7 +9,7 @@ public class Entity
             /// <summary>
             /// Team Id
             /// </summary>
-            public byte team = 0;
+            public int team = 0;
             /// <summary>
             /// Health in percent
             /// </summary>

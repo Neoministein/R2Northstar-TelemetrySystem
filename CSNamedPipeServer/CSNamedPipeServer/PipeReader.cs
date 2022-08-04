@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.IO.Pipes;
 using System.Text;
 using System.Collections;
+using System;
 
 namespace CSNamedPipeServer
 {
@@ -17,7 +18,7 @@ namespace CSNamedPipeServer
         private bool m_closed = false;
 
         public const bool argUseHttp = true;
-        public const LogMode argLogMode = LogMode.All;
+        public const LogMode argLogMode = LogMode.None;
 
         public PipeInstance(NamedPipeServerStream _pipe)
         {
@@ -36,41 +37,31 @@ namespace CSNamedPipeServer
         /// <summary>
         /// Main Loop that executes the named pipe as well as handling http and json
         /// </summary>
-        public async Task<int> RunPipe()
+        public async Task<int> RunPipe(CancellationToken _token = default)
         {
+            byte[] readBuffer = new byte[102400];
             try
             {
-
-                byte[] readBuffer = new byte[102400];
-                m_namedPipeServer.WaitForConnection();
-                while (m_namedPipeServer.IsConnected && 0 < m_namedPipeServer.Read(readBuffer, 0, 102400)) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
+                await m_namedPipeServer.WaitForConnectionAsync(_token);
+                while (m_namedPipeServer.IsConnected) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
                 {
+                    Memory<byte> memBuf = new Memory<byte>(readBuffer);
+                    var bytesRead = await m_namedPipeServer.ReadAsync(memBuf, _token);
+
+                    if (0 >= bytesRead)
+                    {
+                        break;
+                    }
+                    
                     // TODO: Multithreading/Coroutine
                     try
                     {
-                        string readString = Encoding.UTF8.GetString(readBuffer);
-                        if (argLogMode >= LogMode.Most)
-                            Console.WriteLine("NamedPipe read: " + readString);
-                        int index = readString.IndexOf('\0');
-                        if (index >= 0)
-                            readString = readString.Substring(0, index);
-                        if (readString == "Close")
+                        if (ProcessInputFromPipe(Encoding.UTF8.GetString(readBuffer.AsSpan()).AsSpan()))
+                        {
                             break;
-
-                        string[] curLog = readString.Split('|');
-                        // Remove leading empty string
-                        if (curLog[0] == "")
-                            curLog = curLog.Skip(1).ToArray();
-                        if (argLogMode >= LogMode.Most)
-                            Console.WriteLine("NamedPipe result: " + String.Join("   ", curLog));
-                        try
-                        {
-                            ProcessCommand(curLog);
                         }
-                        catch (Exception _ex)
-                        {
-                            Console.WriteLine("RunPipe() command exception: " + _ex);
-                        }
+                        
+                        readBuffer.Initialize();
                     }
                     catch (Exception _ex)
                     {
@@ -93,6 +84,53 @@ namespace CSNamedPipeServer
             return 0;
         }
 
+        public bool ProcessInputFromPipe(ReadOnlySpan<char> input)
+        {
+            if (argLogMode >= LogMode.Most)
+                Console.WriteLine("NamedPipe read: " + input.ToString());
+
+            int index = input.IndexOf('\0');
+
+            ReadOnlySpan<char> actualInput = index >= 0 ? input[..index] : input;
+
+            if (actualInput == "Close")
+                return true;
+            
+            int locationOfSplit = actualInput.IndexOf('|');
+            int endOfLastSplit = 0;
+
+            var curLog = actualInput.ToString().Split("|");
+            
+           /*while (locationOfSplit > 0)
+            {
+                ReadOnlySpan<char> currentCommmand = actualInput.Slice(endOfLastSplit, locationOfSplit);
+                if (argLogMode >= LogMode.Most)
+                    Console.WriteLine("NamedPipe result: " + String.Join("   ", currentCommmand.ToString()));
+
+                if (currentCommmand.Length != 0)
+                {
+                    ProcessCommand(currentCommmand);
+                }
+                
+                endOfLastSplit = locationOfSplit;
+            }*/
+            // Remove leading empty string
+            if (curLog[0] == "")
+                curLog = curLog.Skip(1).ToArray();
+            if (argLogMode >= LogMode.Most)
+                Console.WriteLine("NamedPipe result: " + String.Join("   ", curLog));
+            try
+            {
+                ProcessCommand(curLog);
+            }
+            catch (Exception _ex)
+            {
+                Console.WriteLine("RunPipe() command exception: " + _ex);
+            }
+
+            return false;
+        }
+        
         #region UtilizeCommand
         /// <summary>
         /// Processes a given command depending of command type
@@ -149,8 +187,12 @@ namespace CSNamedPipeServer
                         // |5|AttackerID|VictimID|Weapon
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: entityKilled: attackerId: " + cmd[1] + ", victimId: " + cmd[2] + ", damageType: " + cmd[3]);
-                        m_currentMatch.players[cmd[2]].isAlive = false;
-                        m_currentMatch.players[cmd[2]].isTitan = false;
+
+                        if (m_currentMatch.players.ContainsKey(cmd[2]))
+                        {
+                            m_currentMatch.players[cmd[2]].isAlive = false;
+                            m_currentMatch.players[cmd[2]].isTitan = false;
+                        }
                         m_currentInfo.events.entityKilled.Add(new Event_EntityKilled(cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]));
                         break;
                     case EventType.PlayerRespawned: // 6
@@ -282,39 +324,21 @@ namespace CSNamedPipeServer
             }
         }
         
-        public void ProcessDynamicBasicNpcInfo(int _count, string[] _cmd)
-        {
-            // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
-            for (int i = 0; i < _count; i++)
-            {
-                NpcWithWeapon npc = new NpcWithWeapon();
-                npc.npcClass = _cmd[1 + (i * 10)];
-                npc.entityId = _cmd[2 + (i * 10)];
-                npc.team = byte.Parse(_cmd[3 + (i * 10)]);
-                npc.position = new Vector<int>(GetVectorData(_cmd[4 + (i * 10)]));
-                npc.position = new Vector<int>(GetVectorData(_cmd[5 + (i * 10)]));
-                npc.position = new Vector<int>(GetVectorData(_cmd[6 + (i * 10)]));
-                npc.health = (byte)Math.Clamp(double.Parse(_cmd[7 + (i * 10)]), 0, 100);
-                npc.primary = _cmd[8 + (i * 10)];
-                npc.secondary = _cmd[9 + (i * 10)];
-                m_currentInfo.npcs.Add(npc);
-            }
-        }
-        
         public void ProcessDynamicWeaponNpcInfo(int _count, string[] _cmd)
         {
             // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
             for (int i = 0; i < _count; i++)
             {
-                NpcTitan npc = new NpcTitan();
-                npc.npcClass = _cmd[1 + (i * 9)];
-                npc.entityId = _cmd[2 + (i * 9)];
-                npc.team = byte.Parse(_cmd[3 + (i * 9)]);
-                npc.position = new Vector<int>(GetVectorData(_cmd[4 + (i * 9)]));
-                npc.position = new Vector<int>(GetVectorData(_cmd[5 + (i * 9)]));
-                npc.position = new Vector<int>(GetVectorData(_cmd[6 + (i * 9)]));
-                npc.health = (byte)Math.Clamp(double.Parse(_cmd[7 + (i * 9)]), 0, 100);
-                npc.titanClass = _cmd[8 + (i * 9)];
+                NpcWithWeapon npc = new NpcWithWeapon();
+                npc.npcClass = _cmd[0 + (i * 9)];
+                npc.entityId = _cmd[1 + (i * 9)];
+                npc.team = int.Parse(_cmd[2 + (i * 9)]);
+                npc.position = new Vector<int>(GetVectorData(_cmd[3 + (i * 9)]));
+                npc.rotation = new Vector<int>(GetVectorData(_cmd[4 + (i * 9)]));
+                npc.velocity = new Vector<int>(GetVectorData(_cmd[5 + (i * 9)]));
+                npc.health = (byte)Math.Clamp(double.Parse(_cmd[6 + (i * 9)]), 0, 100);
+                npc.primary = _cmd[7 + (i * 9)];
+                npc.secondary = _cmd[8 + (i * 9)];
                 m_currentInfo.npcs.Add(npc);
             }
         }
@@ -324,14 +348,32 @@ namespace CSNamedPipeServer
             // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
             for (int i = 0; i < _count; i++)
             {
+                NpcTitan npc = new NpcTitan();
+                npc.npcClass = _cmd[0 + (i * 8)];
+                npc.entityId = _cmd[1 + (i * 8)];
+                npc.team = int.Parse(_cmd[2 + (i * 8)]);
+                npc.position = new Vector<int>(GetVectorData(_cmd[3 + (i * 8)]));
+                npc.rotation = new Vector<int>(GetVectorData(_cmd[4 + (i * 8)]));
+                npc.velocity = new Vector<int>(GetVectorData(_cmd[5 + (i * 8)]));
+                npc.health = (byte)Math.Clamp(double.Parse(_cmd[6 + (i * 8)]), 0, 100);
+                npc.titanClass = _cmd[7 + (i * 8)];
+                m_currentInfo.npcs.Add(npc);
+            }
+        }
+        
+        public void ProcessDynamicBasicNpcInfo(int _count, string[] _cmd)
+        {
+            // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
+            for (int i = 0; i < _count; i++)
+            {
                 Npc npc = new Npc();
-                npc.npcClass = _cmd[1 + (i * 8)];
-                npc.entityId = _cmd[2 + (i * 8)];
-                npc.team = byte.Parse(_cmd[3 + (i * 8)]);
-                npc.position = new Vector<int>(GetVectorData(_cmd[4 + (i * 8)]));
-                npc.position = new Vector<int>(GetVectorData(_cmd[5 + (i * 8)]));
-                npc.position = new Vector<int>(GetVectorData(_cmd[6 + (i * 8)]));
-                npc.health = (byte)Math.Clamp(double.Parse(_cmd[7 + (i * 8)]), 0, 100);
+                npc.npcClass = _cmd[0 + (i * 7)];
+                npc.entityId = _cmd[1 + (i * 7)];
+                npc.team = int.Parse(_cmd[2 + (i * 7)]);
+                npc.position = new Vector<int>(GetVectorData(_cmd[3 + (i * 7)]));
+                npc.rotation = new Vector<int>(GetVectorData(_cmd[4 + (i * 7)]));
+                npc.velocity = new Vector<int>(GetVectorData(_cmd[5 + (i * 7)]));
+                npc.health = (byte)Math.Clamp(double.Parse(_cmd[6 + (i * 7)]), 0, 100);
                 m_currentInfo.npcs.Add(npc);
             }
         }
