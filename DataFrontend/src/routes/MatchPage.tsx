@@ -22,7 +22,7 @@ export default function MatchPage() {
         }
         client = new MatchStateService().getMatchStateSocket(match.id);
         client.onmessage = (message) => {
-            matchState = message;
+            matchState = JSON.parse(message.data);
         }
     })
 
