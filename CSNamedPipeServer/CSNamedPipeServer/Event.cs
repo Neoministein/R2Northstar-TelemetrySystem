@@ -10,7 +10,7 @@ namespace CSNamedPipeServer
     {
         public List<Event_PlayerConnect> playerConnect = new List<Event_PlayerConnect>(0);
         public List<Event_PlayerDisconnect> playerDisconnect = new List<Event_PlayerDisconnect>(0);
-        public List<Event_PlayerKilled> playerKilled = new List<Event_PlayerKilled>(0);
+        public List<Event_EntityKilled> entityKilled = new List<Event_EntityKilled>(0);
         public List<Event_PlayerRespawned> playerRespawned = new List<Event_PlayerRespawned>(0);
         public List<Event_PilotBecomesTitan> pilotBecomesTitan = new List<Event_PilotBecomesTitan>(0);
         public List<Event_TitanBecomesPilot> titanBecomesPilot = new List<Event_TitanBecomesPilot>(0);
@@ -18,6 +18,7 @@ namespace CSNamedPipeServer
         public List<Event_PlayerJump> playerJump = new List<Event_PlayerJump>(0);
         public List<Event_PlayerDoubleJump> playerDoubleJump = new List<Event_PlayerDoubleJump>(0);
         public List<Event_PlayerMantle> playerMantle = new List<Event_PlayerMantle>(0);
+        public List<Event_NpcLeeched> npcLeeched = new List<Event_NpcLeeched>(0);
     }
 
     public struct Event_PlayerConnect
@@ -38,16 +39,20 @@ namespace CSNamedPipeServer
             entityId = _entityId;
         }
     }
-    public struct Event_PlayerKilled
+    public struct Event_EntityKilled
     {
+        public bool isAttackerPlayer;
         public string attackerId;
+        public bool isVictimPlayer;
         public string victimId;
-        public string weapon;
-        public Event_PlayerKilled(string _attackerId, string _victimId, string _weapon)
+        public string damageType;
+        public Event_EntityKilled(string _isAttackerPlayer, string _attackerId, string _isVictimPlayer, string _victimId, string _damageType)
         {
+            isAttackerPlayer = _isAttackerPlayer == "true" ? true : false;
             attackerId = _attackerId;
+            isVictimPlayer = _isVictimPlayer == "true" ? true : false;
             victimId = _victimId;
-            weapon = _weapon;
+            damageType = _damageType;
         }
     }
     public struct Event_PlayerRespawned
@@ -114,6 +119,18 @@ namespace CSNamedPipeServer
         public Event_PlayerMantle(string _entityId)
         {
             entityId = _entityId;
+        }
+    }
+
+    public struct Event_NpcLeeched
+    {
+        public string playerId;
+        public string npcId;
+
+        public Event_NpcLeeched(string _playerId, string _npcId)
+        {
+            playerId = _playerId;
+            npcId = _npcId;
         }
     }
 }
