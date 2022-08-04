@@ -3,6 +3,7 @@ package com.neo.r2.ts.impl.rest;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.impl.map.heatmap.HeatmapGeneratorImpl;
 import com.neo.r2.ts.impl.map.scaling.GameMap;
+import com.neo.r2.ts.impl.map.scaling.MapScale;
 import com.neo.r2.ts.impl.map.scaling.MapScalingService;
 import com.neo.r2.ts.impl.persistence.entity.Heatmap;
 import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
@@ -74,11 +75,11 @@ public class MapResource {
     @GET
     @Path("{map}/scale")
     public Response getScaling(@PathParam("map") String map) {
-        try {
-            return responseGenerator.success(JsonUtil.fromPojo(mapScalingService.getMapScale(map)));
-        } catch (InternalLogicException ex) {
-            return responseGenerator.error(400, customRestRestResponse.getUnsupportedMap());
+        Optional<MapScale> optionalGameMap = mapScalingService.getMapScale(map);
+        if (optionalGameMap.isPresent()) {
+            return responseGenerator.success(JsonUtil.fromPojo(optionalGameMap.get()));
         }
+        return responseGenerator.error(400, customRestRestResponse.getUnsupportedMap());
     }
 
     @GET
