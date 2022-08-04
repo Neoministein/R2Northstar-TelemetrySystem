@@ -18,6 +18,11 @@ export default function MatchListPage() {
         matchService.getRunningMatches()
             .then(data => setMatches(data));
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const toDateString = (rowData : MatchEntity) => {
+        return new Date(rowData.startDate).toISOString().replace("T", " ").split(".")[0];
+    }
+
     return (
         <div>
             <div className="card">
@@ -28,7 +33,7 @@ export default function MatchListPage() {
                     <Column field="nsServerName" header="Ns Server Name"></Column>
                     <Column field="map" header="Map"></Column>
                     <Column field="gamemode" header="Gamemode"></Column>
-                    <Column field="startDate" header="Start date"></Column>
+                    <Column field="startDate" header="Start date" body={toDateString}></Column>
                 </DataTable>
             </div>
         </div>
