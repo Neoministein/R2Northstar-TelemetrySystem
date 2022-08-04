@@ -31,8 +31,15 @@ public class MatchStateOutputSocket {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("id") String id) {
-        List<Session> sessions = sessionMap.putIfAbsent(id, new ArrayList<>());
-        sessions.add(session);
+        List<Session> sessions = sessionMap.get(id);
+        if (sessions == null) {
+            sessions = new ArrayList<>();
+            sessions.add(session);
+            sessionMap.put(id, sessions);
+        } else {
+            sessions.add(session);
+        }
+
     }
 
     @OnClose
@@ -63,11 +70,14 @@ public class MatchStateOutputSocket {
     public void broadcast(String id ,String message) {
         sessionMap.computeIfPresent(id, (key, val) -> {
             val.forEach(session -> {
-                try {
-                    session.getBasicRemote().sendObject(message);
-                } catch (IOException | EncodeException ex) {
-                    LOGGER.warn("Unable to brodcast message to session [{}] [{}]", session.getId(), ex.getMessage());
+                synchronized (session) {
+                    try {
+                        session.getBasicRemote().sendObject(message);
+                    } catch (IOException | EncodeException ex) {
+                        LOGGER.warn("Unable to broadcast message to session [{}] [{}]", session.getId(), ex.getMessage());
+                    }
                 }
+
             });
             return val;
         });
