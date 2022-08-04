@@ -1,31 +1,7 @@
 ﻿namespace CSNamedPipeServer
 {
-    public class Player
+    public class Player : Entity
     {
-        /// <summary>
-        /// Team Id
-        /// </summary>
-        public byte team = 0;
-        /// <summary>
-        /// Health in percent
-        /// </summary>
-        public byte health = 0; // 8bit int
-        /// <summary>
-        /// Rotation (reduced to flat degree values)
-        /// </summary>
-        public Vector<int> rotation = new Vector<int>();
-        /// <summary>
-        /// Position (reduced to flat degree values)
-        /// </summary>
-        public Vector<int> position = new Vector<int>();
-        /// <summary>
-        /// Rotation (reduced to flat degree values)
-        /// </summary>
-        public Vector<int> velocity = new Vector<int>();
-        /// <summary>
-        /// Unique player id
-        /// </summary>
-        public string entityId = "";
         /// <summary>
         /// Players equipment
         /// </summary>
@@ -77,15 +53,15 @@
         public class Equipment
         {
             /// <summary>
-            /// Primary weapon
+            /// Primary damageType
             /// </summary>
             public string primary = "none";
             /// <summary>
-            /// Secondary weapon
+            /// Secondary damageType
             /// </summary>
             public string secondary = "none";
             /// <summary>
-            /// Third weapon
+            /// Third damageType
             /// </summary>
             public string weapon3 = "none";
             /// <summary>

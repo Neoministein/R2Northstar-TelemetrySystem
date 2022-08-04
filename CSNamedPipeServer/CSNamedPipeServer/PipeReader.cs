@@ -145,13 +145,13 @@ namespace CSNamedPipeServer
                         m_currentMatch.players.Remove(cmd[1]);
                         m_currentInfo.events.playerDisconnect.Add(new Event_PlayerDisconnect(cmd[1]));
                         break;
-                    case EventType.PlayerKilled: // 5
+                    case EventType.EntityKilled: // 5
                         // |5|AttackerID|VictimID|Weapon
                         if (argLogMode >= LogMode.Event)
-                            Console.WriteLine("Event: playerKilled: attackerId: " + cmd[1] + ", victimId: " + cmd[2] + ", weapon: " + cmd[3]);
+                            Console.WriteLine("Event: entityKilled: attackerId: " + cmd[1] + ", victimId: " + cmd[2] + ", damageType: " + cmd[3]);
                         m_currentMatch.players[cmd[2]].isAlive = false;
                         m_currentMatch.players[cmd[2]].isTitan = false;
-                        m_currentInfo.events.playerKilled.Add(new Event_PlayerKilled(cmd[1], cmd[2], cmd[3]));
+                        m_currentInfo.events.entityKilled.Add(new Event_EntityKilled(cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]));
                         break;
                     case EventType.PlayerRespawned: // 6
                         // |6|PlayerID
@@ -233,9 +233,22 @@ namespace CSNamedPipeServer
                             Console.WriteLine("Event: playerCrouch: playerId: " + cmd[1] + ", isCrouching: " + cmd[2]);
                         m_currentMatch.players[cmd[1]].isCrouching = cmd[2] == "true";
                         break;
+                    case EventType.DynamicBasicNpcInfo: // 30
+                        
+                        ProcessDynamicBasicNpcInfo(int.Parse(cmd[1]), cmd.Skip(2).ToArray());
+                        break;
+                    case EventType.DynamicWeaponNpcInfo: // 31
+                        ProcessDynamicWeaponNpcInfo(int.Parse(cmd[1]), cmd.Skip(2).ToArray());
+                        break;
+                    case EventType.DynamicTitanNpcInfo: // 32
+                        ProcessDynamicTitanNpcInfo(int.Parse(cmd[1]), cmd.Skip(2).ToArray());
+                        break;
                     case EventType.DebugMessage: // 99
                         // |99|DebugText
                         Console.WriteLine("---- DebugText ----");
+                        break;
+                    case EventType.NpcLeeched:
+                        m_currentInfo.events.npcLeeched.Add(new Event_NpcLeeched(cmd[1], cmd[2]));
                         break;
                     default:
                         Console.WriteLine("Unknown command: " + cmd[0]);
@@ -266,6 +279,60 @@ namespace CSNamedPipeServer
                 m_currentMatch.players[_cmd[(i * 5)]].rotation = new Vector<int>(GetVectorData(_cmd[2 + (i * 5)]));
                 m_currentMatch.players[_cmd[(i * 5)]].velocity = new Vector<int>(GetVectorData(_cmd[3 + (i * 5)]));
                 m_currentMatch.players[_cmd[(i * 5)]].health = (byte)Math.Clamp(double.Parse(_cmd[4 + (i * 5)]), 0, 100); // Not sure how accurate health is saved in squirrel
+            }
+        }
+        
+        public void ProcessDynamicBasicNpcInfo(int _count, string[] _cmd)
+        {
+            // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
+            for (int i = 0; i < _count; i++)
+            {
+                NpcWithWeapon npc = new NpcWithWeapon();
+                npc.npcClass = _cmd[1 + (i * 10)];
+                npc.entityId = _cmd[2 + (i * 10)];
+                npc.team = byte.Parse(_cmd[3 + (i * 10)]);
+                npc.position = new Vector<int>(GetVectorData(_cmd[4 + (i * 10)]));
+                npc.position = new Vector<int>(GetVectorData(_cmd[5 + (i * 10)]));
+                npc.position = new Vector<int>(GetVectorData(_cmd[6 + (i * 10)]));
+                npc.health = (byte)Math.Clamp(double.Parse(_cmd[7 + (i * 10)]), 0, 100);
+                npc.primary = _cmd[8 + (i * 10)];
+                npc.secondary = _cmd[9 + (i * 10)];
+                m_currentInfo.npcs.Add(npc);
+            }
+        }
+        
+        public void ProcessDynamicWeaponNpcInfo(int _count, string[] _cmd)
+        {
+            // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
+            for (int i = 0; i < _count; i++)
+            {
+                NpcTitan npc = new NpcTitan();
+                npc.npcClass = _cmd[1 + (i * 9)];
+                npc.entityId = _cmd[2 + (i * 9)];
+                npc.team = byte.Parse(_cmd[3 + (i * 9)]);
+                npc.position = new Vector<int>(GetVectorData(_cmd[4 + (i * 9)]));
+                npc.position = new Vector<int>(GetVectorData(_cmd[5 + (i * 9)]));
+                npc.position = new Vector<int>(GetVectorData(_cmd[6 + (i * 9)]));
+                npc.health = (byte)Math.Clamp(double.Parse(_cmd[7 + (i * 9)]), 0, 100);
+                npc.titanClass = _cmd[8 + (i * 9)];
+                m_currentInfo.npcs.Add(npc);
+            }
+        }
+        
+        public void ProcessDynamicTitanNpcInfo(int _count, string[] _cmd)
+        {
+            // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
+            for (int i = 0; i < _count; i++)
+            {
+                Npc npc = new Npc();
+                npc.npcClass = _cmd[1 + (i * 8)];
+                npc.entityId = _cmd[2 + (i * 8)];
+                npc.team = byte.Parse(_cmd[3 + (i * 8)]);
+                npc.position = new Vector<int>(GetVectorData(_cmd[4 + (i * 8)]));
+                npc.position = new Vector<int>(GetVectorData(_cmd[5 + (i * 8)]));
+                npc.position = new Vector<int>(GetVectorData(_cmd[6 + (i * 8)]));
+                npc.health = (byte)Math.Clamp(double.Parse(_cmd[7 + (i * 8)]), 0, 100);
+                m_currentInfo.npcs.Add(npc);
             }
         }
         #endregion

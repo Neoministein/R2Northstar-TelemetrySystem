@@ -7,7 +7,7 @@
         GameFinished = 2,
         PlayerConnect = 3,
         PlayerDisconnect = 4,
-        PlayerKilled = 5,
+        EntityKilled = 5,
         PlayerRespawned = 6,
         PilotBecomesTitan = 7,
         TitanBecomesPilot = 8,
@@ -20,7 +20,13 @@
         PlayerMantle = 15,
         PlayerWallHang = 16,
         PlayerCrouch = 17,
+        
+        DynamicBasicNpcInfo = 30,
+        DynamicWeaponNpcInfo = 31,
+        DynamicTitanNpcInfo = 32,
 
+        NpcLeeched = 40,
+        
         DebugMessage = 99,
     }
 
