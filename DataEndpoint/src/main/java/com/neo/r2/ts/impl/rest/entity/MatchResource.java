@@ -3,10 +3,10 @@ package com.neo.r2.ts.impl.rest.entity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.map.heatmap.HeatmapQueueService;
 import com.neo.r2.ts.impl.map.heatmap.QueueableHeatmapInstruction;
+import com.neo.r2.ts.impl.map.scaling.MapScalingService;
 import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.r2.ts.impl.rest.CustomRestRestResponse;
-import com.neo.r2.ts.impl.security.Secured;
-import com.neo.r2.ts.impl.persistence.GlobalGameState;
+import com.neo.r2.ts.impl.match.GlobalMatchState;
 import com.neo.r2.ts.impl.persistence.entity.Match;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.StringUtils;
@@ -16,21 +16,20 @@ import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.entity.EntityQuery;
 import com.neo.util.framework.api.queue.QueueMessage;
-import com.neo.util.framework.rest.api.RestAction;
-import com.neo.util.framework.rest.impl.DefaultResponse;
-import com.neo.util.framework.rest.impl.RestActionProcessor;
+import com.neo.util.framework.rest.api.parser.ValidateJsonSchema;
+import com.neo.util.framework.rest.api.security.Secured;
 import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 import com.networknt.schema.JsonSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.transaction.RollbackException;
-import javax.transaction.Transactional;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.RollbackException;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 
 @RequestScoped
@@ -61,119 +60,117 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     public static final String P_HEATMAP = "/heatmap";
 
     @Inject
-    GlobalGameState globalGameState;
+    protected GlobalMatchState globalGameState;
 
     @Inject
-    RestActionProcessor actionProcessor;
+    protected HeatmapQueueService heatmapQueueService;
 
     @Inject
-    HeatmapQueueService heatmapQueueService;
+    protected CustomRestRestResponse customRestRestResponse;
+
+    @Inject
+    protected MapScalingService mapScalingService;
 
     @POST
     @Secured
     @Path(P_NEW)
-    public Response newGame(String x) {
-        RestAction restAction = () -> {
-            JsonNode json = JsonUtil.fromJson(x);
-            JsonSchemaUtil.isValidOrThrow(json, JSON_SCHEMA);
-            Match match = new Match();
-            match.setMap(json.get("map").asText());
-            match.setNsServerName(json.get("ns_server_name").asText());
-            match.setGamemode(json.get("gamemode").asText());
-            match.setOwner(requestDetails.getUUId().orElse(null));
-            try {
-                entityRepository.create(match);
-            } catch (RollbackException ex) {
-                throw new InternalLogicException(ex);
-            }
-            LOGGER.info("New match registered {}", match.getId());
-            return parseEntityToResponse(match, Views.Public.class);
-        };
+    @ValidateJsonSchema("schemas/NewMatch.json")
+    public Response newGame(JsonNode jsonNode) {
+        Match match = new Match();
+        match.setMap(jsonNode.get("map").asText());
+        match.setNsServerName(jsonNode.get("ns_server_name").asText());
+        match.setGamemode(jsonNode.get("gamemode").asText());
+        if (requestDetails.getUser().isPresent()) {
+            match.setOwner(requestDetails.getUser().get().getName());
+        }
+        if (mapScalingService.getMap(match.getMap()).isEmpty()) {
+            return responseGenerator.error(400, customRestRestResponse.getUnsupportedMap());
+        }
 
-        return actionProcessor.process(restAction);
+        try {
+            entityRepository.create(match);
+        } catch (RollbackException ex) {
+            throw new InternalLogicException(ex);
+        }
+        LOGGER.info("New match registered {}", match.getId());
+        return parseEntityToResponse(match, Views.Public.class);
     }
 
     @PUT
     @Secured
     @Path(P_END + "/{id}")
     public Response endGame(@PathParam("id") String id) {
-        RestAction restAction = () -> {
-            if (StringUtils.isEmpty(id)) {
-                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
+        if (StringUtils.isEmpty(id)) {
+            return responseGenerator.error(404, errorNotFound);
+        }
+        try {
+            Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
+            if (optMatch.isEmpty()) {
+                return responseGenerator.error(404, errorNotFound);
             }
-            try {
-                Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
-                if (optMatch.isEmpty()) {
-                    return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
-                }
-                Match match = optMatch.get();
-                if (!match.getIsRunning()) {
-                    return DefaultResponse.error(400, CustomRestRestResponse.E_MATCH_ALREADY_ENDED, requestDetails.getRequestContext());
-                }
-                match.setIsRunning(false);
-
-                entityRepository.edit(match);
-                globalGameState.removeGameState(match.getId());
-
-                LOGGER.info("Match finished {}", match.getId());
-                QueueableHeatmapInstruction queueableHeatmapInstruction = new QueueableHeatmapInstruction();
-                queueableHeatmapInstruction.setMatchId(id);
-                queueableHeatmapInstruction.setType(HeatmapType.PLAYER_POSITION);
-                LOGGER.info("Add match {} to queue for heatmap generation", match.getId());
-                heatmapQueueService.addToQueue(new QueueMessage(QueueableHeatmapInstruction.QUEUE_MESSAGE_TYPE, queueableHeatmapInstruction));
-                return parseEntityToResponse(match, Views.Public.class);
-            } catch (RollbackException ex) {
-                throw new InternalLogicException(ex);
-            } catch (IllegalArgumentException ex) {
-                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
+            Match match = optMatch.get();
+            if (!match.getIsRunning()) {
+                return responseGenerator.error(400, customRestRestResponse.getMatchAlreadyEnded());
             }
-        };
+            match.setIsRunning(false);
 
-        return actionProcessor.process(restAction);
+            entityRepository.edit(match);
+            globalGameState.removeGameState(match.getId());
+
+            LOGGER.info("Match finished {}", match.getId());
+            QueueableHeatmapInstruction queueableHeatmapInstruction = new QueueableHeatmapInstruction();
+            queueableHeatmapInstruction.setMatchId(id);
+            queueableHeatmapInstruction.setType(HeatmapType.PLAYER_POSITION);
+            LOGGER.info("Add match {} to queue for heatmap generation", match.getId());
+            heatmapQueueService.addToQueue(new QueueMessage(QueueableHeatmapInstruction.QUEUE_MESSAGE_TYPE, queueableHeatmapInstruction));
+            return parseEntityToResponse(match, Views.Public.class);
+        } catch (RollbackException ex) {
+            throw new InternalLogicException(ex);
+        } catch (IllegalArgumentException ex) {
+            return responseGenerator.error(404, errorNotFound);
+        }
     }
 
     @GET
     @Path(P_PLAYING)
     @Transactional
     public Response playing() {
-        RestAction restAction = () -> {
-            String result = JsonUtil.toJson(entityRepository.find(Q_ARE_PLAYING), Views.Public.class);
-            return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(result));
-        };
-        return actionProcessor.process(restAction);
+        String result = JsonUtil.toJson(entityRepository.find(Q_ARE_PLAYING), Views.Public.class);
+        return responseGenerator.success(JsonUtil.fromJson(result));
+    }
+
+    @GET
+    @Path("/{id}")
+    @Transactional
+    public Response match(@PathParam("id") String id) {
+        return super.getByPrimaryKey(id);
     }
 
     @GET
     @Path(P_STOPPED)
     @Transactional
     public Response stopped() {
-        RestAction restAction = () -> {
-            String result = JsonUtil.toJson(entityRepository.find(Q_STOPPLED_PLAYING), Views.Public.class);
-            return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromJson(result));
-        };
-        return actionProcessor.process(restAction);
+        String result = JsonUtil.toJson(entityRepository.find(Q_STOPPLED_PLAYING), Views.Public.class);
+        return responseGenerator.success(JsonUtil.fromJson(result));
     }
 
     @GET
     @Path(P_HEATMAP + "/{id}")
     @Transactional
     public Response getHeatmap(@PathParam("id") String id) {
-        RestAction restAction = () -> {
-            if (StringUtils.isEmpty(id)) {
-                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
+        if (StringUtils.isEmpty(id)) {
+            return responseGenerator.error(404, errorNotFound);
+        }
+        try {
+            Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
+            if (optMatch.isEmpty()) {
+                return responseGenerator.error(404, errorNotFound);
             }
-            try {
-                Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
-                if (optMatch.isEmpty()) {
-                    return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
-                }
 
-                return parseEntityToResponse(optMatch.get(), Views.Public.class);
-            } catch (IllegalArgumentException ex) {
-                return DefaultResponse.error(404, E_NOT_FOUND, requestDetails.getRequestContext());
-            }
-        };
-        return actionProcessor.process(restAction);
+            return parseEntityToResponse(optMatch.get(), Views.Public.class);
+        } catch (IllegalArgumentException ex) {
+            return responseGenerator.error(404, errorNotFound);
+        }
     }
 
     @Override

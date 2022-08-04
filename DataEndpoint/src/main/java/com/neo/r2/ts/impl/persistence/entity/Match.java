@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
-import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,14 +26,13 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
     public static final String C_OWNER = "owner";
 
     @Id
-    @Type(type = "uuid-char")
     @GeneratedValue
     @Column(name = DataBaseEntity.C_ID)
         @JsonView(Views.Public.class)
     private UUID id;
 
     @Column(name = C_IS_PLAYING, nullable = false)
-        @JsonView(Views.Internal.class)
+        @JsonView(Views.Public.class)
     private boolean isRunning = true;
 
     @Column(name = C_NS_SERVER_NAME, nullable = false)
@@ -54,7 +53,7 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
 
     @Column(name = C_OWNER)
         @JsonView(Views.Owner.class)
-    private UUID owner;
+    private String owner;
 
     @OneToMany(mappedBy = TABLE_NAME, orphanRemoval = true)
         @JsonView(Views.Public.class)
@@ -108,7 +107,7 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
         this.startDate = startDate;
     }
 
-    public void setOwner(UUID matchOwner) {
+    public void setOwner(String matchOwner) {
         this.owner = matchOwner;
     }
 

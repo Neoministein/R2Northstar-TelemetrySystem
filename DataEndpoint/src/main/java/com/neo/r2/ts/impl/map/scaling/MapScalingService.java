@@ -1,13 +1,9 @@
 package com.neo.r2.ts.impl.map.scaling;
 
-import com.neo.util.common.impl.exception.InternalLogicException;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @ApplicationScoped
 public class MapScalingService {
@@ -41,16 +37,12 @@ public class MapScalingService {
         GAME_MAPS.put("mp_wargames",            new GameMap("mp_wargames",GameMap.MapType.MP, new MapScale(5923,5105,9.5)));
     }
 
-    public GameMap getMap(String map) {
-        GameMap mapScale = GAME_MAPS.get(map);
-        if (mapScale != null) {
-            return mapScale;
-        }
-        throw new InternalLogicException("Unsupported map");
+    public Optional<GameMap> getMap(String map) {
+        return Optional.ofNullable(GAME_MAPS.get(map));
     }
 
-    public MapScale getMapScale(String map) {
-        return getMap(map).getMapScale();
+    public Optional<MapScale> getMapScale(String map) {
+        return Optional.ofNullable(getMap(map).orElse(null).scale());
     }
 
     public List<GameMap> getMaps() {

@@ -1,31 +1,29 @@
 package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
-import com.neo.util.common.api.json.Views;
-import com.neo.util.common.impl.exception.InternalLogicException;
-import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.r2.ts.impl.map.heatmap.HeatmapGeneratorImpl;
 import com.neo.r2.ts.impl.map.scaling.GameMap;
 import com.neo.r2.ts.impl.map.scaling.MapScalingService;
 import com.neo.r2.ts.impl.persistence.entity.Heatmap;
-import com.neo.r2.ts.impl.security.Secured;
-import com.neo.util.framework.api.connection.RequestDetails;
+import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
+import com.neo.util.common.api.json.Views;
+import com.neo.util.common.impl.exception.InternalLogicException;
+import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.entity.EntityQuery;
 import com.neo.util.framework.api.persistence.entity.EntityRepository;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
-import com.neo.util.framework.rest.api.RestAction;
-import com.neo.util.framework.rest.impl.DefaultResponse;
-import com.neo.util.framework.rest.impl.RestActionProcessor;
+import com.neo.util.framework.rest.api.response.ResponseGenerator;
+import com.neo.util.framework.rest.api.security.Secured;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RequestScoped
 @Path(MapResource.RESOURCE_LOCATION)
@@ -35,97 +33,82 @@ public class MapResource {
     public static final String RESOURCE_LOCATION = "api/v1/map/";
 
     @Inject
-    RequestDetails requestDetails;
+    protected EntityRepository entityRepository;
 
     @Inject
-    EntityRepository entityRepository;
+    protected ResponseGenerator responseGenerator;
 
     @Inject
-    MapScalingService mapScalingService;
+    protected CustomRestRestResponse customRestRestResponse;
 
     @Inject
-    HeatmapGeneratorImpl heatmapGenerator;
+    protected MapScalingService mapScalingService;
 
     @Inject
-    RestActionProcessor actionProcessor;
+    protected HeatmapGeneratorImpl heatmapGenerator;
 
     @GET
     public Response get() {
-        RestAction restAction = () -> {
-            try {
-                List<GameMap> gameMaps = mapScalingService.getMaps();
-                ObjectNode resultData = JsonUtil.emptyObjectNode();
-                resultData.set("hits",JsonUtil.fromPojo(gameMaps));
-                resultData.put("hitCount", gameMaps.size());
+        try {
+            List<GameMap> gameMaps = mapScalingService.getMaps();
+            ObjectNode resultData = JsonUtil.emptyObjectNode();
+            resultData.set("hits",JsonUtil.fromPojo(gameMaps));
+            resultData.put("hitCount", gameMaps.size());
 
-                return DefaultResponse.success(requestDetails.getRequestContext(),resultData);
-            } catch (InternalLogicException ex) {
-                return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
-            }
-        };
-        return actionProcessor.process(restAction);
+            return responseGenerator.success(resultData);
+        } catch (InternalLogicException ex) {
+            return responseGenerator.error(400, customRestRestResponse.getUnsupportedMap());
+        }
     }
 
     @GET
     @Path("{map}")
     public Response get(@PathParam("map") String map) {
-        RestAction restAction = () -> {
-            try {
-                return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromPojo(mapScalingService.getMap(map)));
-            } catch (InternalLogicException ex) {
-                return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
-            }
-        };
-        return actionProcessor.process(restAction);
+        Optional<GameMap> optionalGameMap = mapScalingService.getMap(map);
+        if (optionalGameMap.isPresent()) {
+            return responseGenerator.success(JsonUtil.fromPojo(optionalGameMap.get()));
+        }
+        return responseGenerator.error(400, customRestRestResponse.getUnsupportedMap());
     }
 
     @GET
-    @Path("scaling/{map}")
+    @Path("{map}/scale")
     public Response getScaling(@PathParam("map") String map) {
-        RestAction restAction = () -> {
-            try {
-                return DefaultResponse.success(requestDetails.getRequestContext(), JsonUtil.fromPojo(mapScalingService.getMapScale(map)));
-            } catch (InternalLogicException ex) {
-                return DefaultResponse.error(400, CustomRestRestResponse.E_UNSUPPORTED_MAP, requestDetails.getRequestContext());
-            }
-        };
-        return actionProcessor.process(restAction);
+        try {
+            return responseGenerator.success(JsonUtil.fromPojo(mapScalingService.getMapScale(map)));
+        } catch (InternalLogicException ex) {
+            return responseGenerator.error(400, customRestRestResponse.getUnsupportedMap());
+        }
     }
 
     @GET
-    @Path("heatmap/{map}")
+    @Path("{map}/heatmap")
     public Response getHeatmapData(@PathParam("map") String map) {
-        RestAction restAction = () -> {
-            try {
-                EntityQuery<Heatmap> heatmapEntityQuery = new EntityQuery<>(
-                        Heatmap.class,
-                        0,
-                        1,
-                        List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map),
-                                new ExplicitSearchCriteria(Heatmap.C_TYPE, HeatmapType.FULL_MAP_AGGREGATION)),
-                        Map.of(AuditableDataBaseEntity.C_UPDATED_ON, false));
+        try {
+            EntityQuery<Heatmap> heatmapEntityQuery = new EntityQuery<>(
+                    Heatmap.class,
+                    0,
+                    1,
+                    List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map),
+                            new ExplicitSearchCriteria(Heatmap.C_TYPE, HeatmapType.FULL_MAP_AGGREGATION)),
+                    Map.of(AuditableDataBaseEntity.C_UPDATED_ON, false));
 
-                String result = JsonUtil.toJson(entityRepository.find(heatmapEntityQuery), Views.Public.class);
-                return DefaultResponse.success(this.requestDetails.getRequestContext(), JsonUtil.fromJson(result));
-            } catch (InternalLogicException ex) {
-                return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
-            }
-        };
-        return actionProcessor.process(restAction);
+            String result = JsonUtil.toJson(entityRepository.find(heatmapEntityQuery), Views.Public.class);
+            return responseGenerator.success(JsonUtil.fromJson(result));
+        } catch (InternalLogicException ex) {
+            return responseGenerator.error(503, customRestRestResponse.getService());
+        }
     }
 
     @POST
     @Secured
-    @Path("heatmap/{map}")
+    @Path("{map}/heatmap")
     public Response createHeatmapData(@PathParam("map") String map) {
-        RestAction restAction = () -> {
-            try {
-                String result = JsonUtil.toJson(heatmapGenerator.calculateMap(map), Views.Public.class);
-                return DefaultResponse.success(this.requestDetails.getRequestContext(), JsonUtil.fromJson(result));
-            } catch (InternalLogicException ex) {
-                return DefaultResponse.error(503, CustomRestRestResponse.E_SERVICE,requestDetails.getRequestContext());
-            }
-        };
-        return actionProcessor.process(restAction);
+        try {
+            String result = JsonUtil.toJson(heatmapGenerator.calculateMap(map), Views.Public.class);
+            return responseGenerator.success(JsonUtil.fromJson(result));
+        } catch (InternalLogicException ex) {
+            return responseGenerator.error(503, customRestRestResponse.getService());
+        }
     }
 }

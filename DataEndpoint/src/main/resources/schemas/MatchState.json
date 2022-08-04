@@ -181,7 +181,7 @@
             ]
           }
         },
-        "playerKilled": {
+        "entityKilled": {
           "type": "array",
           "items": {
             "type": "object",
@@ -194,12 +194,20 @@
               },
               "weapon": {
                 "type": "string"
+              },
+              "isAttackerPlayer": {
+                "type": "boolean"
+              },
+              "isVictimPlayer": {
+                "type": "boolean"
               }
             },
             "required": [
               "attackerId",
               "victimId",
-              "weapon"
+              "weapon",
+              "isAttackerPlayer",
+              "isVictimPlayer"
             ]
           }
         },
@@ -325,7 +333,7 @@
       "required": [
         "playerConnect",
         "playerDisconnect",
-        "playerKilled",
+        "entityKilled",
         "playerRespawned",
         "pilotBecomesTitan",
         "titanBecomesPilot",
@@ -334,6 +342,104 @@
         "playerDoubleJump",
         "playerMantle"
       ]
+    },
+    "npcs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entityId": {
+            "type": "string"
+          },
+          "team": {
+            "type": "string"
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "rotation": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "velocity": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "titanClass": {
+            "type": "string"
+          },
+          "health": {
+            "type": "integer"
+          },
+          "npcClass": {
+            "type": "string"
+          },
+          "primary": {
+            "type": "string"
+          },
+          "secondary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "entityId",
+          "team",
+          "position",
+          "rotation",
+          "velocity",
+          "titanClass",
+          "health",
+          "npcClass",
+          "primary",
+          "secondary"
+        ]
+      }
     }
   },
   "required": [
@@ -341,6 +447,7 @@
     "map",
     "timePassed",
     "players",
-    "events"
+    "events",
+    "npcs"
   ]
 }

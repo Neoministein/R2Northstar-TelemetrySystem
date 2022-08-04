@@ -1,14 +1,41 @@
 package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.util.framework.rest.impl.DefaultResponse;
+import com.neo.util.framework.rest.api.response.ResponseGenerator;
 
-public final class CustomRestRestResponse {
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-    public static final ObjectNode E_UNSUPPORTED_MAP =  DefaultResponse.errorObject("tmly/000","Unknown or unsupported map");
-    public static final ObjectNode E_MATCH_ALREADY_ENDED = DefaultResponse.errorObject("tmly/000","Match has already ended");
+@ApplicationScoped
+public class CustomRestRestResponse {
 
-    public static final ObjectNode E_SERVICE = DefaultResponse.errorObject("svc/000", "Internal service not available");
+    protected final ObjectNode unsupportedMap;
+    protected final ObjectNode matchAlreadyEnded;
 
-    private CustomRestRestResponse(){}
+    protected final ObjectNode service;
+    protected final ObjectNode forbidden;
+
+    @Inject
+    public CustomRestRestResponse(ResponseGenerator responseGenerator) {
+        unsupportedMap = responseGenerator.errorObject("tmly/000","Unknown or unsupported map");
+        matchAlreadyEnded = responseGenerator.errorObject("tmly/000","Match has already ended");
+        service = responseGenerator.errorObject("svc/000", "Internal service not available");
+        forbidden = responseGenerator.errorObject("auth/000", "Unauthorized");
+    }
+
+    public ObjectNode getUnsupportedMap() {
+        return unsupportedMap;
+    }
+
+    public ObjectNode getMatchAlreadyEnded() {
+        return matchAlreadyEnded;
+    }
+
+    public ObjectNode getService() {
+        return service;
+    }
+
+    public ObjectNode getForbidden() {
+        return forbidden;
+    }
 }

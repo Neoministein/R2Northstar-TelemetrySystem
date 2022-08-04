@@ -9,11 +9,15 @@ services:
       POSTGRES_DB: R2-TS # The PostgreSQL default database (automatically created at first launch)
     ports: 
     - 5432:5432
-  r2-ts-active-mq:
-    image: rmohr/activemq:5.10.0
+  r2-ts-artemis:
+    image: quay.io/artemiscloud/activemq-artemis-broker
     ports:
-      - 8161:8161
-      - 61616:61616
+      - "8161:8161"
+      - "61616:61616"
+      - "5672:5672"
+    environment:
+      AMQ_USER: admin
+      AMQ_PASSWORD: admin
   r2-ts-es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
     container_name: elasticsearch

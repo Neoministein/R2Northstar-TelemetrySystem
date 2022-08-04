@@ -1,25 +1,35 @@
 package com.neo.r2.ts.impl.security;
 
 import com.neo.r2.ts.impl.persistence.entity.UserToken;
+import com.neo.util.framework.api.PriorityConstants;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.entity.EntityQuery;
 import com.neo.util.framework.api.persistence.entity.EntityRepository;
 import com.neo.util.framework.api.persistence.entity.EntityResult;
+import com.neo.util.framework.api.security.AuthenticationProvider;
+import com.neo.util.framework.api.security.AuthenticationScheme;
+import com.neo.util.framework.api.security.RolePrincipal;
+import com.neo.util.framework.api.security.credential.BearerCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Inject;
+import jakarta.security.enterprise.credential.Credential;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Alternative
+@Priority(PriorityConstants.APPLICATION)
 @ApplicationScoped
-public class AuthenticationService {
+public class BasicAuthenticationProvider implements AuthenticationProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthenticationProvider.class);
 
     protected static final EntityQuery<UserToken> ACTIVE_TOKENS = new EntityQuery<>(
             UserToken.class,
@@ -32,7 +42,7 @@ public class AuthenticationService {
     protected long lastCheck = 0;
 
     @Inject
-    EntityRepository entityRepository;
+    protected EntityRepository entityRepository;
 
     @PostConstruct
     public void init() {
@@ -47,21 +57,35 @@ public class AuthenticationService {
         lastCheck = System.currentTimeMillis();
     }
 
-    public Optional<UserToken> retrieveToken(String token) {
+
+    @Override
+    public Optional<RolePrincipal> authenticate(Credential credential) {
+        if (credential instanceof BearerCredentials) {
+            return authenticate(((BearerCredentials) credential).getToken());
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<String> getSupportedAuthenticationSchemes() {
+        return List.of(AuthenticationScheme.BEARER);
+    }
+
+    protected Optional<RolePrincipal> authenticate(String token) {
         if (tokenCache.containsKey(token)) {
             return Optional.of(tokenCache.get(token));
         }
-        return checkForNewKey(token);
+        return checkForNewKey((token));
     }
 
-    protected synchronized Optional<UserToken> checkForNewKey(String token) {
-        //There is a second contains since this method is synchronized and it could be added while the thread it waiting for the lock
+    protected synchronized Optional<RolePrincipal> checkForNewKey(String token) {
+        //There is a second contains since this method is synchronized, and it could be added while the thread it's waiting for the lock
         if (tokenCache.containsKey(token)) {
             return Optional.of(tokenCache.get(token));
         }
         if (lastCheck + TEN_SEC < System.currentTimeMillis()) {
             init();
-            return retrieveToken(token);
+            return authenticate(token);
         }
         return Optional.empty();
     }

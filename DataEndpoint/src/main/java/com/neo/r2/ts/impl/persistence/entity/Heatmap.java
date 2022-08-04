@@ -7,13 +7,11 @@ import com.neo.util.common.api.json.Views;
 import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = Heatmap.TABLE_NAME)
-@TypeDef(name = "jsonnode", typeClass = JsonNodeStringType.class)
 public class Heatmap extends AuditableDataBaseEntity implements DataBaseEntity {
 
     public static final String TABLE_NAME = "heatmap";
@@ -29,7 +27,7 @@ public class Heatmap extends AuditableDataBaseEntity implements DataBaseEntity {
         @JsonView(Views.Public.class)
     private Long id;
 
-    @Type(type = "jsonnode")
+    @Type(JsonNodeStringType.class)
     @Column(name = C_DATA, nullable = false, columnDefinition = "text")
         @JsonView(Views.Public.class)
     private JsonNode data;

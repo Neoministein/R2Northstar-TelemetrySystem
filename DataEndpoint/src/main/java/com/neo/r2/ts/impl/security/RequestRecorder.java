@@ -8,11 +8,11 @@ import com.neo.util.framework.api.persistence.search.SearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.ext.Provider;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class RequestRecorder implements ContainerResponseFilter {
@@ -34,7 +34,7 @@ public class RequestRecorder implements ContainerResponseFilter {
                 JsonNode responseBody = JsonUtil.fromJson((String) containerResponse.getEntity());
                 RequestLog.RequestSegments requestSegment = new RequestLog.RequestSegments();
                 requestSegment.setRequestId(requestSegment.getRequestId());
-                requestSegment.setOwner(requestDetails.getUUId().isPresent() ? requestDetails.getUUId().toString() : "");
+                requestSegment.setOwner(requestDetails.getUser().isPresent() ? requestDetails.getUser().get().getName() : "");
                 requestSegment.setRemoteAddress(requestSegment.getRemoteAddress());
                 requestSegment.setContext(requestDetails.getRequestContext().toString());
                 requestSegment.setStatus(responseBody.get("status").asText());
