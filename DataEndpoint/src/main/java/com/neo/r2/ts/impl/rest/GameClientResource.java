@@ -3,7 +3,6 @@ package com.neo.r2.ts.impl.rest;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.rest.api.response.ResponseGenerator;
-import com.neo.util.framework.rest.api.security.Secured;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
