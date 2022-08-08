@@ -72,14 +72,10 @@ public class HeatmapGeneratorImpl {
         if (match.isPresent()) {
             List<SearchCriteria> searchCriteriaList = new ArrayList<>();
             switch (heatmapType) {
-                case PLAYER_POSITION:
-                    searchCriteriaList.add(new ExplicitSearchCriteria(
-                            MatchEventSearchable.F_MATCH_ID, match.get().getId().toString()));
-                    break;
-                case FULL_MAP_AGGREGATION:
-                case CUSTOM:
-                default:
-                    throw new InternalLogicException("Unsupported heatmap type");
+                case PLAYER_POSITION ->
+                        searchCriteriaList.add(new ExplicitSearchCriteria(MatchEventSearchable.F_MATCH_ID, match.get().getId().toString()));
+                case FULL_MAP_AGGREGATION, CUSTOM, default ->
+                        throw new InternalLogicException("Unsupported heatmap type");
             }
 
             Heatmap heatmap = calculate(
@@ -111,9 +107,9 @@ public class HeatmapGeneratorImpl {
             ArrayNode resultArray = JsonUtil.emptyArrayNode();
             result.set("entries", resultArray);
 
-            long[] bounds = getMapBounds(searchCriteria, mapScale);
-            for (long x = bounds[0]; x < bounds[1]; x = x + resolution) {
-                for (long y = bounds[2]; y < bounds[3]; y = y + resolution) {
+            Bounds bounds = getMapBounds(searchCriteria, mapScale);
+            for (long x = bounds.xMin; x < bounds.xMax; x = x + resolution) {
+                for (long y = bounds.yMin; y < bounds.yMax; y = y + resolution) {
                     SearchQuery searchQuery = new SearchQuery(0);
                     List<SearchCriteria> entryCriteria = new ArrayList<>(searchCriteria);
                     entryCriteria.add(new LongRangeSearchCriteria(PLAYER_POS_X, mapScale.toGameScaleX(x),mapScale.toGameScaleX(x + PIXELS_PER_CALL) -1, false));
@@ -143,8 +139,7 @@ public class HeatmapGeneratorImpl {
         throw new InternalJsonException("A");
     }
 
-    protected long[] getMapBounds(List<SearchCriteria> searchCriteriaList, MapScale mapScale) {
-        long[] bounds = new long[4];
+    protected Bounds getMapBounds(List<SearchCriteria> searchCriteriaList, MapScale mapScale) {
         SearchQuery searchQuery = new SearchQuery(0);
         searchQuery.setFilters(searchCriteriaList);
         searchQuery.setAggregations(List.of(
@@ -154,15 +149,17 @@ public class HeatmapGeneratorImpl {
                         new SimpleFieldAggregation("yMax",PLAYER_POS_Y, SearchAggregation.AggregationType.MAX)));
 
         SearchResult searchResult = searchRepository.fetch("r2ts-match-event",searchQuery);
-        bounds[0] = mapScale.toMinimapScaleX(getCountFromResult(searchResult,"xMin"));
-        bounds[1] = mapScale.toMinimapScaleX(getCountFromResult(searchResult,"xMax"));
-        bounds[2] = mapScale.toMinimapScaleY(getCountFromResult(searchResult,"yMin"));
-        bounds[3] = mapScale.toMinimapScaleY(getCountFromResult(searchResult,"yMax"));
-
-        return bounds;
+        return new Bounds(
+                mapScale.toMinimapScaleX(getCountFromResult(searchResult,"xMin")),
+                mapScale.toMinimapScaleX(getCountFromResult(searchResult,"xMax")),
+                mapScale.toMinimapScaleY(getCountFromResult(searchResult,"yMin")),
+                mapScale.toMinimapScaleY(getCountFromResult(searchResult,"yMax"))
+        );
     }
 
     protected long getCountFromResult(SearchResult searchResult, String name) {
         return Math.round((double) ((SimpleAggregationResult) searchResult.getAggregations().get(name)).getValue());
     }
+
+    protected record Bounds(long xMin, long xMax, long yMin, long yMax){}
 }
