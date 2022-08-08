@@ -188,10 +188,10 @@ namespace CSNamedPipeServer
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: entityKilled: attackerId: " + cmd[1] + ", victimId: " + cmd[2] + ", damageType: " + cmd[3]);
 
-                        if (m_currentMatch.players.ContainsKey(cmd[2]))
+                        if (m_currentMatch.players.ContainsKey(cmd[4]))
                         {
-                            m_currentMatch.players[cmd[2]].isAlive = false;
-                            m_currentMatch.players[cmd[2]].isTitan = false;
+                            m_currentMatch.players[cmd[4]].isAlive = false;
+                            m_currentMatch.players[cmd[4]].isTitan = false;
                         }
                         m_currentInfo.events.entityKilled.Add(new Event_EntityKilled(cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]));
                         break;
