@@ -42,7 +42,7 @@ public class MapScalingService {
     }
 
     public Optional<MapScale> getMapScale(String map) {
-        return Optional.ofNullable(getMap(map).orElse(null).scale());
+        return getMap(map).map(GameMap::scale);
     }
 
     public List<GameMap> getMaps() {
