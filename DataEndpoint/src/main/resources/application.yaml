@@ -1,3 +1,5 @@
+r2ts:
+  shouldSaveNpcPosition: false
 elastic:
     nodes:
         - ${org.elastic.node.0}

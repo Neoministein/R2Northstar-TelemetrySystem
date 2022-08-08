@@ -7,6 +7,7 @@ import com.neo.r2.ts.impl.persistence.searchable.MatchEventSearchable;
 import com.neo.r2.ts.impl.persistence.searchable.MatchStateSearchable;
 import com.neo.r2.ts.impl.socket.MatchStateOutputSocket;
 import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.api.config.ConfigService;
 import com.neo.util.framework.api.persistence.search.SearchRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,6 +31,8 @@ public class MatchStateService {
             MatchEvent.MANTLE,
             MatchEvent.NEW_LOADOUT);
 
+    protected final boolean shouldSaveNpcPosition;
+
     @Inject
     protected SearchRepository searchRepository;
 
@@ -38,6 +41,11 @@ public class MatchStateService {
 
     @Inject
     protected MatchStateOutputSocket matchStateOutputSocket;
+
+    @Inject
+    public MatchStateService(ConfigService configService) {
+        shouldSaveNpcPosition = configService.get("r2ts").get("shouldSaveNpcPosition").asBoolean().orElse(false);
+    }
 
     public void updateGameState(JsonNode gameSate) {
         String matchId = gameSate.get("matchId").asText();
@@ -66,7 +74,9 @@ public class MatchStateService {
             npcs.put(npc.get(MatchStateSearchable.F_ENTITY_ID).asText(), npc);
             MatchEventSearchable matchEvent = new MatchEventSearchable(state, MatchEvent.NPC_POSITION);
             matchEvent.setEntity(npc);
-            matchEventList.add(matchEvent);
+            if (shouldSaveNpcPosition) {
+                matchEventList.add(matchEvent);
+            }
         }
 
         matchEventList.addAll(parseBasicEvents(players, state));
