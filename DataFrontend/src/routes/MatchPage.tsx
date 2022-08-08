@@ -111,7 +111,7 @@ export default function MatchPage() {
             npcDropshipOrange = p5Instance.loadImage('/img/icon/dropship-orange.png');
             npcDropshipGrey = p5Instance.loadImage('/img/icon/dropship-grey.png');
 
-            npcTitanBlue = p5Instance.loadImage('/img/icon/player-blue-npc-titan.png');
+            npcTitanBlue = p5Instance.loadImage('/img/icon/player-blue-titan-npc.png');
             npcTitanOrange = p5Instance.loadImage('/img/icon/player-orange-npc-titan.png');
             npcTitanGrey = p5Instance.loadImage('/img/icon/npc-titan-grey.png');
 
@@ -171,7 +171,7 @@ export default function MatchPage() {
             const npcIcon = getNpcIcon(npc.npcClass, npc.team)
             p5Instance.push()
             p5Instance.translate((npc.position.x + scale.xOffset) / scale.scale, (npc.position.y * -1 + scale.yOffset) / scale.scale);
-            if (npc.npcClass == "npc_titan") {
+            if (npc.npcClass == "npc_titan" || npc.npcClass == "npc_dropship") {
                 p5Instance.rotate(Math.PI / 180 * (90 - npc.rotation.y));
             }
             p5Instance.image(npcIcon, -(30 / imageScale), -(30 / imageScale),30 / imageScale,30 / imageScale);
@@ -180,7 +180,7 @@ export default function MatchPage() {
     }
 
     function getNpcIcon(npcClass: string, team : number) : p5.Image {
-        if (team == 1) {
+        if (team == 3) {
             switch (npcClass) {
                 case "npc_soldier":
                     return npcSoliderOrange;
