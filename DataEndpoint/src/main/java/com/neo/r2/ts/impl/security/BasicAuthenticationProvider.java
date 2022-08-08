@@ -60,8 +60,8 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Optional<RolePrincipal> authenticate(Credential credential) {
-        if (credential instanceof BearerCredentials) {
-            return authenticate(((BearerCredentials) credential).getToken());
+        if (credential instanceof BearerCredentials bearerCredentials) {
+            return authenticate((bearerCredentials).getToken());
         }
         return Optional.empty();
     }
