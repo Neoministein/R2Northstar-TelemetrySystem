@@ -2,11 +2,11 @@ package com.neo.r2.ts.impl.persistence.repository;
 
 import com.neo.util.framework.persistence.api.PersistenceContextService;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-@RequestScoped
+@ApplicationScoped
 public class DefaultPersistenceContext implements PersistenceContextService {
 
     @PersistenceContext(unitName = "mainPersistence")
