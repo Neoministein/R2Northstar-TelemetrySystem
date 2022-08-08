@@ -55,7 +55,7 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
         @JsonView(Views.Owner.class)
     private String owner;
 
-    @OneToMany(mappedBy = TABLE_NAME, orphanRemoval = true)
+    @OneToMany(mappedBy = TABLE_NAME, orphanRemoval = true, cascade = CascadeType.ALL)
         @JsonView(Views.Public.class)
     private List<Heatmap> heatmaps = new ArrayList<>();
 
@@ -109,6 +109,18 @@ public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
 
     public void setOwner(String matchOwner) {
         this.owner = matchOwner;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public List<Heatmap> getHeatmaps() {
+        return heatmaps;
+    }
+
+    public void setHeatmaps(List<Heatmap> heatmaps) {
+        this.heatmaps = heatmaps;
     }
 
     @Override
