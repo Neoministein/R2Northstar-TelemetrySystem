@@ -11,7 +11,6 @@ import com.neo.r2.ts.impl.persistence.entity.Match;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.StringUtils;
 import com.neo.util.common.impl.exception.InternalLogicException;
-import com.neo.util.common.impl.json.JsonSchemaUtil;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.entity.EntityQuery;
@@ -19,7 +18,6 @@ import com.neo.util.framework.api.queue.QueueMessage;
 import com.neo.util.framework.rest.api.parser.ValidateJsonSchema;
 import com.neo.util.framework.rest.api.security.Secured;
 import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
-import com.networknt.schema.JsonSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +36,6 @@ import java.util.*;
 public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchResource.class);
-
-    protected static final JsonSchema JSON_SCHEMA = JsonSchemaUtil.generateSchemaFromResource("schemas/NewMatch.json");
 
     protected static final EntityQuery<Match> Q_ARE_PLAYING = new EntityQuery<>(Match.class, 0,null,
             List.of(new ExplicitSearchCriteria(Match.C_IS_PLAYING,true)),
@@ -98,6 +94,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
 
     @PUT
     @Secured
+    @Transactional
     @Path(P_END + "/{id}")
     public Response endGame(@PathParam("id") String id) {
         if (StringUtils.isEmpty(id)) {
