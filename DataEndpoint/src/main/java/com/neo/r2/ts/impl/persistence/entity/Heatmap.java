@@ -2,7 +2,7 @@ package com.neo.r2.ts.impl.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.neo.r2.ts.impl.persistence.entity.mapper.JsonNodeStringType;
+import com.neo.r2.ts.impl.persistence.entity.mapper.JsonNodeStringJavaDescriptor;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 
@@ -26,7 +26,7 @@ public class Heatmap /* extends AuditableDataBaseEntity */ implements DataBaseEn
         @JsonView(Views.Public.class)
     private Long id;
 
-    @Type(JsonNodeStringType.class)
+    @Convert(converter = JsonNodeStringJavaDescriptor.class)
     @Column(name = C_DATA, nullable = false, columnDefinition = "text")
         @JsonView(Views.Public.class)
     private JsonNode data;
