@@ -43,7 +43,7 @@ public class MatchStateResource {
 
     @PUT
     @Secured
-    @ValidateJsonSchema("schemas/MatchState.json")
+    @ValidateJsonSchema("MatchState.json")
     public Response put(JsonNode matchState) {
         gameStateService.updateGameState(matchState);
         return responseGenerator.success();
