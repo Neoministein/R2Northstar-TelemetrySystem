@@ -37,9 +37,25 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ../services/esdata1:/usr/share/elasticsearch/data
+      - ../services/esdata:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+    networks:
+      - esnet
+  r2-ts-kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.3
+    volumes:
+      - ../services/kibanadata:/usr/share/kibana/data
+    ports:
+      - 5601:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=http://r2-ts-es01:9200
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
     networks:
       - esnet
 networks:
