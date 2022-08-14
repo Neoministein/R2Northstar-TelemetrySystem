@@ -5,7 +5,6 @@ import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.RandomString;
 import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 import com.neo.util.framework.api.security.RolePrincipal;
-import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 
 import jakarta.persistence.*;
 import javax.security.auth.Subject;
@@ -14,8 +13,8 @@ import java.util.*;
 @Entity
 @Table(name = UserToken.TABLE_NAME, indexes = {
         @Index(name = "key", columnList = UserToken.C_KEY, unique = true)})
-public class UserToken extends AuditableDataBaseEntity implements DataBaseEntity, RolePrincipal {
-
+public class UserToken /* extends AuditableDataBaseEntity */ implements DataBaseEntity, RolePrincipal {
+    //FIXME: Currently doesn't work because Request scope doesn't work in queue processing
     public static final String TABLE_NAME = "user_token";
 
     public static final String C_KEY = "key";

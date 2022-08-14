@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
-import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 
 import jakarta.persistence.*;
 
@@ -15,8 +14,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = Match.TABLE_NAME)
-public class Match extends AuditableDataBaseEntity implements DataBaseEntity {
-
+public class Match /* extends AuditableDataBaseEntity */ implements DataBaseEntity {
+    //FIXME: Currently doesn't work because Request scope doesn't work in queue processing
     public static final String TABLE_NAME = "match";
     public static final String C_IS_PLAYING = "isRunning";
     public static final String C_NS_SERVER_NAME = "nsServerName";
