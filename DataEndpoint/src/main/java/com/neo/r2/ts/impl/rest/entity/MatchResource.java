@@ -70,7 +70,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     @POST
     @Secured
     @Path(P_NEW)
-    @ValidateJsonSchema("schemas/NewMatch.json")
+    @ValidateJsonSchema("NewMatch.json")
     public Response newGame(JsonNode jsonNode) {
         Match match = new Match();
         match.setMap(jsonNode.get("map").asText());
@@ -98,12 +98,12 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     @Path(P_END + "/{id}")
     public Response endGame(@PathParam("id") String id) {
         if (StringUtils.isEmpty(id)) {
-            return responseGenerator.error(404, errorNotFound);
+            return responseGenerator.error(404, entityRestResponse.getNotFoundError());
         }
         try {
             Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
             if (optMatch.isEmpty()) {
-                return responseGenerator.error(404, errorNotFound);
+                return responseGenerator.error(404, entityRestResponse.getNotFoundError());
             }
             Match match = optMatch.get();
             if (!match.getIsRunning()) {
@@ -124,7 +124,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
         } catch (RollbackException ex) {
             throw new InternalLogicException(ex);
         } catch (IllegalArgumentException ex) {
-            return responseGenerator.error(404, errorNotFound);
+            return responseGenerator.error(404, entityRestResponse.getNotFoundError());
         }
     }
 
@@ -156,17 +156,17 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     @Transactional
     public Response getHeatmap(@PathParam("id") String id) {
         if (StringUtils.isEmpty(id)) {
-            return responseGenerator.error(404, errorNotFound);
+            return responseGenerator.error(404, entityRestResponse.getNotFoundError());
         }
         try {
             Optional<Match> optMatch = entityRepository.find(UUID.fromString(id), Match.class);
             if (optMatch.isEmpty()) {
-                return responseGenerator.error(404, errorNotFound);
+                return responseGenerator.error(404, entityRestResponse.getNotFoundError());
             }
 
             return parseEntityToResponse(optMatch.get(), Views.Public.class);
         } catch (IllegalArgumentException ex) {
-            return responseGenerator.error(404, errorNotFound);
+            return responseGenerator.error(404, entityRestResponse.getNotFoundError());
         }
     }
 
