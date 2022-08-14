@@ -167,7 +167,10 @@ namespace CSNamedPipeServer
                         // |2
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: GameFinished: matchId: " + m_currentMatch.matchId);
-                        EndMatch();
+                        if (m_currentMatch.isRunning)
+                        {
+                            EndMatch();    
+                        }
                         break;
                     case EventType.PlayerConnect: // 3
                         // |3|PlayerID|TeamID
@@ -384,6 +387,7 @@ namespace CSNamedPipeServer
         /// </summary>
         public void EndMatch()
         {
+            m_currentMatch.isRunning = false;
             m_closed = true;
             Task t1 = Task.Run(() => m_currentMatch.EndMatch().Wait());
         }
