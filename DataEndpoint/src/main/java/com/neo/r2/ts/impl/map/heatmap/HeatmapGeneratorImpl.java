@@ -10,6 +10,7 @@ import com.neo.r2.ts.impl.persistence.entity.Heatmap;
 import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.r2.ts.impl.persistence.entity.Match;
 import com.neo.r2.ts.impl.persistence.searchable.MatchEventSearchable;
+import com.neo.util.common.impl.StopWatch;
 import com.neo.util.common.impl.exception.InternalJsonException;
 import com.neo.util.common.impl.exception.InternalLogicException;
 import com.neo.util.common.impl.json.JsonUtil;
@@ -41,7 +42,7 @@ public class HeatmapGeneratorImpl {
 
     protected static final int PIXELS_PER_CALL = 4;
 
-    protected static final SimpleFieldAggregation COUNT_AGGREGATION = new SimpleFieldAggregation(COUNT, MatchEventSearchable.F_MATCH_ID, AbstractSearchAggregation.AggregationType.COUNT);
+    protected static final SimpleFieldAggregation COUNT_AGGREGATION = new SimpleFieldAggregation(COUNT, MatchEventSearchable.F_MATCH_ID, SimpleFieldAggregation.Type.COUNT);
 
     @Inject
     protected EntityRepository repository;
@@ -116,18 +117,30 @@ public class HeatmapGeneratorImpl {
             for (long x = bounds.xMin; x < bounds.xMax; x = x + resolution) {
                 SearchQuery searchQuery = new SearchQuery(0);
                 searchQuery.setFilters(searchCriteria);
-                List<CriteriaAggregation.KeyedCriteria> keyedCriteria = new ArrayList<>();
+                Map<String, SearchCriteria> criteriaMap = new HashMap<>();
                 searchQuery.setAggregations(List.of(COUNT_AGGREGATION));
                 for (long y = bounds.yMin; y < bounds.yMax; y = y + resolution) {
                     CombinedSearchCriteria criteria = new CombinedSearchCriteria(
                             new LongRangeSearchCriteria(PLAYER_POS_X, mapScale.toGameScaleX(x),mapScale.toGameScaleX(x + PIXELS_PER_CALL) -1, false),
                             new LongRangeSearchCriteria(PLAYER_POS_Y,mapScale.toGameScaleY(y),mapScale.toGameScaleY(y + PIXELS_PER_CALL) -1, false)
                     );
-                    keyedCriteria.add(new CriteriaAggregation.KeyedCriteria(y + "", criteria));
+                    criteriaMap.put(Long.toString(y), criteria);
                 }
-                searchQuery.setAggregations(List.of(new CriteriaAggregation("test", keyedCriteria, COUNT_AGGREGATION)));
+                searchQuery.setAggregations(List.of(new CriteriaAggregation("test", criteriaMap, COUNT_AGGREGATION)));
                 SearchResult searchResult = searchRepository.fetch("r2ts-match-event",searchQuery);
-                LOGGER.info("{}", searchResult);
+                for (Map.Entry<String, Object> entry: ((CriteriaAggregationResult) searchResult.getAggregations().get("test")).getCriteriaResult().entrySet()) {
+                    long count = parseLongFromDouble(entry.getValue());
+                    if (count != 0) {
+                        ObjectNode node = JsonUtil.emptyObjectNode();
+                        node.put("x", mapScale.toMinimapFormatX(mapScale.toGameScaleX(x)));
+                        node.put("y", mapScale.toMinimapFormatY(mapScale.toGameScaleY(Long.parseLong(entry.getKey()))));
+                        node.put(COUNT, count);
+                        resultArray.add(node);
+                        if (heatmap.getHighestCount() < count) {
+                            heatmap.setHighestCount(count);
+                        }
+                    }
+                }
             }
             heatmap.setData(result);
             return heatmap;
@@ -140,10 +153,10 @@ public class HeatmapGeneratorImpl {
         SearchQuery searchQuery = new SearchQuery(0);
         searchQuery.setFilters(searchCriteriaList);
         searchQuery.setAggregations(List.of(
-                        new SimpleFieldAggregation("xMin",PLAYER_POS_X, AbstractSearchAggregation.AggregationType.MIN),
-                        new SimpleFieldAggregation("xMax",PLAYER_POS_X, AbstractSearchAggregation.AggregationType.MAX),
-                        new SimpleFieldAggregation("yMin",PLAYER_POS_Y, AbstractSearchAggregation.AggregationType.MIN),
-                        new SimpleFieldAggregation("yMax",PLAYER_POS_Y, AbstractSearchAggregation.AggregationType.MAX)));
+                        new SimpleFieldAggregation("xMin",PLAYER_POS_X, SimpleFieldAggregation.Type.MIN),
+                        new SimpleFieldAggregation("xMax",PLAYER_POS_X, SimpleFieldAggregation.Type.MAX),
+                        new SimpleFieldAggregation("yMin",PLAYER_POS_Y, SimpleFieldAggregation.Type.MIN),
+                        new SimpleFieldAggregation("yMax",PLAYER_POS_Y, SimpleFieldAggregation.Type.MAX)));
 
         SearchResult searchResult = searchRepository.fetch("r2ts-match-event",searchQuery);
         return new Bounds(
@@ -155,7 +168,11 @@ public class HeatmapGeneratorImpl {
     }
 
     protected long getCountFromResult(SearchResult searchResult, String name) {
-        return Math.round((double) ((SimpleAggregationResult) searchResult.getAggregations().get(name)).getValue());
+        return parseLongFromDouble(((SimpleAggregationResult) searchResult.getAggregations().get(name)).getValue());
+    }
+
+    protected long parseLongFromDouble(Object value) {
+        return Math.round((double) value);
     }
 
     protected record Bounds(long xMin, long xMax, long yMin, long yMax){}
