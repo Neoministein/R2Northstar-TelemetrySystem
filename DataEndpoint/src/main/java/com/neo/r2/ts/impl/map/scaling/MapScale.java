@@ -1,16 +1,6 @@
 package com.neo.r2.ts.impl.map.scaling;
 
-public class MapScale {
-
-    private final long xOffset;
-    private final long yOffset;
-    private final double scale;
-
-    public MapScale(long posX, long posY, double scale) {
-        this.xOffset = posX;
-        this.yOffset = posY;
-        this.scale = scale;
-    }
+public record MapScale(long xOffset, long yOffset, double scale) {
 
     public long getxOffset() {
         return xOffset;
