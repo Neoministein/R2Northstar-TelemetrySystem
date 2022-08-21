@@ -18,7 +18,7 @@ public class CustomRestRestResponse {
     @Inject
     public CustomRestRestResponse(ResponseGenerator responseGenerator) {
         unsupportedMap = responseGenerator.errorObject("tmly/000","Unknown or unsupported map");
-        matchAlreadyEnded = responseGenerator.errorObject("tmly/000","Match has already ended");
+        matchAlreadyEnded = responseGenerator.errorObject("tmly/001","Match has already ended");
         service = responseGenerator.errorObject("svc/000", "Internal service not available");
         forbidden = responseGenerator.errorObject("auth/000", "Unauthorized");
     }
