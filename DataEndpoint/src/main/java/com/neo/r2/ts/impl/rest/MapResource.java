@@ -11,12 +11,13 @@ import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.exception.InternalLogicException;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
+import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 import com.neo.util.framework.api.persistence.entity.EntityQuery;
 import com.neo.util.framework.api.persistence.entity.EntityRepository;
-import com.neo.util.framework.persistence.impl.AuditableDataBaseEntity;
 import com.neo.util.framework.rest.api.response.ResponseGenerator;
 import com.neo.util.framework.rest.api.security.Secured;
 
+import com.neo.util.framework.rest.impl.entity.EntityRestResponse;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -38,6 +39,9 @@ public class MapResource {
 
     @Inject
     protected ResponseGenerator responseGenerator;
+
+    @Inject
+    protected EntityRestResponse entityRestResponse;
 
     @Inject
     protected CustomRestRestResponse customRestRestResponse;
@@ -92,10 +96,13 @@ public class MapResource {
                     1,
                     List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map),
                             new ExplicitSearchCriteria(Heatmap.C_TYPE, HeatmapType.FULL_MAP_AGGREGATION)),
-                    Map.of(AuditableDataBaseEntity.C_UPDATED_ON, false));
-
-            String result = JsonUtil.toJson(entityRepository.find(heatmapEntityQuery), Views.Public.class);
-            return responseGenerator.success(JsonUtil.fromJson(result));
+                    Map.of(DataBaseEntity.C_ID, false));
+            Optional<Heatmap> result = entityRepository.find(heatmapEntityQuery).getFirst();
+            if (result.isPresent()) {
+                String jsonString = JsonUtil.toJson(result.get(), Views.Public.class);
+                return responseGenerator.success(JsonUtil.fromJson(jsonString));
+            }
+            return responseGenerator.error(404, entityRestResponse.getNotFoundError());
         } catch (InternalLogicException ex) {
             return responseGenerator.error(503, customRestRestResponse.getService());
         }
