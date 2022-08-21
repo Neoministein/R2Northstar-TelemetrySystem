@@ -31,7 +31,7 @@ export class GameMapService {
     }
 
     getMapHeatmap(map : string) : Promise<HeatmapEntity> {
-        return fetch(AppConfig.apiUrl + "/map/" + map + "/heatmap").then(response => response.json()).then(d => d.data.hits);
+        return fetch(AppConfig.apiUrl + "/map/" + map + "/heatmap").then(response => response.json()).then(d => d.data);
     }
 
     getAllMaps() : Promise<GameMapEntity[]> {
