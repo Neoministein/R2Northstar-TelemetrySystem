@@ -7,7 +7,8 @@
       "maxLength": 36
     },
     "map": {
-      "type": "string"
+      "type": "string",
+      "maxLength": 256
     },
     "timePassed": {
       "type": "integer"
@@ -18,13 +19,15 @@
         "type": "object",
         "properties": {
           "entityId": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 256
           },
           "team": {
             "type": "integer"
           },
           "titanClass": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 256
           },
           "position": {
             "type": "object",
@@ -39,6 +42,7 @@
                 "type": "integer"
               }
             },
+            "additionalProperties": false,
             "required": [
               "x",
               "y",
@@ -58,6 +62,7 @@
                 "type": "integer"
               }
             },
+            "additionalProperties": false,
             "required": [
               "x",
               "y",
@@ -77,6 +82,7 @@
                 "type": "integer"
               }
             },
+            "additionalProperties": false,
             "required": [
               "x",
               "y",
@@ -108,18 +114,23 @@
             "type": "object",
             "properties": {
               "primary": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "secondary": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "weapon3": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "special": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               }
             },
+            "additionalProperties": false,
             "required": [
               "primary",
               "secondary",
@@ -128,6 +139,7 @@
             ]
           }
         },
+        "additionalProperties": false,
         "required": [
           "entityId",
           "team",
@@ -155,12 +167,14 @@
             "type": "object",
             "properties": {
               "entityId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "team": {
                 "type": "integer"
               }
             },
+            "additionalProperties": false,
             "required": [
               "entityId",
               "team"
@@ -173,9 +187,11 @@
             "type": "object",
             "properties": {
               "entityId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               }
             },
+            "additionalProperties": false,
             "required": [
               "entityId"
             ]
@@ -187,13 +203,16 @@
             "type": "object",
             "properties": {
               "attackerId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "victimId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "damageType": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "isAttackerPlayer": {
                 "type": "boolean"
@@ -202,6 +221,7 @@
                 "type": "boolean"
               }
             },
+            "additionalProperties": false,
             "required": [
               "attackerId",
               "victimId",
@@ -217,9 +237,11 @@
             "type": "object",
             "properties": {
               "entityId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               }
             },
+            "additionalProperties": false,
             "required": [
               "entityId"
             ]
@@ -231,12 +253,15 @@
             "type": "object",
             "properties": {
               "entityId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "titanClass": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               }
             },
+            "additionalProperties": false,
             "required": [
               "entityId",
               "titanClass"
@@ -249,9 +274,11 @@
             "type": "object",
             "properties": {
               "entityId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               }
             },
+            "additionalProperties": false,
             "required": [
               "entityId"
             ]
@@ -263,21 +290,27 @@
             "type": "object",
             "properties": {
               "entityId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "primary": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "secondary": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "weapon3": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               },
               "special": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               }
             },
+            "additionalProperties": false,
             "required": [
               "entityId",
               "primary",
@@ -293,9 +326,11 @@
             "type": "object",
             "properties": {
               "entityId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               }
             },
+            "additionalProperties": false,
             "required": [
               "entityId"
             ]
@@ -307,9 +342,11 @@
             "type": "object",
             "properties": {
               "entityId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               }
             },
+            "additionalProperties": false,
             "required": [
               "entityId"
             ]
@@ -321,15 +358,18 @@
             "type": "object",
             "properties": {
               "entityId": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 256
               }
             },
+            "additionalProperties": false,
             "required": [
               "entityId"
             ]
           }
         }
       },
+      "additionalProperties": false,
       "required": [
         "playerConnect",
         "playerDisconnect",
@@ -349,7 +389,8 @@
         "type": "object",
         "properties": {
           "entityId": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 256
           },
           "team": {
             "type": "integer"
@@ -367,6 +408,7 @@
                 "type": "integer"
               }
             },
+            "additionalProperties": false,
             "required": [
               "x",
               "y",
@@ -386,6 +428,7 @@
                 "type": "integer"
               }
             },
+            "additionalProperties": false,
             "required": [
               "x",
               "y",
@@ -405,6 +448,7 @@
                 "type": "integer"
               }
             },
+            "additionalProperties": false,
             "required": [
               "x",
               "y",
@@ -412,21 +456,26 @@
             ]
           },
           "titanClass": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 256
           },
           "health": {
             "type": "integer"
           },
           "npcClass": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 256
           },
           "primary": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 256
           },
           "secondary": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 256
           }
         },
+        "additionalProperties": false,
         "required": [
           "entityId",
           "team",
@@ -439,6 +488,7 @@
       }
     }
   },
+  "additionalProperties": false,
   "required": [
     "matchId",
     "map",
