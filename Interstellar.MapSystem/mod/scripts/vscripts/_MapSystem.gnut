@@ -5,28 +5,40 @@ struct {
     bool isThreadRunning = false
 } file
 
+bool isMatchRunning = false
+
 void function MapSystem_Init()
 {
     AddCallback_GameStateEnter( eGameState.WaitingForPlayers, OnWaitingForPlayers )
     AddCallback_GameStateEnter( eGameState.Playing, OnGameStartePlay )
     AddCallback_GameStateEnter( eGameState.Postmatch, OnGameFinished )
-    
+    AddCallback_GameStateEnter( eGameState.Prematch, PrintDebug )
+
 
     AddCallback_OnClientConnected( Map_PlayerConnect )
     AddCallback_OnClientDisconnected( Map_PlayerDisconnect )
 
     AddCallback_OnPilotBecomesTitan( Map_PilotBecomesTitan )
     AddCallback_OnTitanBecomesPilot( Map_TitanBecomesPilot )
-    AddCallback_OnPlayerKilled( Map_PlayerKilled )
+
+    AddCallback_OnPlayerKilled( Map_EntityKilled )
+    AddCallback_OnNPCKilled( Map_EntityKilled )
+
+    AddCallback_NPCLeeched( Map_OnSpectreLeeched )
 
     AddCallback_OnPlayerRespawned( Map_PlayerRespawned )
 
     AddCallback_OnPlayerGetsNewPilotLoadout( Map_OnPlayerGetsNewPilotLoadout )
 }
 
-void function OnWaitingForPlayers() 
+void function OnWaitingForPlayers()
 {
-    print( "|1|" + GetMapName())
+    if ( isMatchRunning ) {
+        NSEndMatch( "|2" )
+        isMatchRunning = false
+    }
+    NSStartNewMatch( "|1|" + GetMapName() + "|" + GameRules_GetGameMode() )
+    isMatchRunning = true
 }
 
 
@@ -42,12 +54,13 @@ void function OnGameFinished()
 {
     file.isThreadRunning = false
     wait 0.1
-    print( "|2" )
+    NSEndMatch( "|2" )
+    isMatchRunning = false
 }
 
-void function Map_PlayerConnect( entity player ) 
+void function Map_PlayerConnect( entity player )
 {
-	print( "|3|" + player.GetUID() + "|" + player.GetTeam() )
+	NSSendToNamedPipe( "|3|" + player.GetPlayerName() + "|" + player.GetTeam() )
 
     AddPlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
     AddPlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
@@ -71,9 +84,9 @@ void function Map_PlayerConnect( entity player )
     AddButtonReleasedPlayerInputCallback( player, 4, Map_OnPlayerEndCrouch)
 }
 
-void function Map_PlayerDisconnect( entity player ) 
+void function Map_PlayerDisconnect( entity player )
 {
-	print( "|4|" + player.GetUID() )
+	NSSendToNamedPipe( "|4|" + player.GetPlayerName() )
 
     RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
     RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
@@ -93,133 +106,277 @@ void function Map_PlayerDisconnect( entity player )
     RemoveButtonPressedPlayerInputCallback( player, 1, Map_EndShoot)
 }
 
-void function printDynamicInfos() 
+void function printDynamicInfos()
 {
-	while ( file.isThreadRunning ) 
+	while ( file.isThreadRunning )
 	{
+        GetNpcData()
+
         array<entity> players = GetPlayerArray()
         string infos = "|0|" + players.len()
-		foreach(entity player in GetPlayerArray()) 
+		foreach(entity player in GetPlayerArray())
 		{
-			infos += "|" + player.GetUID()
+			infos += "|" + player.GetPlayerName()
 			infos += "|" + player.GetOrigin()
 			infos += "|" + player.GetAngles()
 			infos += "|" + player.GetVelocity()
-            //infos += "|" + player.GetActiveWeapon().GetWeaponClassName()
 			infos += "|" + (100.0 * player.GetHealth() / player.GetMaxHealth())
 		}
-        print( infos )
+        NSSendToNamedPipe( infos )
 		wait 0.001
 	}
 }
 
-void function Map_PlayerKilled( entity victim, entity attacker, var damageInfo ) 
+void function GetNpcData()
 {
-    string infos = "|5"
-    try {
-        infos += "|" + attacker.GetUID()
-    } catch (exception) {
-        infos += "|UNKOWN"
-    }
-    infos += "|" + victim.GetUID()
-    infos += "|" + DamageInfo_GetDamageWeaponName( damageInfo )
-    print( infos )
+    string entityInfo = ""
+    int numberOfEntities = 0;
+    array<entity> npc = GetNPCArrayByClass( "npc_soldier" )
+
+    numberOfEntities += npc.len()
+    entityInfo += GetNpcClassDataWithWeapon( npc, "npc_soldier" )
+
+    npc = GetNPCArrayByClass( "npc_spectre" )
+    numberOfEntities += npc.len()
+    entityInfo += GetNpcClassDataWithWeapon( npc, "npc_spectre" )
+
+    npc = GetNPCArrayByClass( "npc_stalker" )
+    numberOfEntities += npc.len()
+    entityInfo += GetNpcClassDataWithWeapon( npc, "npc_stalker" )
+    NSSendToNamedPipe("|31|" + numberOfEntities + entityInfo)
+
+
+    entityInfo = ""
+    numberOfEntities = 0;
+    npc = GetNPCArrayByClass( "npc_super_spectre" )
+    numberOfEntities += npc.len()
+    entityInfo += GetNpcClassData( npc, "npc_super_spectre" )
+
+    npc = GetNPCArrayByClass( "npc_drone" )
+    numberOfEntities += npc.len()
+    entityInfo += GetNpcClassData( npc, "npc_drone" )
+
+    npc = GetNPCArrayByClass( "npc_dropship" )
+    numberOfEntities += npc.len()
+    entityInfo += GetNpcClassData( npc, "npc_dropship" )
+
+    npc = GetNPCArrayByClass( "npc_turret_sentry" )
+    numberOfEntities += npc.len()
+    entityInfo += GetNpcClassData( npc, "npc_turret_sentry" )
+
+    npc = GetNPCArrayByClass( "npc_turret_mega" )
+    numberOfEntities += npc.len()
+    entityInfo += GetNpcClassData( npc, "npc_turret_mega" )
+    NSSendToNamedPipe("|30|" + numberOfEntities + entityInfo)
+
+
+    entityInfo = ""
+    numberOfEntities = 0;
+    npc = GetNPCArrayByClass( "npc_titan" )
+    numberOfEntities += npc.len()
+    entityInfo += GetNpcTitanClassData( npc, "npc_titan" )
+
+    NSSendToNamedPipe("|32|" + numberOfEntities + entityInfo)
 }
 
-void function Map_PlayerRespawned( entity player ) 
+string function GetNpcClassData(array< entity > entities, string npcClass)
 {
-    print( "|6|" + player.GetUID() )
+    string info = ""
+	foreach ( ent in entities )
+	{
+        info += "|" + npcClass
+        info += "|" + ent.GetEncodedEHandle()
+        info += "|" + ent.GetTeam()
+        info += "|" + ent.GetOrigin()
+        info += "|" + ent.GetAngles()
+        info += "|" + ent.GetVelocity()
+        info += "|" + (100.0 * ent.GetHealth() / ent.GetMaxHealth())
+    }
+    return info;
+}
+
+string function GetNpcClassDataWithWeapon(array< entity > entities, string npcClass)
+{
+    string info = ""
+	foreach ( ent in entities )
+	{
+        info += "|" + npcClass
+        info += "|" + ent.GetEncodedEHandle()
+        info += "|" + ent.GetTeam()
+        info += "|" + ent.GetOrigin()
+        info += "|" + ent.GetAngles()
+        info += "|" + ent.GetVelocity()
+        info += "|" + (100.0 * ent.GetHealth() / ent.GetMaxHealth())
+        if (ent.GetMainWeapons().len() == 1)
+        {
+            info += "|" + ent.GetMainWeapons()[0] + "|-"
+        }
+        else if (ent.GetMainWeapons().len() == 2)
+        {
+            info += "|" + ent.GetMainWeapons()[0] + "|" + ent.GetMainWeapons()[1]
+        } else {
+            info += "|-|-"
+        }
+    }
+    return info;
+}
+
+string function GetNpcTitanClassData(array< entity > entities, string npcClass)
+{
+    string info = ""
+	foreach ( ent in entities )
+	{
+        info += "|" + npcClass
+        info += "|" + ent.GetEncodedEHandle()
+        info += "|" + ent.GetTeam()
+        info += "|" + ent.GetOrigin()
+        info += "|" + ent.GetAngles()
+        info += "|" + ent.GetVelocity()
+        info += "|" + (100.0 * ent.GetHealth() / ent.GetMaxHealth())
+        info += "|" + GetSoulTitanSubClass( ent.GetTitanSoul() )
+    }
+    return info;
+}
+
+void function Map_OnSpectreLeeched( entity spectre, entity player )
+{
+    string info = "|40"
+    info += "|" + player.GetPlayerName()
+    info += "|" + spectre.GetEncodedEHandle()
+    NSSendToNamedPipe( info )
+}
+
+void function Map_EntityKilled( entity victim, entity attacker, var damageInfo )
+{
+    string infos = "|5|" + attacker.IsPlayer()
+    if (attacker.IsPlayer()) {
+        infos += "|" + attacker.GetPlayerName()
+    }
+    else
+    {
+        try
+        {
+            infos += "|" + attacker.GetEncodedEHandle()
+        } catch (exception) {
+            infos += "|UNKOWN"
+        }
+    }
+    infos += "|" + victim.IsPlayer()
+    if (victim.IsPlayer()) {
+        infos += "|" + victim.GetPlayerName()
+    }
+    else
+    {
+        try {
+            infos += "|" + victim.GetEncodedEHandle()
+        } catch (exception) {
+            infos += "|UNKOWN"
+        }
+    }
+
+    infos += "|" + DamageInfo_GetDamageWeaponName( damageInfo )
+    NSSendToNamedPipe( infos )
+}
+
+void function Map_PlayerRespawned( entity player )
+{
+    NSSendToNamedPipe( "|6|" + player.GetPlayerName() )
 }
 
 void function Map_PilotBecomesTitan( entity player, entity titan )
 {
 	string infos = "|7"
-    infos += "|" + player.GetUID()
+    infos += "|" + player.GetPlayerName()
     infos += "|" + GetActiveTitanLoadout( player ).titanClass
-    print( infos )
+    NSSendToNamedPipe( infos )
 }
 
 void function Map_TitanBecomesPilot( entity player, entity titan )
 {
-    print( "|8|" + player.GetUID() )
+    NSSendToNamedPipe( "|8|" + player.GetPlayerName() )
 }
 
-void function Map_OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef newTitanLoadout ) 
+void function Map_OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef newTitanLoadout )
 {
     PilotLoadoutDef modifiedLoadout = GetActivePilotLoadout( player )
 
     string infos = "|9"
-	infos += "|" + player.GetUID()
+	infos += "|" + player.GetPlayerName()
 	infos += "|" + modifiedLoadout.primary
 	infos += "|" + modifiedLoadout.secondary
 	infos += "|" + modifiedLoadout.weapon3
     infos += "|" + modifiedLoadout.special
-    print( infos )
+    NSSendToNamedPipe( infos )
 }
 
-void function Map_OnPlayerBeginWallrun( entity player ) 
+void function Map_OnPlayerBeginWallrun( entity player )
 {
-    print( "|10|" + player.GetUID() + "|true" )
+    NSSendToNamedPipe( "|10|" + player.GetPlayerName() + "|true" )
 }
 
-void function Map_OnPlayerEndWallrun( entity player ) 
+void function Map_OnPlayerEndWallrun( entity player )
 {
-    print( "|10|" + player.GetUID() + "|false" )
+    NSSendToNamedPipe( "|10|" + player.GetPlayerName() + "|false" )
 }
 
-void function Map_StartShoot( entity player ) 
+void function Map_StartShoot( entity player )
 {
-    print( "|11|" + player.GetUID() + "|true" )
+    NSSendToNamedPipe( "|11|" + player.GetPlayerName() + "|true" )
 }
 
-void function Map_EndShoot( entity player ) 
+void function Map_EndShoot( entity player )
 {
-    print( "|11|" + player.GetUID() + "|false" )
+    NSSendToNamedPipe( "|11|" + player.GetPlayerName() + "|false" )
 }
 
 /**/
 
-void function Map_OnPlayerJump( entity player ) 
+void function Map_OnPlayerJump( entity player )
 {
-    print( "|12|" + player.GetUID() )
+    NSSendToNamedPipe( "|12|" + player.GetPlayerName() )
 }
 
-void function Map_OnPlayerDoubleJump( entity player ) 
+void function Map_OnPlayerDoubleJump( entity player )
 {
-    print( "|13|" + player.GetUID() )
+    NSSendToNamedPipe( "|13|" + player.GetPlayerName() )
 }
 
-void function Map_OnPlayerLeaveGround( entity player ) 
+void function Map_OnPlayerLeaveGround( entity player )
 {
-    print( "|14|" + player.GetUID() + "|true" )
+    NSSendToNamedPipe( "|14|" + player.GetPlayerName() + "|true" )
 }
 
-void function Map_OnPlayerTochGround( entity player ) 
+void function Map_OnPlayerTochGround( entity player )
 {
-    print( "|14|" + player.GetUID() + "|false" )
+    NSSendToNamedPipe( "|14|" + player.GetPlayerName() + "|false" )
 }
 
-void function Map_OnPlayerMantle( entity player ) 
+void function Map_OnPlayerMantle( entity player )
 {
-    print( "|15|" + player.GetUID() )
+    NSSendToNamedPipe( "|15|" + player.GetPlayerName() )
 }
 
-void function Map_OnPlayerBeginWallHang( entity player ) 
+void function Map_OnPlayerBeginWallHang( entity player )
 {
-    print( "|16|" + player.GetUID() + "|true" )
+    NSSendToNamedPipe( "|16|" + player.GetPlayerName() + "|true" )
 }
 
-void function Map_OnPlayerEndWallHang( entity player ) 
+void function Map_OnPlayerEndWallHang( entity player )
 {
-    print( "|16|" + player.GetUID() + "|false" )
+    NSSendToNamedPipe( "|16|" + player.GetPlayerName() + "|false" )
 }
 
-void function Map_OnPlayerBeginCrouch( entity player ) 
+void function Map_OnPlayerBeginCrouch( entity player )
 {
-    print( "|17|" + player.GetUID() + "|true" )
+    NSSendToNamedPipe( "|17|" + player.GetPlayerName() + "|true" )
 }
 
-void function Map_OnPlayerEndCrouch( entity player ) 
+void function Map_OnPlayerEndCrouch( entity player )
 {
-    print( "|17|" + player.GetUID() + "|false" )
+    NSSendToNamedPipe( "|17|" + player.GetPlayerName() + "|false" )
+}
+
+void function PrintDebug()
+{
+    NSSendToNamedPipe( "|99|DebugText" )
 }
