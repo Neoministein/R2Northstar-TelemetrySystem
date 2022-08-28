@@ -133,50 +133,50 @@ void function GetNpcData()
     int numberOfEntities = 0;
     array<entity> npc = GetNPCArrayByClass( "npc_soldier" )
 
-    numberOfEntities = npc.len()
+    numberOfEntities += npc.len()
     entityInfo += GetNpcClassDataWithWeapon( npc, "npc_soldier" )
 
     npc = GetNPCArrayByClass( "npc_spectre" )
-    numberOfEntities = npc.len()
+    numberOfEntities += npc.len()
     entityInfo += GetNpcClassDataWithWeapon( npc, "npc_spectre" )
 
     npc = GetNPCArrayByClass( "npc_stalker" )
-    numberOfEntities = npc.len()
+    numberOfEntities += npc.len()
     entityInfo += GetNpcClassDataWithWeapon( npc, "npc_stalker" )
-    NSSendToNamedPipe("|31|" + numberOfEntities + "|" + entityInfo)
+    NSSendToNamedPipe("|31|" + numberOfEntities + entityInfo)
 
 
     entityInfo = ""
     numberOfEntities = 0;
     npc = GetNPCArrayByClass( "npc_super_spectre" )
-    numberOfEntities = npc.len()
+    numberOfEntities += npc.len()
     entityInfo += GetNpcClassData( npc, "npc_super_spectre" )
 
     npc = GetNPCArrayByClass( "npc_drone" )
-    numberOfEntities = npc.len()
+    numberOfEntities += npc.len()
     entityInfo += GetNpcClassData( npc, "npc_drone" )
 
     npc = GetNPCArrayByClass( "npc_dropship" )
-    numberOfEntities = npc.len()
+    numberOfEntities += npc.len()
     entityInfo += GetNpcClassData( npc, "npc_dropship" )
 
     npc = GetNPCArrayByClass( "npc_turret_sentry" )
-    numberOfEntities = npc.len()
+    numberOfEntities += npc.len()
     entityInfo += GetNpcClassData( npc, "npc_turret_sentry" )
 
     npc = GetNPCArrayByClass( "npc_turret_mega" )
-    numberOfEntities = npc.len()
+    numberOfEntities += npc.len()
     entityInfo += GetNpcClassData( npc, "npc_turret_mega" )
-    NSSendToNamedPipe("|30|" + numberOfEntities + "|" + entityInfo)
+    NSSendToNamedPipe("|30|" + numberOfEntities + entityInfo)
 
 
     entityInfo = ""
     numberOfEntities = 0;
     npc = GetNPCArrayByClass( "npc_titan" )
-    numberOfEntities = npc.len()
+    numberOfEntities += npc.len()
     entityInfo += GetNpcTitanClassData( npc, "npc_titan" )
 
-    NSSendToNamedPipe("|32|" + numberOfEntities + "|" + entityInfo)
+    NSSendToNamedPipe("|32|" + numberOfEntities + entityInfo)
 }
 
 string function GetNpcClassData(array< entity > entities, string npcClass)
@@ -214,6 +214,8 @@ string function GetNpcClassDataWithWeapon(array< entity > entities, string npcCl
         else if (ent.GetMainWeapons().len() == 2)
         {
             info += "|" + ent.GetMainWeapons()[0] + "|" + ent.GetMainWeapons()[1]
+        } else {
+            info += "|-|-"
         }
     }
     return info;
