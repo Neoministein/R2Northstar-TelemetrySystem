@@ -20,7 +20,6 @@ services:
       AMQ_PASSWORD: admin
   r2-ts-es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
-    container_name: elasticsearch
     environment:
       - node.name=es01
       - discovery.type=single-node
