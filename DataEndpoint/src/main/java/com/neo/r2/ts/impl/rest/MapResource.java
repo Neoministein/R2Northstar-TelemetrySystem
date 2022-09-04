@@ -11,9 +11,9 @@ import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.exception.InternalLogicException;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
-import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 import com.neo.util.framework.api.persistence.entity.EntityQuery;
 import com.neo.util.framework.api.persistence.entity.EntityRepository;
+import com.neo.util.framework.api.persistence.entity.PersistenceEntity;
 import com.neo.util.framework.rest.api.response.ResponseGenerator;
 import com.neo.util.framework.rest.api.security.Secured;
 
@@ -96,7 +96,7 @@ public class MapResource {
                     1,
                     List.of(new ExplicitSearchCriteria(Heatmap.C_MAP, map),
                             new ExplicitSearchCriteria(Heatmap.C_TYPE, HeatmapType.FULL_MAP_AGGREGATION)),
-                    Map.of(DataBaseEntity.C_ID, false));
+                    Map.of(PersistenceEntity.C_ID, false));
             Optional<Heatmap> result = entityRepository.find(heatmapEntityQuery).getFirst();
             if (result.isPresent()) {
                 String jsonString = JsonUtil.toJson(result.get(), Views.Public.class);

@@ -3,8 +3,9 @@ package com.neo.r2.ts.impl.persistence.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.neo.util.common.api.json.Views;
-import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 
+import com.neo.util.framework.api.persistence.entity.PersistenceEntity;
+import com.neo.util.framework.database.impl.AuditableDataBaseEntity;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -14,8 +15,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = Match.TABLE_NAME)
-public class Match /* extends AuditableDataBaseEntity */ implements DataBaseEntity {
-    //FIXME: Currently doesn't work because Request scope doesn't work in queue processing
+public class Match extends AuditableDataBaseEntity implements PersistenceEntity {
     public static final String TABLE_NAME = "match";
     public static final String C_IS_PLAYING = "isRunning";
     public static final String C_NS_SERVER_NAME = "nsServerName";
@@ -26,7 +26,7 @@ public class Match /* extends AuditableDataBaseEntity */ implements DataBaseEnti
 
     @Id
     @GeneratedValue
-    @Column(name = DataBaseEntity.C_ID)
+    @Column(name = PersistenceEntity.C_ID)
         @JsonView(Views.Public.class)
     private UUID id;
 

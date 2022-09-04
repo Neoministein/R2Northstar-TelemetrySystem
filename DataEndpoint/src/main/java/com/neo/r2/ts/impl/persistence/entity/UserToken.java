@@ -3,9 +3,10 @@ package com.neo.r2.ts.impl.persistence.entity;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.RandomString;
-import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
+import com.neo.util.framework.api.persistence.entity.PersistenceEntity;
 import com.neo.util.framework.api.security.RolePrincipal;
 
+import com.neo.util.framework.database.impl.AuditableDataBaseEntity;
 import jakarta.persistence.*;
 import javax.security.auth.Subject;
 import java.util.*;
@@ -13,8 +14,8 @@ import java.util.*;
 @Entity
 @Table(name = UserToken.TABLE_NAME, indexes = {
         @Index(name = "key", columnList = UserToken.C_KEY, unique = true)})
-public class UserToken /* extends AuditableDataBaseEntity */ implements DataBaseEntity, RolePrincipal {
-    //FIXME: Currently doesn't work because Request scope doesn't work in queue processing
+public class UserToken extends AuditableDataBaseEntity implements PersistenceEntity, RolePrincipal {
+
     public static final String TABLE_NAME = "user_token";
 
     public static final String C_KEY = "key";
@@ -26,7 +27,7 @@ public class UserToken /* extends AuditableDataBaseEntity */ implements DataBase
     public static final String C_ROLE = "role";
 
     @Id
-    @Column(name = DataBaseEntity.C_ID, columnDefinition = "serial")
+    @Column(name = PersistenceEntity.C_ID, columnDefinition = "serial")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
         @JsonView(Views.Internal.class)
     private Long id;
@@ -48,7 +49,7 @@ public class UserToken /* extends AuditableDataBaseEntity */ implements DataBase
     private boolean disabled = false;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = T_ROLE, joinColumns = @JoinColumn(name = DataBaseEntity.C_ID))
+    @CollectionTable(name = T_ROLE, joinColumns = @JoinColumn(name = PersistenceEntity.C_ID))
     @Column(name = C_ROLE)
         @JsonView(Views.Owner.class)
     private List<String> roles = new ArrayList<>();
