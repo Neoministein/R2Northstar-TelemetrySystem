@@ -14,6 +14,8 @@ import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.ext.Provider;
 
+import java.util.Date;
+
 @Provider
 public class RequestRecorder implements ContainerResponseFilter {
 
@@ -32,15 +34,16 @@ public class RequestRecorder implements ContainerResponseFilter {
         if (containerResponse.getStatus() != 404 && !containerResponse.getStatusInfo().getReasonPhrase().equals("Not Found")) {
             try {
                 JsonNode responseBody = JsonUtil.fromJson((String) containerResponse.getEntity());
-                RequestLog.RequestSegments requestSegment = new RequestLog.RequestSegments();
-                requestSegment.setRequestId(requestSegment.getRequestId());
-                requestSegment.setOwner(requestDetails.getUser().isPresent() ? requestDetails.getUser().get().getName() : "");
-                requestSegment.setRemoteAddress(requestSegment.getRemoteAddress());
-                requestSegment.setContext(requestDetails.getRequestContext().toString());
-                requestSegment.setStatus(responseBody.get("status").asText());
-                requestSegment.setError(responseBody.has("error") ? responseBody.get("error").get("code").asText() : "");
-                requestSegment.setProcessTime(System.currentTimeMillis() - requestDetails.getRequestReceiveDate().getTime());
-                requestSegment.setAgent(containerRequest.getHeaders().get("User-Agent") != null ? containerRequest.getHeaders().get("User-Agent").toString() : "");
+                RequestLog.RequestSegments requestSegment = new RequestLog.RequestSegments(
+                        new Date(),
+                        requestDetails.getRequestId(),
+                        requestDetails.getUser().isPresent() ? requestDetails.getUser().get().getName() : "",
+                        requestDetails.getRemoteAddress(),
+                        requestDetails.getRequestContext().toString(),
+                        responseBody.get("status").asText(),
+                        responseBody.has("error") ? responseBody.get("error").get("code").asText() : "",
+                        System.currentTimeMillis() - requestDetails.getRequestReceiveDate().getTime(),
+                        containerRequest.getHeaders().get("User-Agent") != null ? containerRequest.getHeaders().get("User-Agent").toString() : "");
                 if (searchRepository.enabled()) {
                     searchResolver(requestSegment);
                 } else {
@@ -63,13 +66,13 @@ public class RequestRecorder implements ContainerResponseFilter {
     protected void logResolver(RequestLog.RequestSegments requestSegments) {
         try {
             ACCESS_LOGGER.trace("{}|{}|{}|{}|{}|{}|{}",
-                    requestSegments.getOwner(),
-                    requestSegments.getRemoteAddress(),
-                    requestSegments.getContext(),
-                    requestSegments.getStatus(),
-                    requestSegments.getError(),
-                    requestSegments.getProcessTime(),
-                    requestSegments.getAgent());
+                    requestSegments.owner(),
+                    requestSegments.remoteAddress(),
+                    requestSegments.context(),
+                    requestSegments.status(),
+                    requestSegments.error(),
+                    requestSegments.processTime(),
+                    requestSegments.agent());
         } catch (Exception ex) {
             LOGGER.warn("Unable to create access log entry [{}]", ex.getMessage());
         }
