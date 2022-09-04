@@ -29,43 +29,43 @@
         <!-- NeoUtil -->
 
         <dependency>
-            <groupId>com.neo.util.framework</groupId>
-            <artifactId>api</artifactId>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-framework</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.neo.util.framework</groupId>
-            <artifactId>elastic</artifactId>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-elastic</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.neo.util.framework</groupId>
-            <artifactId>startup</artifactId>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-startup</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.neo.util.framework</groupId>
-            <artifactId>persistence</artifactId>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-database</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.neo.util.helidon</groupId>
-            <artifactId>rest-integreation</artifactId>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-helidon-rest</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.neo.util.helidon</groupId>
-            <artifactId>config</artifactId>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-helidon-config</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>com.neo.util.microprofile</groupId>
-            <artifactId>queue</artifactId>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-mp-queue</artifactId>
             <version>1.0.0</version>
         </dependency>
 

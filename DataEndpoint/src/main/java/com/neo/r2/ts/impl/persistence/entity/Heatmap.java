@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.persistence.entity.mapper.JsonNodeStringJavaDescriptor;
 import com.neo.util.common.api.json.Views;
-import com.neo.util.framework.api.persistence.entity.DataBaseEntity;
 
+import com.neo.util.framework.api.persistence.entity.PersistenceEntity;
+import com.neo.util.framework.database.impl.AuditableDataBaseEntity;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = Heatmap.TABLE_NAME)
-public class Heatmap /* extends AuditableDataBaseEntity */ implements DataBaseEntity {
-    //FIXME: Currently doesn't work because Request scope doesn't work in queue processing
+public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntity {
 
     public static final String TABLE_NAME = "heatmap";
     public static final String C_DATA = "data";
@@ -21,7 +21,7 @@ public class Heatmap /* extends AuditableDataBaseEntity */ implements DataBaseEn
     public static final String C_DESCRIPTION = "description";
 
     @Id
-    @Column(name = DataBaseEntity.C_ID, columnDefinition = "serial")
+    @Column(name = PersistenceEntity.C_ID, columnDefinition = "serial")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
         @JsonView(Views.Public.class)
     private Long id;
