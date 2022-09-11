@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.helidon.applications</groupId>
         <artifactId>helidon-applications-project</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
     </parent>
     
     <groupId>com.neo.r2</groupId>
@@ -21,7 +21,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <org.jboss.jandex.version>2.1.1.Final</org.jboss.jandex.version>
-        <helidon.version>3.0.0</helidon.version>
+        <helidon.version>3.0.1</helidon.version>
         <mockito.core.version>3.12.4</mockito.core.version>
     </properties>
 
@@ -132,6 +132,11 @@
             <version>${helidon.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.helidon.microprofile.scheduling</groupId>
+            <artifactId>helidon-microprofile-scheduling</artifactId>
+            <version>${helidon.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-jakarta-client</artifactId>
             <version>2.23.1</version>
@@ -193,6 +198,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
                 <configuration>
                     <source>17</source>
                     <target>17</target>
