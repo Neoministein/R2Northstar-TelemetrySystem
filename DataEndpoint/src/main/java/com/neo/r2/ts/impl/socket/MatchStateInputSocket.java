@@ -1,6 +1,7 @@
 package com.neo.r2.ts.impl.socket;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.neo.r2.ts.api.socket.AbstractMonitorableWebsocket;
 import com.neo.r2.ts.impl.match.MatchStateService;
 import com.neo.r2.ts.impl.security.BasicWebsocketAuthentication;
 import com.neo.util.common.impl.json.JsonSchemaUtil;
@@ -9,9 +10,9 @@ import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import com.networknt.schema.JsonSchema;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
-import org.elasticsearch.common.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,7 @@ import java.util.List;
 
 @ApplicationScoped
 @ServerEndpoint(value = MatchStateInputSocket.WS_LOCATION, configurator = BasicWebsocketAuthentication.class)
-public class MatchStateInputSocket {
+public class MatchStateInputSocket extends AbstractMonitorableWebsocket {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchStateInputSocket.class);
 
@@ -56,8 +57,8 @@ public class MatchStateInputSocket {
         sessions.remove(session);
     }
 
-    @OnMessage
-    public void onMessage(String message) {
+    @Override
+    public void handleIncomingMessage(String message) {
         try {
             JsonNode matchState = JsonUtil.fromJson(message);
             JsonSchemaUtil.isValidOrThrow(matchState, matchStateSchema);
