@@ -1,0 +1,17 @@
+{
+  "index_patterns": [
+    "r2ts-socket-log-*"
+  ],
+  "settings": {
+    "number_of_shards": "1",
+    "auto_expand_replicas": "0-1"
+  },
+  "mappings": {
+    "properties": {
+    }
+  },
+  "aliases": {
+      "r2ts-socket-log": {}
+  },
+  "version": 3
+}
