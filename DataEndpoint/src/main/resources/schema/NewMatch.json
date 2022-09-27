@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "map": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "ns_server_name": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "gamemode": {
+      "type": "string",
+      "maxLength": 256
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "map",
+    "ns_server_name",
+    "gamemode"
+  ]
+}

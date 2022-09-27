@@ -1,9 +1,16 @@
 version: '3.9'
 
 services:
-  mapsystem-datafrontend:
-    image: nginx:1.21.6
-    volumes:
-    - ../../root:/usr/share/nginx/html
+  react-ui:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
     ports:
-    - 80:80
+      - "3000:3000"
+    container_name: react-ui
+    stdin_open: true
+    volumes:
+      - type: bind
+        source: ../..
+        target: /usr/src/app/my-app
+      - /usr/src/app/my-app/node_modules

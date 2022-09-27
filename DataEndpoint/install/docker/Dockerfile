@@ -1,9 +1,9 @@
 
 # 1st stage, build the app
-FROM maven:3.6-jdk-11 as build
+FROM maven:3.8.5-eclipse-temurin-17-alpine as build
 
 #Install git
-RUN apt-get install git
+RUN apk add git
 #RUN apt-get install openssh
 
 WORKDIR /dependency/neoutil
@@ -29,13 +29,13 @@ RUN mvn package -DskipTests
 RUN echo "done!"
 
 # 2nd stage, build the runtime image
-FROM openjdk:11-jre-slim
+FROM openjdk:17-alpine
 WORKDIR /dataEndpoint
 
 # Copy the binary built in the 1st stage
-COPY --from=build /dataEndpoint/target/mapsystem-data-endpoint.jar ./
+COPY --from=build /dataEndpoint/target/r2-telemetry-system-endpoint.jar ./
 COPY --from=build /dataEndpoint/target/libs ./libs
 
-CMD ["java", "-Djdk.serialFilter=org.elasticsearch.*;com.neo.*;io.helidon.*", "-jar", "mapsystem-data-endpoint.jar" ]
+CMD ["java", "--enable-preview" ,"-Djdk.serialFilter=org.apache.http.impl.auth.*;java.util.*;!*", "-jar", "r2-telemetry-system-endpoint.jar" ]
 
 EXPOSE 8080

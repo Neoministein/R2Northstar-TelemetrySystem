@@ -57,6 +57,8 @@
         /// Time passed since start of the game in milliseconds
         /// </summary>
         public int timePassed;
+
+        public List<Npc> npcs = new List<Npc>();
     }
 
     public class NewMatchResponse

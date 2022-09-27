@@ -1,0 +1,52 @@
+{
+  "index_patterns": [
+    "r2ts-request-log-*"
+  ],
+  "settings": {
+    "number_of_shards": "1",
+    "auto_expand_replicas": "0-1"
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "segment": {
+        "properties": {
+          "agent": {
+            "type": "keyword"
+          },
+          "context": {
+            "type": "keyword"
+          },
+          "error": {
+            "type": "keyword"
+          },
+          "owner": {
+            "type": "keyword"
+          },
+          "processTime": {
+            "type": "short"
+          },
+          "remoteAddress": {
+            "type": "ip"
+          },
+          "requestId": {
+            "type": "keyword"
+          },
+          "status": {
+            "type": "keyword"
+          },
+          "timestamp": {
+            "type": "date",
+            "format": "epoch_millis||yyyy-MM-dd HH:mm:ss.SSS"
+          }
+        }
+      }
+    }
+  },
+  "aliases": {
+      "r2ts-request-log": {}
+  },
+  "version": 3
+}

@@ -1,17 +1,25 @@
 version: '3.9'
 
 services:
-  ms-database:
+  r2-ts-database:
     image: postgres:12-alpine
     environment:
       POSTGRES_USER: DBACC # The PostgreSQL user (useful to connect to the database)
       POSTGRES_PASSWORD: DBACC # The PostgreSQL password (useful to connect to the database)
-      POSTGRES_DB: TF2-MS # The PostgreSQL default database (automatically created at first launch)
+      POSTGRES_DB: R2-TS # The PostgreSQL default database (automatically created at first launch)
     ports: 
     - 5432:5432
-  ms-es01:
+  r2-ts-artemis:
+    image: quay.io/artemiscloud/activemq-artemis-broker
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+      - "5672:5672"
+    environment:
+      AMQ_USER: admin
+      AMQ_PASSWORD: admin
+  r2-ts-es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
-    container_name: elasticsearch
     environment:
       - node.name=es01
       - discovery.type=single-node
@@ -28,9 +36,25 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ../services/esdata1:/usr/share/elasticsearch/data
+      - ../services/esdata:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+    networks:
+      - esnet
+  r2-ts-kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.3
+    volumes:
+      - ../services/kibanadata:/usr/share/kibana/data
+    ports:
+      - 5601:5601
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=http://r2-ts-es01:9200
+      - http.cors.enabled=true
+      - http.cors.allow-origin=*
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
     networks:
       - esnet
 networks:

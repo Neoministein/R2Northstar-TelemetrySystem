@@ -1,0 +1,526 @@
+{
+  "type": "object",
+  "properties": {
+    "matchId": {
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36
+    },
+    "map": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "timePassed": {
+      "type": "integer"
+    },
+    "players": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "team": {
+            "type": "integer"
+          },
+          "titanClass": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "rotation": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "velocity": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "isTitan": {
+            "type": "boolean"
+          },
+          "isWallRunning": {
+            "type": "boolean"
+          },
+          "isShooting": {
+            "type": "boolean"
+          },
+          "isGrounded": {
+            "type": "boolean"
+          },
+          "isHanging": {
+            "type": "boolean"
+          },
+          "isCrouching": {
+            "type": "boolean"
+          },
+          "isAlive": {
+            "type": "boolean"
+          },
+          "health": {
+            "type": "number"
+          },
+          "equipment": {
+            "type": "object",
+            "properties": {
+              "primary": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "secondary": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "weapon3": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "special": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "primary",
+              "secondary",
+              "weapon3",
+              "special"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "entityId",
+          "team",
+          "titanClass",
+          "position",
+          "rotation",
+          "velocity",
+          "isTitan",
+          "isWallRunning",
+          "isShooting",
+          "isGrounded",
+          "isHanging",
+          "isCrouching",
+          "isAlive",
+          "health",
+          "equipment"
+        ]
+      }
+    },
+    "events": {
+      "type": "object",
+      "properties": {
+        "playerConnect": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "team": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "entityId",
+              "team"
+            ]
+          }
+        },
+        "playerDisconnect": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "entityId"
+            ]
+          }
+        },
+        "entityKilled": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "attackerId": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "victimId": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "damageType": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "isAttackerPlayer": {
+                "type": "boolean"
+              },
+              "isVictimPlayer": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "attackerId",
+              "victimId",
+              "damageType",
+              "isAttackerPlayer",
+              "isVictimPlayer"
+            ]
+          }
+        },
+        "playerRespawned": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "entityId"
+            ]
+          }
+        },
+        "pilotBecomesTitan": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "titanClass": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "entityId",
+              "titanClass"
+            ]
+          }
+        },
+        "titanBecomesPilot": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "entityId"
+            ]
+          }
+        },
+        "playerGetsNewPilotLoadout": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "primary": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "secondary": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "weapon3": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "special": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "entityId",
+              "primary",
+              "secondary",
+              "weapon3",
+              "special"
+            ]
+          }
+        },
+        "playerJump": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "entityId"
+            ]
+          }
+        },
+        "playerDoubleJump": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "entityId"
+            ]
+          }
+        },
+        "playerMantle": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "entityId"
+            ]
+          }
+        },
+        "npcLeeched": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "npcId": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "playerId",
+              "npcId"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "playerConnect",
+        "playerDisconnect",
+        "entityKilled",
+        "playerRespawned",
+        "pilotBecomesTitan",
+        "titanBecomesPilot",
+        "playerGetsNewPilotLoadout",
+        "playerJump",
+        "playerDoubleJump",
+        "playerMantle",
+        "npcLeeched"
+      ]
+    },
+    "npcs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "team": {
+            "type": "integer"
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "rotation": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "velocity": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer"
+              },
+              "y": {
+                "type": "integer"
+              },
+              "z": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "titanClass": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "health": {
+            "type": "integer"
+          },
+          "npcClass": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "primary": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "secondary": {
+            "type": "string",
+            "maxLength": 256
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "entityId",
+          "team",
+          "position",
+          "rotation",
+          "velocity",
+          "health",
+          "npcClass"
+        ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "matchId",
+    "map",
+    "timePassed",
+    "players",
+    "events",
+    "npcs"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+	"Name" : "Interstellar.Telemetry",
+	"Description" : "",
+    "Version": "1.0.0",
+	"LoadPriority": 0,
+
+	"Scripts": [		
+        {
+			"Path": "_MapSystem.gnut",
+            "RunOn": "SERVER && MP",
+            "ServerCallback": {
+                "Before": "MapSystem_Init"
+            }
+		}
+	]
+}

@@ -1,47 +1,11 @@
 ﻿namespace CSNamedPipeServer
 {
-    public class Player
+    public class Player : Entity
     {
         /// <summary>
-        /// Team Id
+        /// Players equipment
         /// </summary>
-        public byte team = 0;
-        /// <summary>
-        /// Health in percent
-        /// </summary>
-        public byte health = 0; // 8bit int
-        /// <summary>
-        /// Rotation (reduced to flat degree values)
-        /// </summary>
-        public Vector<int> rotation = new Vector<int>();
-        /// <summary>
-        /// Position (reduced to flat degree values)
-        /// </summary>
-        public Vector<int> position = new Vector<int>();
-        /// <summary>
-        /// Rotation (reduced to flat degree values)
-        /// </summary>
-        public Vector<int> velocity = new Vector<int>();
-        /// <summary>
-        /// Unique player id
-        /// </summary>
-        public string playerId = "";
-        /// <summary>
-        /// Primary weapon
-        /// </summary>
-        public string primary = "none";
-        /// <summary>
-        /// Secondary weapon
-        /// </summary>
-        public string secondary = "none";
-        /// <summary>
-        /// Third weapon
-        /// </summary>
-        public string weapon3 = "none";
-        /// <summary>
-        /// Pilot ability
-        /// </summary>
-        public string special = "none";
+        public Equipment equipment = new Equipment();
         /// <summary>
         /// Type of titan
         /// </summary>
@@ -82,8 +46,28 @@
         /// <param name="_team">Team id</param>
         public Player(string _id, byte _team)
         {
-            playerId = _id;
+            entityId = _id;
             team = _team;
+        }
+
+        public class Equipment
+        {
+            /// <summary>
+            /// Primary damageType
+            /// </summary>
+            public string primary = "none";
+            /// <summary>
+            /// Secondary damageType
+            /// </summary>
+            public string secondary = "none";
+            /// <summary>
+            /// Third damageType
+            /// </summary>
+            public string weapon3 = "none";
+            /// <summary>
+            /// Pilot ability
+            /// </summary>
+            public string special = "none";
         }
     }
 }

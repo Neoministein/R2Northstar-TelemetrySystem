@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.IO.Pipes;
 using System.Text;
 using System.Collections;
+using System;
 
 namespace CSNamedPipeServer
 {
@@ -11,15 +12,13 @@ namespace CSNamedPipeServer
         // Http post erstellen
         // Http put schließen
         private NamedPipeServerStream m_namedPipeServer;
-        private const int BUFFER_SIZE = 512; // Same as northstar.dll
-        private const int TCHAR_SIZE = 2; // Same as northstar.dll
         private Match m_currentMatch = new Match("empty0", "empty1", "empty2", false, true); // Needed, because its assigned outside of the constructor
         private DynamicInfos m_currentInfo = new DynamicInfos();
         private DateTime m_startTime;
         private bool m_closed = false;
 
         public const bool argUseHttp = true;
-        public const LogMode argLogMode = LogMode.Event;
+        public const LogMode argLogMode = LogMode.None;
 
         public PipeInstance(NamedPipeServerStream _pipe)
         {
@@ -38,49 +37,100 @@ namespace CSNamedPipeServer
         /// <summary>
         /// Main Loop that executes the named pipe as well as handling http and json
         /// </summary>
-        public async Task<int> RunPipe()
+        public async Task<int> RunPipe(CancellationToken _token = default)
         {
-            byte[] readBuffer = new byte[BUFFER_SIZE * TCHAR_SIZE];
-            m_namedPipeServer.WaitForConnection();
-            while (m_namedPipeServer.IsConnected && 0 < m_namedPipeServer.Read(readBuffer, 0, BUFFER_SIZE * TCHAR_SIZE)) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
+            byte[] readBuffer = new byte[102400];
+            try
             {
-                // TODO: Multithreading/Coroutine
-
-                string readString = Encoding.Unicode.GetString(readBuffer);
-                if (argLogMode >= LogMode.Most)
-                    Console.WriteLine("NamedPipe read: " + readString);
-                int index = readString.IndexOf('\0');
-                if (index >= 0)
-                    readString = readString.Substring(0, index);
-                if (readString == "Close")
-                    break;
-
-                string[] curLog = readString.Split('|');
-                // Remove leading empty string
-                if (curLog[0] == "")
-                    curLog = curLog.Skip(1).ToArray();
-                if (argLogMode >= LogMode.Most)
-                    Console.WriteLine("NamedPipe result: " + String.Join("   ", curLog));
-                try
+                await m_namedPipeServer.WaitForConnectionAsync(_token);
+                while (m_namedPipeServer.IsConnected) // TODO: Start new session when match ends or disconnect //!m_closed && m_server.IsConnected
                 {
-                    ProcessCommand(curLog);
+                    Memory<byte> memBuf = new Memory<byte>(readBuffer);
+                    var bytesRead = await m_namedPipeServer.ReadAsync(memBuf, _token);
+
+                    if (0 >= bytesRead)
+                    {
+                        break;
+                    }
+                    
+                    // TODO: Multithreading/Coroutine
+                    try
+                    {
+                        if (ProcessInputFromPipe(Encoding.UTF8.GetString(readBuffer.AsSpan()).AsSpan()))
+                        {
+                            break;
+                        }
+                        
+                        readBuffer.Initialize();
+                    }
+                    catch (Exception _ex)
+                    {
+                        Console.WriteLine("RunPipe() process input exception: " + _ex.ToString());
+                    }
+                    readBuffer = new byte[102400];
                 }
-                catch (Exception _ex)
+                if (m_currentMatch.isRunning)
                 {
-                    Console.WriteLine(_ex);
+                    Console.WriteLine("Pipe connection lost. Ending current match");
+                    EndMatch();
                 }
+                m_namedPipeServer.Close();
+                //Console.WriteLine("Exit: 0");
             }
-            if (m_currentMatch.isRunning)
+            catch(Exception _ex)
             {
-                Console.WriteLine("Pipe connection lost. Ending current match");
-                EndMatch();
+                Console.WriteLine("RunPipe() complete exception: " + _ex.ToString());
             }
-            m_namedPipeServer.Close();
-            //Console.WriteLine("Exit: 0");
-
             return 0;
         }
 
+        public bool ProcessInputFromPipe(ReadOnlySpan<char> input)
+        {
+            if (argLogMode >= LogMode.Most)
+                Console.WriteLine("NamedPipe read: " + input.ToString());
+
+            int index = input.IndexOf('\0');
+
+            ReadOnlySpan<char> actualInput = index >= 0 ? input[..index] : input;
+
+            if (actualInput == "Close")
+                return true;
+            
+            int locationOfSplit = actualInput.IndexOf('|');
+            int endOfLastSplit = 0;
+
+            var curLog = actualInput.ToString().Split("|");
+            
+           /*while (locationOfSplit > 0)
+            {
+                ReadOnlySpan<char> currentCommmand = actualInput.Slice(endOfLastSplit, locationOfSplit);
+                if (argLogMode >= LogMode.Most)
+                    Console.WriteLine("NamedPipe result: " + String.Join("   ", currentCommmand.ToString()));
+
+                if (currentCommmand.Length != 0)
+                {
+                    ProcessCommand(currentCommmand);
+                }
+                
+                endOfLastSplit = locationOfSplit;
+            }*/
+            // Remove leading empty string
+            if (curLog[0] == "")
+                curLog = curLog.Skip(1).ToArray();
+            if (argLogMode >= LogMode.Most)
+                Console.WriteLine("NamedPipe result: " + String.Join("   ", curLog));
+            try
+            {
+                ProcessCommand(curLog);
+            }
+            catch (Exception _ex)
+            {
+                Console.WriteLine("RunPipe() command exception: " + _ex);
+            }
+
+            return false;
+        }
+        
         #region UtilizeCommand
         /// <summary>
         /// Processes a given command depending of command type
@@ -117,36 +167,43 @@ namespace CSNamedPipeServer
                         // |2
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: GameFinished: matchId: " + m_currentMatch.matchId);
-                        EndMatch();
+                        if (m_currentMatch.isRunning)
+                        {
+                            EndMatch();    
+                        }
                         break;
                     case EventType.PlayerConnect: // 3
                         // |3|PlayerID|TeamID
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: PlayerConnect: playerId: " + cmd[1] + ", teamId: " + cmd[2]);
                         m_currentMatch.players.Add(cmd[1], new Player(cmd[1], byte.Parse(cmd[2])));
-                        m_currentInfo.events.eventPlayerConnect.Add(new Event_PlayerConnect(cmd[1], byte.Parse(cmd[2])));
+                        m_currentInfo.events.playerConnect.Add(new Event_PlayerConnect(cmd[1], byte.Parse(cmd[2])));
                         break;
                     case EventType.PlayerDisconnect: // 4
                         // |4|PlayerID
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: PlayerDisconnect: playerId: " + cmd[1]);
                         m_currentMatch.players.Remove(cmd[1]);
-                        m_currentInfo.events.eventPlayerDisconnect.Add(new Event_PlayerDisconnect(cmd[1]));
+                        m_currentInfo.events.playerDisconnect.Add(new Event_PlayerDisconnect(cmd[1]));
                         break;
-                    case EventType.PlayerKilled: // 5
+                    case EventType.EntityKilled: // 5
                         // |5|AttackerID|VictimID|Weapon
                         if (argLogMode >= LogMode.Event)
-                            Console.WriteLine("Event: playerKilled: attackerId: " + cmd[1] + ", victimId: " + cmd[2] + ", weapon: " + cmd[3]);
-                        m_currentMatch.players[cmd[2]].isAlive = false;
-                        m_currentMatch.players[cmd[2]].isTitan = false;
-                        m_currentInfo.events.eventPlayerKilled.Add(new Event_PlayerKilled(cmd[1], cmd[2], cmd[3]));
+                            Console.WriteLine("Event: entityKilled: attackerId: " + cmd[1] + ", victimId: " + cmd[2] + ", damageType: " + cmd[3]);
+
+                        if (m_currentMatch.players.ContainsKey(cmd[4]))
+                        {
+                            m_currentMatch.players[cmd[4]].isAlive = false;
+                            m_currentMatch.players[cmd[4]].isTitan = false;
+                        }
+                        m_currentInfo.events.entityKilled.Add(new Event_EntityKilled(cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]));
                         break;
                     case EventType.PlayerRespawned: // 6
                         // |6|PlayerID
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerRespawned: playerId: " + cmd[1]);
                         m_currentMatch.players[cmd[1]].isAlive = true;
-                        m_currentInfo.events.eventPlayerRespawned.Add(new Event_PlayerRespawned(cmd[1]));
+                        m_currentInfo.events.playerRespawned.Add(new Event_PlayerRespawned(cmd[1]));
                         break;
                     case EventType.PilotBecomesTitan: // 7
                         // |7|PlayerID|TitanClass
@@ -154,24 +211,24 @@ namespace CSNamedPipeServer
                             Console.WriteLine("Event: pilotBecomesTitan: playerId: " + cmd[1] + ", titanClass: " + cmd[2]);
                         m_currentMatch.players[cmd[1]].isTitan = true;
                         m_currentMatch.players[cmd[1]].titanClass = cmd[2];
-                        m_currentInfo.events.eventPilotBecomesTitan.Add(new Event_PilotBecomesTitan(cmd[1], cmd[2]));
+                        m_currentInfo.events.pilotBecomesTitan.Add(new Event_PilotBecomesTitan(cmd[1], cmd[2]));
                         break;
                     case EventType.TitanBecomesPilot: // 8
                         // |8|PlayerID
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: titanBecomesPilot: playerId: " + cmd[1]);
                         m_currentMatch.players[cmd[1]].isTitan = false;
-                        m_currentInfo.events.eventTitanBecomesPilot.Add(new Event_TitanBecomesPilot(cmd[1]));
+                        m_currentInfo.events.titanBecomesPilot.Add(new Event_TitanBecomesPilot(cmd[1]));
                         break;
                     case EventType.PlayerGetsNewPilotLoadout: // 9
                         // |9|PlayerID|Primary|Secondary|Weapon3|Special
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerGetsNewPilotLoadout: playerId: " + cmd[1] + ", primary: " + cmd[2] + ", secondary: " + cmd[3] + ", weapon3: " + cmd[4] + ", special: " + cmd[5]);
-                        m_currentMatch.players[cmd[1]].primary = cmd[2];
-                        m_currentMatch.players[cmd[1]].secondary = cmd[3];
-                        m_currentMatch.players[cmd[1]].weapon3 = cmd[4];
-                        m_currentMatch.players[cmd[1]].special = cmd[5];
-                        m_currentInfo.events.eventPlayerGetsNewPilotLoadout.Add(new Event_PlayerGetsNewPilotLoadout(cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]));
+                        m_currentMatch.players[cmd[1]].equipment.primary = cmd[2];
+                        m_currentMatch.players[cmd[1]].equipment.secondary = cmd[3];
+                        m_currentMatch.players[cmd[1]].equipment.weapon3 = cmd[4];
+                        m_currentMatch.players[cmd[1]].equipment.special = cmd[5];
+                        m_currentInfo.events.playerGetsNewPilotLoadout.Add(new Event_PlayerGetsNewPilotLoadout(cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]));
                         break;
                     case EventType.PlayerWallrun: // 10
                         // |10|PlayerID|isWallRunning
@@ -189,13 +246,13 @@ namespace CSNamedPipeServer
                         // |12|PlayerID
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerJump: playerId: " + cmd[1]);
-                        m_currentInfo.events.eventPlayerJump.Add(new Event_PlayerJump(cmd[1]));
+                        m_currentInfo.events.playerJump.Add(new Event_PlayerJump(cmd[1]));
                         break;
                     case EventType.PlayerDoubleJump: // 13
                         // |13|PlayerID
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerDoubleJump: playerId: " + cmd[1]);
-                        m_currentInfo.events.eventPlayerDoubleJump.Add(new Event_PlayerDoubleJump(cmd[1]));
+                        m_currentInfo.events.playerDoubleJump.Add(new Event_PlayerDoubleJump(cmd[1]));
                         break;
                     case EventType.PlayerGround: // 14
                         // |14|PlayerID|isInAir
@@ -207,7 +264,7 @@ namespace CSNamedPipeServer
                         // |15|PlayerID
                         if (argLogMode >= LogMode.Event)
                             Console.WriteLine("Event: playerMantle: playerId: " + cmd[1]);
-                        m_currentInfo.events.eventPlayerMantle.Add(new Event_PlayerMantle(cmd[1]));
+                        m_currentInfo.events.playerMantle.Add(new Event_PlayerMantle(cmd[1]));
                         break;
                     case EventType.PlayerWallHang: // 16
                         // |16|PlayerID|isHanging
@@ -221,9 +278,22 @@ namespace CSNamedPipeServer
                             Console.WriteLine("Event: playerCrouch: playerId: " + cmd[1] + ", isCrouching: " + cmd[2]);
                         m_currentMatch.players[cmd[1]].isCrouching = cmd[2] == "true";
                         break;
+                    case EventType.DynamicBasicNpcInfo: // 30
+                        
+                        ProcessDynamicBasicNpcInfo(int.Parse(cmd[1]), cmd.Skip(2).ToArray());
+                        break;
+                    case EventType.DynamicWeaponNpcInfo: // 31
+                        ProcessDynamicWeaponNpcInfo(int.Parse(cmd[1]), cmd.Skip(2).ToArray());
+                        break;
+                    case EventType.DynamicTitanNpcInfo: // 32
+                        ProcessDynamicTitanNpcInfo(int.Parse(cmd[1]), cmd.Skip(2).ToArray());
+                        break;
                     case EventType.DebugMessage: // 99
                         // |99|DebugText
                         Console.WriteLine("---- DebugText ----");
+                        break;
+                    case EventType.NpcLeeched:
+                        m_currentInfo.events.npcLeeched.Add(new Event_NpcLeeched(cmd[1], cmd[2]));
                         break;
                     default:
                         Console.WriteLine("Unknown command: " + cmd[0]);
@@ -256,6 +326,60 @@ namespace CSNamedPipeServer
                 m_currentMatch.players[_cmd[(i * 5)]].health = (byte)Math.Clamp(double.Parse(_cmd[4 + (i * 5)]), 0, 100); // Not sure how accurate health is saved in squirrel
             }
         }
+        
+        public void ProcessDynamicWeaponNpcInfo(int _count, string[] _cmd)
+        {
+            // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
+            for (int i = 0; i < _count; i++)
+            {
+                NpcWithWeapon npc = new NpcWithWeapon();
+                npc.npcClass = _cmd[0 + (i * 9)];
+                npc.entityId = _cmd[1 + (i * 9)];
+                npc.team = int.Parse(_cmd[2 + (i * 9)]);
+                npc.position = new Vector<int>(GetVectorData(_cmd[3 + (i * 9)]));
+                npc.rotation = new Vector<int>(GetVectorData(_cmd[4 + (i * 9)]));
+                npc.velocity = new Vector<int>(GetVectorData(_cmd[5 + (i * 9)]));
+                npc.health = (byte)Math.Clamp(double.Parse(_cmd[6 + (i * 9)]), 0, 100);
+                npc.primary = _cmd[7 + (i * 9)];
+                npc.secondary = _cmd[8 + (i * 9)];
+                m_currentInfo.npcs.Add(npc);
+            }
+        }
+        
+        public void ProcessDynamicTitanNpcInfo(int _count, string[] _cmd)
+        {
+            // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
+            for (int i = 0; i < _count; i++)
+            {
+                NpcTitan npc = new NpcTitan();
+                npc.npcClass = _cmd[0 + (i * 8)];
+                npc.entityId = _cmd[1 + (i * 8)];
+                npc.team = int.Parse(_cmd[2 + (i * 8)]);
+                npc.position = new Vector<int>(GetVectorData(_cmd[3 + (i * 8)]));
+                npc.rotation = new Vector<int>(GetVectorData(_cmd[4 + (i * 8)]));
+                npc.velocity = new Vector<int>(GetVectorData(_cmd[5 + (i * 8)]));
+                npc.health = (byte)Math.Clamp(double.Parse(_cmd[6 + (i * 8)]), 0, 100);
+                npc.titanClass = _cmd[7 + (i * 8)];
+                m_currentInfo.npcs.Add(npc);
+            }
+        }
+        
+        public void ProcessDynamicBasicNpcInfo(int _count, string[] _cmd)
+        {
+            // PlayerID|Position<x,y,z>|Rotation<x,y,z>|Velocity<x,y,z>|HealthInPercent
+            for (int i = 0; i < _count; i++)
+            {
+                Npc npc = new Npc();
+                npc.npcClass = _cmd[0 + (i * 7)];
+                npc.entityId = _cmd[1 + (i * 7)];
+                npc.team = int.Parse(_cmd[2 + (i * 7)]);
+                npc.position = new Vector<int>(GetVectorData(_cmd[3 + (i * 7)]));
+                npc.rotation = new Vector<int>(GetVectorData(_cmd[4 + (i * 7)]));
+                npc.velocity = new Vector<int>(GetVectorData(_cmd[5 + (i * 7)]));
+                npc.health = (byte)Math.Clamp(double.Parse(_cmd[6 + (i * 7)]), 0, 100);
+                m_currentInfo.npcs.Add(npc);
+            }
+        }
         #endregion
 
         /// <summary>
@@ -263,6 +387,7 @@ namespace CSNamedPipeServer
         /// </summary>
         public void EndMatch()
         {
+            m_currentMatch.isRunning = false;
             m_closed = true;
             Task t1 = Task.Run(() => m_currentMatch.EndMatch().Wait());
         }
@@ -321,7 +446,7 @@ namespace CSNamedPipeServer
         private bool m_closed = false;
 
         public const bool argUseHttp = true;
-        public const LogMode argLogMode = LogMode.Event;
+        public const LogMode argLogMode = LogMode.All;
 
         public List<PipeInstance> m_runningGamePipes = new List<PipeInstance>();
 
