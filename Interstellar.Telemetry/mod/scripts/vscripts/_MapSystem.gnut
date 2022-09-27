@@ -34,10 +34,10 @@ void function MapSystem_Init()
 void function OnWaitingForPlayers()
 {
     if ( isMatchRunning ) {
-        NSEndMatch( "|2" )
+        NSCloseNamedPipe( "2" )
         isMatchRunning = false
     }
-    NSStartNewMatch( "|1|" + GetMapName() + "|" + GameRules_GetGameMode() )
+    NSOpenNamedPipe( "1|" + GetMapName() + "|" + GameRules_GetGameMode() + "|" + GetConVarString( "ns_server_name" ), "2" )
     isMatchRunning = true
 }
 
@@ -54,13 +54,13 @@ void function OnGameFinished()
 {
     file.isThreadRunning = false
     wait 0.1
-    NSEndMatch( "|2" )
+    NSCloseNamedPipe( "2" )
     isMatchRunning = false
 }
 
 void function Map_PlayerConnect( entity player )
 {
-	NSSendToNamedPipe( "|3|" + player.GetPlayerName() + "|" + player.GetTeam() )
+	NSSendToNamedPipe( "3|" + player.GetPlayerName() + "|" + player.GetTeam() )
 
     AddPlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
     AddPlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
@@ -86,7 +86,7 @@ void function Map_PlayerConnect( entity player )
 
 void function Map_PlayerDisconnect( entity player )
 {
-	NSSendToNamedPipe( "|4|" + player.GetPlayerName() )
+	NSSendToNamedPipe( "4|" + player.GetPlayerName() )
 
     RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
     RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
@@ -113,7 +113,7 @@ void function printDynamicInfos()
         GetNpcData()
 
         array<entity> players = GetPlayerArray()
-        string infos = "|0|" + players.len()
+        string infos = "0|" + players.len()
 		foreach(entity player in GetPlayerArray())
 		{
 			infos += "|" + player.GetPlayerName()
@@ -240,7 +240,7 @@ string function GetNpcTitanClassData(array< entity > entities, string npcClass)
 
 void function Map_OnSpectreLeeched( entity spectre, entity player )
 {
-    string info = "|40"
+    string info = "40"
     info += "|" + player.GetPlayerName()
     info += "|" + spectre.GetEncodedEHandle()
     NSSendToNamedPipe( info )
@@ -280,12 +280,12 @@ void function Map_EntityKilled( entity victim, entity attacker, var damageInfo )
 
 void function Map_PlayerRespawned( entity player )
 {
-    NSSendToNamedPipe( "|6|" + player.GetPlayerName() )
+    NSSendToNamedPipe( "6|" + player.GetPlayerName() )
 }
 
 void function Map_PilotBecomesTitan( entity player, entity titan )
 {
-	string infos = "|7"
+	string infos = "7"
     infos += "|" + player.GetPlayerName()
     infos += "|" + GetActiveTitanLoadout( player ).titanClass
     NSSendToNamedPipe( infos )
@@ -293,14 +293,14 @@ void function Map_PilotBecomesTitan( entity player, entity titan )
 
 void function Map_TitanBecomesPilot( entity player, entity titan )
 {
-    NSSendToNamedPipe( "|8|" + player.GetPlayerName() )
+    NSSendToNamedPipe( "8|" + player.GetPlayerName() )
 }
 
 void function Map_OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef newTitanLoadout )
 {
     PilotLoadoutDef modifiedLoadout = GetActivePilotLoadout( player )
 
-    string infos = "|9"
+    string infos = "9"
 	infos += "|" + player.GetPlayerName()
 	infos += "|" + modifiedLoadout.primary
 	infos += "|" + modifiedLoadout.secondary
@@ -311,72 +311,72 @@ void function Map_OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef ne
 
 void function Map_OnPlayerBeginWallrun( entity player )
 {
-    NSSendToNamedPipe( "|10|" + player.GetPlayerName() + "|true" )
+    NSSendToNamedPipe( "10|" + player.GetPlayerName() + "|true" )
 }
 
 void function Map_OnPlayerEndWallrun( entity player )
 {
-    NSSendToNamedPipe( "|10|" + player.GetPlayerName() + "|false" )
+    NSSendToNamedPipe( "10|" + player.GetPlayerName() + "|false" )
 }
 
 void function Map_StartShoot( entity player )
 {
-    NSSendToNamedPipe( "|11|" + player.GetPlayerName() + "|true" )
+    NSSendToNamedPipe( "11|" + player.GetPlayerName() + "|true" )
 }
 
 void function Map_EndShoot( entity player )
 {
-    NSSendToNamedPipe( "|11|" + player.GetPlayerName() + "|false" )
+    NSSendToNamedPipe( "11|" + player.GetPlayerName() + "|false" )
 }
 
 /**/
 
 void function Map_OnPlayerJump( entity player )
 {
-    NSSendToNamedPipe( "|12|" + player.GetPlayerName() )
+    NSSendToNamedPipe( "12|" + player.GetPlayerName() )
 }
 
 void function Map_OnPlayerDoubleJump( entity player )
 {
-    NSSendToNamedPipe( "|13|" + player.GetPlayerName() )
+    NSSendToNamedPipe( "13|" + player.GetPlayerName() )
 }
 
 void function Map_OnPlayerLeaveGround( entity player )
 {
-    NSSendToNamedPipe( "|14|" + player.GetPlayerName() + "|true" )
+    NSSendToNamedPipe( "14|" + player.GetPlayerName() + "|true" )
 }
 
 void function Map_OnPlayerTochGround( entity player )
 {
-    NSSendToNamedPipe( "|14|" + player.GetPlayerName() + "|false" )
+    NSSendToNamedPipe( "14|" + player.GetPlayerName() + "|false" )
 }
 
 void function Map_OnPlayerMantle( entity player )
 {
-    NSSendToNamedPipe( "|15|" + player.GetPlayerName() )
+    NSSendToNamedPipe( "15|" + player.GetPlayerName() )
 }
 
 void function Map_OnPlayerBeginWallHang( entity player )
 {
-    NSSendToNamedPipe( "|16|" + player.GetPlayerName() + "|true" )
+    NSSendToNamedPipe( "16|" + player.GetPlayerName() + "|true" )
 }
 
 void function Map_OnPlayerEndWallHang( entity player )
 {
-    NSSendToNamedPipe( "|16|" + player.GetPlayerName() + "|false" )
+    NSSendToNamedPipe( "16|" + player.GetPlayerName() + "|false" )
 }
 
 void function Map_OnPlayerBeginCrouch( entity player )
 {
-    NSSendToNamedPipe( "|17|" + player.GetPlayerName() + "|true" )
+    NSSendToNamedPipe( "17|" + player.GetPlayerName() + "|true" )
 }
 
 void function Map_OnPlayerEndCrouch( entity player )
 {
-    NSSendToNamedPipe( "|17|" + player.GetPlayerName() + "|false" )
+    NSSendToNamedPipe( "17|" + player.GetPlayerName() + "|false" )
 }
 
 void function PrintDebug()
 {
-    NSSendToNamedPipe( "|99|DebugText" )
+    NSSendToNamedPipe( "99|DebugText" )
 }
