@@ -110,6 +110,9 @@
           "isAlive": {
             "type": "boolean"
           },
+          "health": {
+            "type": "number"
+          },
           "equipment": {
             "type": "object",
             "properties": {
@@ -154,6 +157,7 @@
           "isHanging",
           "isCrouching",
           "isAlive",
+          "health",
           "equipment"
         ]
       }
@@ -367,6 +371,27 @@
               "entityId"
             ]
           }
+        },
+        "npcLeeched": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string",
+                "maxLength": 256
+              },
+              "npcId": {
+                "type": "string",
+                "maxLength": 256
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "playerId",
+              "npcId"
+            ]
+          }
         }
       },
       "additionalProperties": false,
@@ -380,7 +405,8 @@
         "playerGetsNewPilotLoadout",
         "playerJump",
         "playerDoubleJump",
-        "playerMantle"
+        "playerMantle",
+        "npcLeeched"
       ]
     },
     "npcs": {
