@@ -145,9 +145,7 @@ public class HeatmapGeneratorImpl {
                 }
             }
             heatmap.setData(result);
-
         }
-        throw new InternalJsonException("A");
     }
 
     protected Bounds getMapBounds(List<SearchCriteria> searchCriteriaList, MapScale mapScale) {
