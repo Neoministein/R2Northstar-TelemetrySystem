@@ -143,7 +143,7 @@ void function GetNpcData()
     npc = GetNPCArrayByClass( "npc_stalker" )
     numberOfEntities += npc.len()
     entityInfo += GetNpcClassDataWithWeapon( npc, "npc_stalker" )
-    NSSendToNamedPipe("|31|" + numberOfEntities + entityInfo)
+    NSSendToNamedPipe("31|" + numberOfEntities + entityInfo)
 
 
     entityInfo = ""
@@ -167,7 +167,7 @@ void function GetNpcData()
     npc = GetNPCArrayByClass( "npc_turret_mega" )
     numberOfEntities += npc.len()
     entityInfo += GetNpcClassData( npc, "npc_turret_mega" )
-    NSSendToNamedPipe("|30|" + numberOfEntities + entityInfo)
+    NSSendToNamedPipe("30|" + numberOfEntities + entityInfo)
 
 
     entityInfo = ""
@@ -176,7 +176,7 @@ void function GetNpcData()
     numberOfEntities += npc.len()
     entityInfo += GetNpcTitanClassData( npc, "npc_titan" )
 
-    NSSendToNamedPipe("|32|" + numberOfEntities + entityInfo)
+    NSSendToNamedPipe("32|" + numberOfEntities + entityInfo)
 }
 
 string function GetNpcClassData(array< entity > entities, string npcClass)
@@ -248,7 +248,7 @@ void function Map_OnSpectreLeeched( entity spectre, entity player )
 
 void function Map_EntityKilled( entity victim, entity attacker, var damageInfo )
 {
-    string infos = "|5|" + attacker.IsPlayer()
+    string infos = "5|" + attacker.IsPlayer()
     if (attacker.IsPlayer()) {
         infos += "|" + attacker.GetPlayerName()
     }
