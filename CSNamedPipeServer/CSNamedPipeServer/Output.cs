@@ -16,7 +16,7 @@ namespace CSNamedPipeServer
 
         public static void Init()
         {
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", GloVars.argUserKey);
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", GloVars.ArgUserKey);
         }
 
         // TODO: Use queue instead
