@@ -8,15 +8,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public abstract class AbstractMonitorableWebsocket implements MonitorableWebsocket {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMonitorableWebsocket.class);
 
-    protected Map<Session, SocketLogSearchable> socketData = new HashMap<>();
+    protected Map<Session, SocketLogSearchable> socketData = new ConcurrentHashMap<>();
 
     protected abstract void handleIncomingMessage(String message);
 
@@ -50,11 +50,6 @@ public abstract class AbstractMonitorableWebsocket implements MonitorableWebsock
     }
 
     protected void modifySearchableData(final Session session, Consumer<SocketLogSearchable> edit) {
-        SocketLogSearchable socketDataSearchable = socketData.get(session);
-        if (socketDataSearchable == null) {
-            socketDataSearchable = new SocketLogSearchable(session);
-            socketData.put(session, socketDataSearchable);
-        }
-        edit.accept(socketDataSearchable);
+        edit.accept(socketData.computeIfAbsent(session, SocketLogSearchable::new));
     }
 }
