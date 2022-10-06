@@ -17,7 +17,7 @@ class FullTelemetrySystemTest {
     @Test
     void run() throws Exception{
         startNamedPipeServer().run();
-        Thread.sleep(100);
+        Thread.sleep(1000);
         String pipeName = getNameFromMasterPipe();
         Thread.sleep(3000);
         try {
