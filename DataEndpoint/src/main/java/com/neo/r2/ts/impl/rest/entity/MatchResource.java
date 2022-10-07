@@ -76,8 +76,8 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
         match.setMap(jsonNode.get("map").asText());
         match.setNsServerName(jsonNode.get("ns_server_name").asText());
         match.setGamemode(jsonNode.get("gamemode").asText());
-        if (requestDetails.getUser().isPresent()) {
-            match.setOwner(requestDetails.getUser().get().getName());
+        if (getRequestDetails().getUser().isPresent()) {
+            match.setOwner(getRequestDetails().getUser().get().getName());
         }
         if (mapScalingService.getMap(match.getMap()).isEmpty()) {
             return responseGenerator.error(400, customRestRestResponse.getUnsupportedMap());
@@ -119,7 +119,10 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
             queueableHeatmapInstruction.setMatchId(id);
             queueableHeatmapInstruction.setType(HeatmapType.PLAYER_POSITION);
             LOGGER.info("Add match {} to queue for heatmap generation", match.getId());
-            heatmapQueueService.addToQueue(new QueueMessage(QueueableHeatmapInstruction.QUEUE_MESSAGE_TYPE, queueableHeatmapInstruction));
+            heatmapQueueService.addToQueue(new QueueMessage(
+                    requestDetails,
+                    QueueableHeatmapInstruction.QUEUE_MESSAGE_TYPE,
+                    queueableHeatmapInstruction));
             return parseEntityToResponse(match, Views.Public.class);
         } catch (RollbackException ex) {
             throw new InternalLogicException(ex);

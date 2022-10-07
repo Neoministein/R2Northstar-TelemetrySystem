@@ -5,6 +5,8 @@ import com.neo.r2.ts.impl.persistence.searchable.RequestLog;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.connection.RequestDetails;
 import com.neo.util.framework.api.persistence.search.SearchRepository;
+import com.neo.util.framework.impl.connection.HttpRequestDetails;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,13 +19,14 @@ import jakarta.ws.rs.ext.Provider;
 import java.util.Date;
 
 @Provider
+@ApplicationScoped
 public class RequestRecorder implements ContainerResponseFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestRecorder.class);
     private static final Logger ACCESS_LOGGER = LoggerFactory.getLogger("Request");
 
     @Inject
-    RequestDetails requestDetails;
+    jakarta.inject.Provider<RequestDetails> requestDetailsProvider;
 
     @Inject
     SearchRepository searchRepository;
@@ -33,16 +36,19 @@ public class RequestRecorder implements ContainerResponseFilter {
             ContainerResponseContext containerResponse) {
         if (containerResponse.getStatus() != 404 && !containerResponse.getStatusInfo().getReasonPhrase().equals("Not Found")) {
             try {
+                RequestDetails requestDetails = requestDetailsProvider.get();
+                HttpRequestDetails httpRequestDetails = (HttpRequestDetails) requestDetails;
+
                 JsonNode responseBody = JsonUtil.fromJson((String) containerResponse.getEntity());
                 RequestLog.RequestSegments requestSegment = new RequestLog.RequestSegments(
                         new Date(),
                         requestDetails.getRequestId(),
-                        requestDetails.getUser().isPresent() ? requestDetails.getUser().get().getName() : "",
-                        requestDetails.getRemoteAddress(),
+                        httpRequestDetails.getUser().isPresent() ? httpRequestDetails.getUser().get().getName() : "",
+                        httpRequestDetails.getRemoteAddress(),
                         requestDetails.getRequestContext().toString(),
                         responseBody.get("status").asText(),
                         responseBody.has("error") ? responseBody.get("error").get("code").asText() : "",
-                        System.currentTimeMillis() - requestDetails.getRequestReceiveDate().getTime(),
+                        System.currentTimeMillis() - requestDetails.getRequestStartDate().getTime(),
                         containerRequest.getHeaders().get("User-Agent") != null ? containerRequest.getHeaders().get("User-Agent").toString() : "");
                 if (searchRepository.enabled()) {
                     searchResolver(requestSegment);

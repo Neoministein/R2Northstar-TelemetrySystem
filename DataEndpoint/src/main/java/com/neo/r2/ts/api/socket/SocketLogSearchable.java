@@ -6,8 +6,11 @@ import com.neo.util.framework.api.persistence.search.GenericSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
 import jakarta.websocket.Session;
 
+import java.util.Date;
+
 public class SocketLogSearchable extends GenericSearchable {
 
+    private Date timestamp;
     private String socketId;
     private String protocolVersion;
     private String negotiatedSubProtocol;
@@ -18,6 +21,7 @@ public class SocketLogSearchable extends GenericSearchable {
 
 
     public SocketLogSearchable(Session session) {
+        this.timestamp = new Date();
         this.socketId = session.getId();
         this.protocolVersion = session.getProtocolVersion();
         this.negotiatedSubProtocol = session.getNegotiatedSubprotocol();
@@ -55,6 +59,10 @@ public class SocketLogSearchable extends GenericSearchable {
     @Override
     public String getIndexName() {
         return "socket-log";
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
     }
 
     public String getSocketId() {
