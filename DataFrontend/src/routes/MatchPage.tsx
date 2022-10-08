@@ -11,11 +11,12 @@ export default function MatchPage() {
     const navigate = useNavigate();
     let client;
     let matchState : any;
-    let scale = {} as GameMapScaleEntity;
+    let mapScale = {} as GameMapScaleEntity;
+    let canvasSize = getCanvasSize();
 
     useEffect(() => {
         if (match) {
-            new GameMapService().getMapScale(match.map).then(data => {scale = data});
+            new GameMapService().getMapScale(match.map).then(data => {mapScale = data});
         } else {
             navigate("/");
             return;
@@ -24,7 +25,11 @@ export default function MatchPage() {
         client.onmessage = (message) => {
             matchState = JSON.parse(message.data);
         }
-    })
+    });
+
+    function getCanvasSize() : number {
+        return window.screen.height - 125;
+    }
 
     let bg : p5.Image;
     let playerBlue : p5.Image;
@@ -117,7 +122,7 @@ export default function MatchPage() {
 
             bg = p5Instance.loadImage('/img/map/' + match.map + '.png');
         }
-        p5Instance.setup = () => p5Instance.createCanvas(1024, 1024, p5Instance.P2D);
+        p5Instance.setup = () => p5Instance.createCanvas(canvasSize, canvasSize, p5Instance.P2D);
 
         p5Instance.draw = () => {
             p5Instance.background(bg as p5.Image, 255 as number);
@@ -128,11 +133,17 @@ export default function MatchPage() {
         };
     }
 
+    function scalePosition(position : number) : number {
+        return position / 1024 * canvasSize;
+    }
+
     function renderPlayers(p5Instance : P5Instance) : void {
-        const imageScale : number = scale.scale / 8
+        const imageScale : number = mapScale.scale / 8
         for(const player of matchState.players) {
             p5Instance.push()
-            p5Instance.translate((player.position.x + scale.xOffset) / scale.scale, (player.position.y * -1 + scale.yOffset) / scale.scale);
+            p5Instance.translate(
+                scalePosition((player.position.x + mapScale.xOffset) / mapScale.scale),
+                scalePosition((player.position.y * -1 + mapScale.yOffset) / mapScale.scale));
 
             let playerIcon : p5.Image;
 
@@ -144,14 +155,22 @@ export default function MatchPage() {
                     } else {
                         playerIcon = playerOrangeTitan;
                     }
-                    p5Instance.image(playerIcon, -(15 / imageScale), -(19 / imageScale),30 / imageScale,38 / imageScale);
+                    p5Instance.image(playerIcon,
+                        scalePosition(-(15 / imageScale)),
+                        scalePosition(-(19 / imageScale)),
+                        scalePosition(30 / imageScale),
+                        scalePosition(38 / imageScale));
                 } else {
                     if(player.team === 2) {
                         playerIcon = playerBlue;
                     } else {
                         playerIcon = playerOrange;
                     }
-                    p5Instance.image(playerIcon, -(9.5 / imageScale), -(12.5 / imageScale),19 / imageScale,25 / imageScale);
+                    p5Instance.image(playerIcon,
+                        scalePosition(-(9.5 / imageScale)),
+                        scalePosition(-(12.5 / imageScale)),
+                        scalePosition(19 / imageScale),
+                        scalePosition(25 / imageScale));
                 }
             } else {
                 if(player.team === 2) {
@@ -159,28 +178,39 @@ export default function MatchPage() {
                 } else {
                     playerIcon = playerOrangeDead;
                 }
-                p5Instance.image(playerIcon, -(9.5 / imageScale), -(12.5 / imageScale),15 / imageScale,19 / imageScale);
+                p5Instance.image(playerIcon,
+                    scalePosition(-(9.5 / imageScale)),
+                    scalePosition(-(12.5 / imageScale)),
+                    scalePosition(15 / imageScale),
+                    scalePosition(19 / imageScale));
             }
             p5Instance.pop()
         }
     }
 
     function renderNpcs(p5Instance : P5Instance) : void {
-        const imageScale : number = scale.scale / 8
+        const imageScale : number = mapScale.scale / 8
         for(const npc of matchState.npcs) {
             const npcIcon = getNpcIcon(npc.npcClass, npc.team)
             p5Instance.push()
-            p5Instance.translate((npc.position.x + scale.xOffset) / scale.scale, (npc.position.y * -1 + scale.yOffset) / scale.scale);
-            if (npc.npcClass == "npc_titan" || npc.npcClass == "npc_dropship") {
+            p5Instance.translate(
+                scalePosition((npc.position.x + mapScale.xOffset) / mapScale.scale),
+                scalePosition((npc.position.y * -1 + mapScale.yOffset) / mapScale.scale));
+
+            if (npc.npcClass === "npc_titan" || npc.npcClass === "npc_dropship") {
                 p5Instance.rotate(Math.PI / 180 * (90 - npc.rotation.y));
             }
-            p5Instance.image(npcIcon, -(30 / imageScale), -(30 / imageScale),30 / imageScale,30 / imageScale);
+            p5Instance.image(npcIcon,
+                scalePosition(-(30 / imageScale)),
+                scalePosition(-(30 / imageScale)),
+                scalePosition(30 / imageScale),
+                scalePosition(30 / imageScale));
             p5Instance.pop();
         }
     }
 
     function getNpcIcon(npcClass: string, team : number) : p5.Image {
-        if (team == 3) {
+        if (team === 3) {
             switch (npcClass) {
                 case "npc_soldier":
                     return npcSoliderOrange;
@@ -202,7 +232,7 @@ export default function MatchPage() {
                 default:
                     return npcIconOrange;
             }
-        } else if (team == 2) {
+        } else if (team === 2) {
             switch (npcClass) {
                 case "npc_soldier":
                     return npcSoliderBlue;
@@ -250,8 +280,10 @@ export default function MatchPage() {
 
     return (
         <div>
-            <h2>{match.id}</h2>
-            <ReactP5Wrapper sketch={sketch} />
+            <h2>{match.nsServerName}</h2>
+            <div>
+                <ReactP5Wrapper sketch={sketch} />
+            </div>
         </div>
     );
 }
