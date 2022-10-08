@@ -9,13 +9,23 @@ export interface HeatmapProps {
 
 export default function Heatmap(props : HeatmapProps) {
 
+    let canvasSize = getCanvasSize();
+
+    function getCanvasSize() : number {
+        return window.screen.height - 125;
+    }
+
+    function scalePosition(position : number) : number {
+        return position / 1024 * canvasSize;
+    }
+
     function sketch(p5Instance : P5Instance) {
         let bg: p5.Image
 
         p5Instance.preload = () => {
             bg = p5Instance.loadImage('/img/map/' + props.map.name + '.png');
         }
-        p5Instance.setup = () => p5Instance.createCanvas(1024, 1024, p5Instance.P2D);
+        p5Instance.setup = () => p5Instance.createCanvas(canvasSize, canvasSize, p5Instance.P2D);
 
         p5Instance.draw = () => {
             p5Instance.background(bg as p5.Image, 255 as number);
@@ -26,7 +36,11 @@ export default function Heatmap(props : HeatmapProps) {
 
                     p5Instance.fill(c);
                     p5Instance.noStroke();
-                    p5Instance.rect(props.heatmap.data.entries[i].x, props.heatmap.data.entries[i].y, 4, 4);
+                    p5Instance.rect(
+                        scalePosition(props.heatmap.data.entries[i].x),
+                        scalePosition(props.heatmap.data.entries[i].y),
+                        scalePosition(4),
+                        scalePosition(4));
                 }
             }
         };
