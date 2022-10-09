@@ -9,36 +9,43 @@ namespace CSNamedPipeServer
 {
     public static class GloVars
     {
-        public static string argUrl;
-        public static string argUserKey;
-        private const int userKeyLength = 47;
+        public const LogMode ArgLogMode = LogMode.None;
+
+        public static string ArgUrl;
+        public static string ArgUserKey;
+        private const int UserKeyLength = 47;
+
+        public static IMessageProcessor GetProcessor()
+        {
+            return new RestProcessor();
+        }
 
         public static void LoadSettings(string _userKey = "", string _url = "")
         {
             if (IsValidSettings || (!String.IsNullOrWhiteSpace(_userKey) && !String.IsNullOrWhiteSpace(_url)))
             {
-                if (String.IsNullOrWhiteSpace(_userKey)) { /*argUserKey = ConfigurationManager.AppSettings.Get("userkey");*/ }
+                if (String.IsNullOrWhiteSpace(_userKey)) { /*ArgUserKey = ConfigurationManager.AppSettings.Get("userkey");*/ }
                 else
                 {
-                    argUserKey = _userKey;
+                    ArgUserKey = _userKey;
                     //ConfigurationManager.AppSettings.Set("userkey", _userKey);
                 }
-                if (argUserKey.Length != userKeyLength)
+                if (ArgUserKey.Length != UserKeyLength)
                     throw new InvalidArgumentsException("User key has invalid length");
 
-                if (String.IsNullOrWhiteSpace(_url)) { /*argUrl = ConfigurationManager.AppSettings.Get("url");*/ }
+                if (String.IsNullOrWhiteSpace(_url)) { /*ArgUrl = ConfigurationManager.AppSettings.Get("url");*/ }
                 else
                 {
-                    argUrl = _url;
-                    if (argUrl[argUrl.Length - 1] != '/')
-                        argUrl += '/';
+                    ArgUrl = _url;
+                    if (ArgUrl[ArgUrl.Length - 1] != '/')
+                        ArgUrl += '/';
                     //ConfigurationManager.AppSettings.Set("url", _url);
                 }
-                bool result = Uri.TryCreate(argUrl, UriKind.Absolute, out Uri uriResult)
+                bool result = Uri.TryCreate(ArgUrl, UriKind.Absolute, out Uri uriResult)
                     && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
                 if (!result)
                 {
-                    throw new InvalidArgumentsException("Invalid Url: " + argUrl);
+                    throw new InvalidArgumentsException("Invalid Url: " + ArgUrl);
                 }
             }
             else
