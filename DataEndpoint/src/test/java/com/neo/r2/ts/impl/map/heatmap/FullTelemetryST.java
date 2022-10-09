@@ -7,7 +7,7 @@ import java.io.FileReader;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 
-class FullTelemetrySystemTest {
+class FullTelemetryST {
 
     protected static final String GENERAL_PIPE_NAME = "\\\\.\\pipe\\GameDataPipe";
     protected static final String HOST = "http://127.0.0.1:8090/api/v1";
