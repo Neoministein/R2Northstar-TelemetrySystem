@@ -12,13 +12,13 @@ import com.neo.util.framework.api.persistence.search.SearchRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 @ApplicationScoped
 public class MatchStateService {
+
+    protected static final String BROADCAST_END = "MATCH_END";
 
     protected static final List<MatchEvent> BASIC_MATCH_EVENTS = List.of(
             MatchEvent.CONNECT,
@@ -56,6 +56,11 @@ public class MatchStateService {
             searchRepository.index(matchState);
             searchRepository.index(parseStateToEvents(gameSate));
         }
+    }
+
+    public void matchEnded(UUID matchId) {
+        matchStateOutputSocket.broadcast(matchId.toString(), BROADCAST_END);
+        globalGameState.removeGameState(matchId);
     }
 
     protected List<MatchEventSearchable> parseStateToEvents(JsonNode state) {
