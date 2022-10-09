@@ -1,5 +1,6 @@
 package com.neo.r2.ts.impl.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.persistence.entity.mapper.JsonNodeStringJavaDescriptor;
@@ -49,7 +50,7 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
     private String description;
 
     @ManyToOne
-        @JsonView(Views.Public.class)
+        @JsonIgnore
     private Match match;
 
     public Long getId() {

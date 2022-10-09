@@ -55,7 +55,7 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
     private String owner;
 
     @OneToMany(mappedBy = TABLE_NAME, orphanRemoval = true, cascade = CascadeType.ALL)
-        @JsonView(Views.Public.class)
+        @JsonIgnore
     private List<Heatmap> heatmaps = new ArrayList<>();
 
     public UUID getId() {

@@ -35,6 +35,7 @@ public class MatchService {
     }
     public void addHeatmap(Match match, Heatmap heatmap) {
         match.getHeatmaps().add(heatmap);
+        heatmap.setMatch(match);
         try {
             entityRepository.edit(match);
         } catch (RollbackException ex) {
