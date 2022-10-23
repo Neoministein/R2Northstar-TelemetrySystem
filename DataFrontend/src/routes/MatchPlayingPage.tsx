@@ -30,9 +30,10 @@ export default function MatchPlayingPage() {
                 navigate("match/", {state: match})
             } else {
                 matchState = JSON.parse(message.data);
-                const timePassedFormatted = millisToMinutesAndSeconds(message.data.timePassed);
+                const timePassedFormatted = millisToMinutesAndSeconds(matchState.timePassed);
                 if (timePassedFormatted != time) {
-                    setTime(timePassedFormatted);
+                    //Currently disabled because it causes p5 to reload every time
+                    //setTime(timePassedFormatted);
                 }
             }
 
@@ -145,7 +146,7 @@ export default function MatchPlayingPage() {
         <div>
             <h2>{match.nsServerName} {time}</h2>
             <div>
-                <ReactP5Wrapper sketch={sketch} />
+                <ReactP5Wrapper sketch={sketch} shouldComponentUpdate={false} />
             </div>
         </div>
     );
