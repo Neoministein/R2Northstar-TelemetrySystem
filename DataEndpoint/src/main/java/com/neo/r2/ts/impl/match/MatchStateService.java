@@ -44,23 +44,29 @@ public class MatchStateService {
 
     @Inject
     public MatchStateService(ConfigService configService) {
-        shouldSaveNpcPosition = configService.get("r2ts").get("shouldSaveNpcPosition").asBoolean().orElse(false);
+        shouldSaveNpcPosition = configService.get("r2ts.shouldSaveNpcPosition").asBoolean().orElse(false);
     }
 
-    public void updateGameState(JsonNode gameSate) {
-        String matchId = gameSate.get("matchId").asText();
-        matchStateOutputSocket.broadcast(matchId, JsonUtil.toJson(gameSate));
-        globalGameState.setCurrentMatchState(matchId, gameSate);
+    public void updateGameState(JsonNode matchState) {
+        MatchStateWrapper matchStateWrapper = new MatchStateWrapper(matchState);
+
+        String matchId = matchState.get("matchId").asText();
+        matchStateOutputSocket.broadcast(matchId, JsonUtil.toJson(matchState));
+        globalGameState.setCurrentMatchState(matchId, matchStateWrapper);
         if (searchRepository.enabled()) {
-            MatchStateSearchable matchState = new MatchStateSearchable(gameSate.deepCopy());
-            searchRepository.index(matchState);
-            searchRepository.index(parseStateToEvents(gameSate));
+            MatchStateSearchable searchable = new MatchStateSearchable(matchState.deepCopy());
+            searchRepository.index(searchable);
+            searchRepository.index(parseStateToEvents(matchState));
         }
     }
 
     public void matchEnded(UUID matchId) {
         matchStateOutputSocket.broadcast(matchId.toString(), BROADCAST_END);
         globalGameState.removeGameState(matchId);
+    }
+
+    public int getNumberOfPlayerInMatch(UUID matchId) {
+        return globalGameState.getCurrentMatchState(matchId).getNumberOfPlayers();
     }
 
     protected List<MatchEventSearchable> parseStateToEvents(JsonNode state) {
@@ -90,7 +96,7 @@ public class MatchStateService {
         return matchEventList;
     }
 
-    public List<MatchEventSearchable> parseBasicEvents(Map<String, JsonNode> players, JsonNode state) {
+    protected List<MatchEventSearchable> parseBasicEvents(Map<String, JsonNode> players, JsonNode state) {
         List<MatchEventSearchable> basicEvents = new ArrayList<>();
         for (MatchEvent basicEvent : BASIC_MATCH_EVENTS) {
             for (JsonNode event: state.get(MatchStateSearchable.F_EVENTS).get(basicEvent.fieldName)) {
@@ -102,7 +108,7 @@ public class MatchStateService {
         return basicEvents;
     }
 
-    public List<MatchEventSearchable> parseKilledEvent(JsonNode matchState, Map<String, JsonNode> players, Map<String, JsonNode> npcs) {
+    protected List<MatchEventSearchable> parseKilledEvent(JsonNode matchState, Map<String, JsonNode> players, Map<String, JsonNode> npcs) {
         List<MatchEventSearchable> killedEvent = new ArrayList<>();
 
         for (JsonNode event: matchState.get(MatchStateSearchable.F_EVENTS).get(MatchEvent.ENTITY_KILLED.fieldName)) {
@@ -126,7 +132,7 @@ public class MatchStateService {
         return killedEvent;
     }
 
-    public List<MatchEventSearchable> parseNpcLeechedEvent(JsonNode matchState, Map<String, JsonNode> players, Map<String, JsonNode> npcs) {
+    protected List<MatchEventSearchable> parseNpcLeechedEvent(JsonNode matchState, Map<String, JsonNode> players, Map<String, JsonNode> npcs) {
         List<MatchEventSearchable> npcLeeched = new ArrayList<>();
         for (JsonNode event: matchState.get(MatchStateSearchable.F_EVENTS).get(MatchEvent.NPC_LEECHED.fieldName)) {
             MatchEventSearchable matchEvent = new MatchEventSearchable(matchState, MatchEvent.NPC_LEECHED);

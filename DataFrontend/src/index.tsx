@@ -4,7 +4,7 @@ import './index.css';
 import MatchListPage from './routes/MatchListPage';
 import reportWebVitals from './reportWebVitals';
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import MatchPage from "./routes/MatchPage";
+import MatchPlayingPage from "./routes/MatchPlayingPage";
 import HeatmapListPage from "./routes/HeatmapListPage";
 import HeatmapMapPage from "./routes/HeatmapMapPage";
 
@@ -14,7 +14,7 @@ root.render(
     <BrowserRouter>
         <Routes>
             <Route path="/" element={<MatchListPage />}/>
-            <Route path="/match/" element={<MatchPage />}/>
+            <Route path="/match/" element={<MatchPlayingPage />}/>
             <Route path="/heatmap/" element={<HeatmapListPage />}/>
             <Route path="/heatmap/map" element={<HeatmapMapPage/>}/>
             <Route

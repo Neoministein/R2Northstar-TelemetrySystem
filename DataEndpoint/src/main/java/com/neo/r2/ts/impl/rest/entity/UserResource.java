@@ -70,7 +70,7 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
             } catch (RollbackException e) {
                 throw new InternalJsonException("Unable to create initial user");
             }
-            return parseEntityToResponse(userToken, Views.Internal.class);
+            return parseToResponse(userToken, Views.Internal.class);
         }
         return responseGenerator.error(403,customRestRestResponse.getForbidden());
     }

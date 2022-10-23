@@ -11,7 +11,6 @@ import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.r2.ts.impl.persistence.entity.Match;
 import com.neo.r2.ts.impl.persistence.searchable.MatchEvent;
 import com.neo.r2.ts.impl.persistence.searchable.MatchEventSearchable;
-import com.neo.util.common.impl.exception.InternalJsonException;
 import com.neo.util.common.impl.exception.InternalLogicException;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.aggregation.*;
@@ -78,7 +77,7 @@ public class HeatmapGeneratorImpl {
     }
 
     public Heatmap calculateMatch(String matchId, HeatmapType heatmapType) {
-        Optional<Match> optionalMatch = matchService.getMatch(matchId);
+        Optional<Match> optionalMatch = matchService.getMatch(matchId, true);
         if (optionalMatch.isEmpty()) {
             throw new InternalLogicException("Unknown match id");
         }

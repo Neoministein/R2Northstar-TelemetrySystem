@@ -23,6 +23,10 @@ export default function MatchListPage() {
         return new Date(rowData.startDate).toISOString().replace("T", " ").split(".")[0];
     }
 
+    const numberOfPlayers = (rowData: MatchEntity)  => {
+        return rowData.numberOfPlayers + "/" + "?";
+    }
+
     return (
         <div>
             <div className="card">
@@ -30,10 +34,11 @@ export default function MatchListPage() {
                     e => {
                         navigate("match/", {state: e.value});
                     }}>
-                    <Column field="nsServerName" header="Ns Server Name"></Column>
-                    <Column field="map" header="Map"></Column>
-                    <Column field="gamemode" header="Gamemode"></Column>
-                    <Column field="startDate" header="Start date" body={toDateString}></Column>
+                    <Column header="Ns Server Name" field="nsServerName"></Column>
+                    <Column header="Players" body={numberOfPlayers}></Column>
+                    <Column header="Map" field="map"></Column>
+                    <Column header="Gamemode" field="gamemode"></Column>
+                    <Column header="Start date" body={toDateString}></Column>
                 </DataTable>
             </div>
         </div>

@@ -21,13 +21,16 @@ public class MatchService {
     @Inject
     protected EntityRepository entityRepository;
 
-    public Optional<Match> getMatch(String id) {
+    public Optional<Match> getMatch(String id, boolean loadHeatmap) {
         if (StringUtils.isEmpty(id)) {
             return Optional.empty();
         }
         try {
             Optional<Match> optionalMatch = entityRepository.find(UUID.fromString(id), Match.class);
-            optionalMatch.ifPresent(match -> match.getHeatmaps().size());
+            if (loadHeatmap) {
+                optionalMatch.ifPresent(match -> match.getHeatmaps().size());
+            }
+
             return optionalMatch;
         } catch (IllegalArgumentException ex) {
             return Optional.empty();

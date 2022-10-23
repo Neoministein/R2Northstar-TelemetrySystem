@@ -74,9 +74,9 @@ namespace CSNamedPipeServer
                     {
                         NewMatchResponse result = JsonConvert.DeserializeObject<NewMatchResponse>(answer);
 
-                        if (result.data.map == _mapName && result.data.nsServerName == _serverName)
+                        if (result.map == _mapName && result.nsServerName == _serverName)
                         {
-                            matchId = result.data.id;
+                            matchId = result.id;
                         }
                         else
                         {

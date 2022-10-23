@@ -53,7 +53,7 @@ public class MatchStateResource {
     @Path("/{id}")
     public Response get(@PathParam("id") String id) {
         try {
-            JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id));
+            JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id)).getJson();
             return responseGenerator.success(state);
         } catch (IllegalArgumentException ex) {
             return responseGenerator.error(404, "","");

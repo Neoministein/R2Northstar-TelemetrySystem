@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.map.heatmap.HeatmapQueueService;
 import com.neo.r2.ts.impl.map.heatmap.QueueableHeatmapInstruction;
 import com.neo.r2.ts.impl.map.scaling.MapScalingService;
+import com.neo.r2.ts.impl.match.MatchService;
 import com.neo.r2.ts.impl.match.MatchStateService;
+import com.neo.r2.ts.impl.rest.dto.ListDto;
+import com.neo.r2.ts.impl.rest.dto.MatchDto;
 import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
 import com.neo.r2.ts.impl.rest.CustomRestRestResponse;
 import com.neo.r2.ts.impl.persistence.entity.Match;
@@ -67,6 +70,9 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     @Inject
     protected MapScalingService mapScalingService;
 
+    @Inject
+    protected MatchService matchService;
+
     @POST
     @Secured
     @Path(P_NEW)
@@ -89,7 +95,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
             throw new InternalLogicException(ex);
         }
         LOGGER.info("New match registered {}", match.getId());
-        return parseEntityToResponse(match, Views.Public.class);
+        return parseToResponse(match, Views.Public.class);
     }
 
     @PUT
@@ -123,7 +129,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
                     requestDetails,
                     QueueableHeatmapInstruction.QUEUE_MESSAGE_TYPE,
                     queueableHeatmapInstruction));
-            return parseEntityToResponse(match, Views.Public.class);
+            return parseToResponse(match, Views.Public.class);
         } catch (RollbackException ex) {
             throw new InternalLogicException(ex);
         } catch (IllegalArgumentException ex) {
@@ -135,7 +141,10 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     @Path(P_PLAYING)
     @Transactional
     public Response playing() {
-        String result = JsonUtil.toJson(entityRepository.find(Q_ARE_PLAYING), Views.Public.class);
+        List<MatchDto> matchDtos = entityRepository.find(Q_ARE_PLAYING).getHits().stream()
+                .map(match -> new MatchDto(match, matchStateService.getNumberOfPlayerInMatch(match.getId()))).toList();
+
+        String result = JsonUtil.toJson(new ListDto(matchDtos), getSerializationScope());
         return responseGenerator.success(JsonUtil.fromJson(result));
     }
 
@@ -143,7 +152,12 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
     @Path("/{id}")
     @Transactional
     public Response match(@PathParam("id") String id) {
-        return super.getByPrimaryKey(id);
+        Optional<Match> match = matchService.getMatch(id, false);
+        if (match.isEmpty()) {
+            return this.responseGenerator.error(404, this.entityRestResponse.getNotFoundError());
+        }
+
+        return parseToResponse(new MatchDto(match.get(), matchStateService.getNumberOfPlayerInMatch(match.get().getId())), getSerializationScope());
     }
 
     @GET
@@ -167,7 +181,7 @@ public class MatchResource extends AbstractEntityRestEndpoint<Match> {
                 return responseGenerator.error(404, entityRestResponse.getNotFoundError());
             }
 
-            return parseEntityToResponse(optMatch.get(), Views.Public.class);
+            return parseToResponse(optMatch.get(), Views.Public.class);
         } catch (IllegalArgumentException ex) {
             return responseGenerator.error(404, entityRestResponse.getNotFoundError());
         }

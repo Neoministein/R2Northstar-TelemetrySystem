@@ -6,16 +6,16 @@ export interface MatchEntity {
     map: string
     gamemode: string
     startDate: number
-    heatmaps: []
+    numberOfPlayers: number
 }
 
 export class MatchService {
 
     getMatch(id : string) : Promise<MatchEntity>{
-        return fetch(AppConfig.apiUrl + "/match/" + id ).then(res => res.json()).then(d => d.data);
+        return fetch(AppConfig.apiUrl + "/match/" + id ).then(res => res.json());
     }
 
     getRunningMatches() : Promise<MatchEntity[]> {
-        return fetch(AppConfig.apiUrl + "/match/playing").then(res => res.json()).then(d => d.data.hits);
+        return fetch(AppConfig.apiUrl + "/match/playing").then(res => res.json()).then(d => d.hits);
     }
 }
