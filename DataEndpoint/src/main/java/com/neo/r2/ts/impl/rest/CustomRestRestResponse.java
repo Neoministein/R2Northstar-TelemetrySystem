@@ -12,6 +12,7 @@ public class CustomRestRestResponse {
     protected final ObjectNode unsupportedMap;
     protected final ObjectNode matchAlreadyEnded;
 
+    protected final ObjectNode notARunningMatch;
     protected final ObjectNode service;
     protected final ObjectNode forbidden;
 
@@ -19,6 +20,7 @@ public class CustomRestRestResponse {
     public CustomRestRestResponse(ResponseGenerator responseGenerator) {
         unsupportedMap = responseGenerator.errorObject("tmly/000","Unknown or unsupported map");
         matchAlreadyEnded = responseGenerator.errorObject("tmly/001","Match has already ended");
+        notARunningMatch = responseGenerator.errorObject("tmly/002", "Not a running match");
         service = responseGenerator.errorObject("svc/000", "Internal service not available");
         forbidden = responseGenerator.errorObject("auth/000", "Unauthorized");
     }
@@ -29,6 +31,10 @@ public class CustomRestRestResponse {
 
     public ObjectNode getMatchAlreadyEnded() {
         return matchAlreadyEnded;
+    }
+
+    public ObjectNode getNotARunningMatch() {
+        return notARunningMatch;
     }
 
     public ObjectNode getService() {

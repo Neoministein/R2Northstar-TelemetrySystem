@@ -66,7 +66,7 @@ public class MatchStateService {
     }
 
     public int getNumberOfPlayerInMatch(UUID matchId) {
-        return globalGameState.getCurrentMatchState(matchId).getNumberOfPlayers();
+        return globalGameState.getCurrentMatchState(matchId).map(MatchStateWrapper::getNumberOfPlayers).orElse(0);
     }
 
     protected List<MatchEventSearchable> parseStateToEvents(JsonNode state) {

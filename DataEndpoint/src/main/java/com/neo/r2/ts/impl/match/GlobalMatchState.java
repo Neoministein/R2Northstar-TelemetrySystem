@@ -3,6 +3,7 @@ package com.neo.r2.ts.impl.match;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -14,8 +15,8 @@ public class GlobalMatchState {
         currentMatchState.put(UUID.fromString(matchId), state);
     }
 
-    public MatchStateWrapper getCurrentMatchState(UUID uuid) {
-        return currentMatchState.get(uuid);
+    public Optional<MatchStateWrapper> getCurrentMatchState(UUID uuid) {
+        return Optional.ofNullable(currentMatchState.get(uuid));
     }
 
     public void removeGameState(UUID uuid) {

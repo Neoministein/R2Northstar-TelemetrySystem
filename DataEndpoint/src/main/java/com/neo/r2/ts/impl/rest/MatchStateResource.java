@@ -3,6 +3,7 @@ package com.neo.r2.ts.impl.rest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.match.MatchStateService;
 import com.neo.r2.ts.impl.match.GlobalMatchState;
+import com.neo.r2.ts.impl.match.MatchStateWrapper;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
@@ -53,11 +54,15 @@ public class MatchStateResource {
     @Path("/{id}")
     public Response get(@PathParam("id") String id) {
         try {
-            JsonNode state = globalGameState.getCurrentMatchState(UUID.fromString(id)).getJson();
-            return responseGenerator.success(state);
-        } catch (IllegalArgumentException ex) {
-            return responseGenerator.error(404, "","");
+            Optional<MatchStateWrapper> matchStateOptional = globalGameState.getCurrentMatchState(UUID.fromString(id));
+            if (matchStateOptional.isPresent()) {
+                return responseGenerator.success(matchStateOptional.get().getJson());
+            }
+        } catch (IllegalArgumentException ignored) {
+            //Happens when UUID is invalid 
         }
+        return responseGenerator.error(404, customRestRestResponse.getNotARunningMatch());
+
     }
 
     @GET
