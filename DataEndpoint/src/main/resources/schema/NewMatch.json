@@ -12,12 +12,16 @@
     "gamemode": {
       "type": "string",
       "maxLength": 256
+    },
+    "maxPlayers": {
+      "type": "number"
     }
   },
   "additionalProperties": false,
   "required": [
     "map",
     "ns_server_name",
-    "gamemode"
+    "gamemode",
+    "maxPlayers"
   ]
 }

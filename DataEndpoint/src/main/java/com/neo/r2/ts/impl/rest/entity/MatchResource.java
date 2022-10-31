@@ -55,7 +55,8 @@ public class MatchResource {
         return responseGenerator.success(JsonUtil.fromPojo(matchFacade.createNewMatch(
                         jsonNode.get("ns_server_name").asText(),
                         jsonNode.get("map").asText(),
-                        jsonNode.get("gamemode").asText()), Views.Public.class));
+                        jsonNode.get("gamemode").asText(),
+                        jsonNode.get("maxPlayers").asInt()), Views.Public.class));
     }
 
     @PUT

@@ -23,6 +23,7 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
     public static final String C_MAP = "map";
     public static final String C_START_DATE = "startDate";
     public static final String C_OWNER = "owner";
+    public static final String C_MAX_PLAYERS = "maxPlayers";
 
     @Id
     @GeneratedValue
@@ -45,6 +46,10 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
     @Column(name = C_GAMEMODE, nullable = false)
         @JsonView(Views.Public.class)
     private String gamemode;
+
+    @Column(name = C_MAX_PLAYERS, nullable = false)
+        @JsonView(Views.Public.class)
+    private Integer maxPlayers;
 
     @Column(name = C_START_DATE, nullable = false, updatable = false)
         @JsonView(Views.Public.class)
@@ -96,6 +101,14 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
 
     public void setGamemode(String gamemode) {
         this.gamemode = gamemode;
+    }
+
+    public Integer getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public void setMaxPlayers(Integer maxPlayers) {
+        this.maxPlayers = maxPlayers;
     }
 
     public Date getStartDate() {

@@ -5,7 +5,7 @@ namespace CSNamedPipeServer;
 
 public class RestProcessor : IMessageProcessor
 {
-    private Match m_currentMatch = new Match("empty0", "empty1", "empty2", false, true); // Needed, because its assigned outside of the constructor
+    private Match m_currentMatch = new Match("empty0", "empty1", "empty2", "0",false, true); // Needed, because its assigned outside of the constructor
     private DynamicInfos m_currentInfo = new DynamicInfos();
     private DateTime m_startTime;
     private bool m_closed = false;
@@ -26,7 +26,7 @@ public class RestProcessor : IMessageProcessor
                     sendCurrentInfo = true;
                     break;
                 case EventType.WaitingForPlayers: // 1
-                    // |1|MapName|Gamemode|Servername
+                    // |1|MapName|Gamemode|Servername|MaxPlayers
                     if (m_currentMatch.isRunning)
                     {
                         if (GloVars.ArgLogMode >= LogMode.Event)
@@ -35,7 +35,7 @@ public class RestProcessor : IMessageProcessor
                     }
                     if (GloVars.ArgLogMode >= LogMode.Event)
                         Console.Write("Event: WaitingForPlayers: gamemode: " + cmd[2] + ", mapName: " + cmd[1]);
-                    m_currentMatch = new Match(cmd[1], cmd[2], cmd[3]);
+                    m_currentMatch = new Match(cmd[1], cmd[2], cmd[3], cmd[4]);
                     m_startTime = DateTime.Now;
                     if (GloVars.ArgLogMode >= LogMode.Event)
                         Console.WriteLine(", matchId: " + m_currentMatch.matchId);

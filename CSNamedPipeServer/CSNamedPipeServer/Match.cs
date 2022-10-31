@@ -27,6 +27,10 @@ namespace CSNamedPipeServer
         /// </summary>
         private string serverName;
         /// <summary>
+        /// Max amount of players that can join the server Name of the server
+        /// </summary>
+        private int maxPlayers = 0;
+        /// <summary>
         /// Dictionary of all players currently on the server
         /// </summary>
         public Dictionary<string, Player> players = new Dictionary<string, Player>();
@@ -42,13 +46,15 @@ namespace CSNamedPipeServer
         /// <param name="_matchId">Id of map given by the backend</param>
         /// <param name="_serverName">Name of the northstar server</param>
         /// <param name="_dontAskServer">Backend wont be notified - for initial named pipe connection</param>
-        public Match(string _mapName, string _gamemode, string _serverName, bool _startImmediatly = true, bool _dontAskServer = false)
+        public Match(string _mapName, string _gamemode, string _serverName, string _maxPlayers ,bool _startImmediatly = true, bool _dontAskServer = false)
         {
             mapName = _mapName;
             gamemode = _gamemode;
+            serverName =  _serverName;
+            Int32.TryParse(_maxPlayers, out maxPlayers);
             if (!_dontAskServer)
             {
-                Task t1 = Task.Run(() => AssignMatchId(_mapName, _gamemode, _serverName).Wait());
+                Task t1 = Task.Run(() => AssignMatchId(_mapName, _gamemode, _serverName, maxPlayers).Wait());
                 isRunning = _startImmediatly;
             }
         }
@@ -60,9 +66,9 @@ namespace CSNamedPipeServer
         /// <param name="_gamemode">Gamemode short term</param>
         /// <returns></returns>
         /// <exception cref="WrongAnswerException">Thrown when the data is for a different server</exception>
-        public async Task AssignMatchId(string _mapName, string _gamemode, string _serverName)
+        public async Task AssignMatchId(string _mapName, string _gamemode, string _serverName, int _maxPlayers)
         {
-            NewMatchRequest newResponse = new NewMatchRequest() { map = _mapName, ns_server_name = _serverName, gamemode = _gamemode };
+            NewMatchRequest newResponse = new NewMatchRequest() { map = _mapName, ns_server_name = _serverName, gamemode = _gamemode, maxPlayers = _maxPlayers};
             if (PipeReader.argUseHttp)
             {
                 string answer = await Output.PostJsonHttpClient(GloVars.ArgUrl + "/match/new", JsonConvert.SerializeObject(newResponse)); // "localhost:8081/api/v1/match/new"

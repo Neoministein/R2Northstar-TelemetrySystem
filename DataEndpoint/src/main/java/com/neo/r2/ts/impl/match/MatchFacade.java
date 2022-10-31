@@ -31,7 +31,7 @@ public class MatchFacade {
 
 
     @Transactional
-    public Match createNewMatch(String nsServerName, String map, String gamemode) {
+    public Match createNewMatch(String nsServerName, String map, String gamemode, int maxPlayers) {
         if (mapScalingService.getMap(map).isEmpty()) {
             throw new ValidationException(CustomConstants.EX_UNSUPPORTED_MAP, map);
         }
@@ -40,6 +40,7 @@ public class MatchFacade {
         match.setMap(map);
         match.setNsServerName(nsServerName);
         match.setGamemode(gamemode);
+        match.setMaxPlayers(maxPlayers);
 
         entityRepository.create(match);
         LOGGER.info("New match registered {}", match.getId());

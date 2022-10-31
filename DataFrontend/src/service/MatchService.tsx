@@ -6,6 +6,7 @@ export interface MatchEntity {
     map: string
     gamemode: string
     startDate: number
+    maxPlayers: number
     numberOfPlayers: number
 }
 

@@ -74,5 +74,6 @@
         public string map;
         public string ns_server_name;
         public string gamemode;
+        public int maxPlayers;
     }
 }

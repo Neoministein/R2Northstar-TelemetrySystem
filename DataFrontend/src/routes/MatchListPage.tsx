@@ -24,7 +24,7 @@ export default function MatchListPage() {
     }
 
     const numberOfPlayers = (rowData: MatchEntity)  => {
-        return rowData.numberOfPlayers + "/" + "?";
+        return rowData.numberOfPlayers + "/" + rowData.maxPlayers;
     }
 
     return (

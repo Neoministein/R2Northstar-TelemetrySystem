@@ -37,7 +37,7 @@ void function OnWaitingForPlayers()
         NSCloseNamedPipe( "2" )
         isMatchRunning = false
     }
-    NSOpenNamedPipe( "1|" + GetMapName() + "|" + GameRules_GetGameMode() + "|" + GetConVarString( "ns_server_name" ), "2" )
+    NSOpenNamedPipe( "1|" + GetMapName() + "|" + GameRules_GetGameMode() + "|" + GetConVarString( "ns_server_name" ) + "|" + GetCurrentPlaylistVarInt( "max_players", 8 ), "2" )
     isMatchRunning = true
 }
 
