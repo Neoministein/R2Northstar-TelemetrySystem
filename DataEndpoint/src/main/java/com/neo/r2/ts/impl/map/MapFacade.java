@@ -16,6 +16,7 @@ import com.neo.util.framework.api.persistence.entity.EntityRepository;
 import com.neo.util.framework.api.persistence.entity.PersistenceEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -51,12 +52,14 @@ public class MapFacade {
                 .orElseThrow(() -> new NoContentFoundException(CustomConstants.EX_NO_HEATMAP_FOR_MAP, map));
     }
 
+    @Transactional
     public Heatmap generateHeatmapForMap(String map) {
         Heatmap heatmap = heatmapFactory.createForMap(getMap(map));
         entityRepository.create(heatmap);
         return heatmap;
     }
 
+    @Transactional
     public Heatmap generateHeatmapForMatch(String matchId, HeatmapType heatmapType) {
         Optional<Match> match = matchService.getMatch(matchId);
         if (match.isEmpty()) {
