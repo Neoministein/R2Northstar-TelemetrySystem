@@ -53,8 +53,8 @@ public class MatchResource {
     @ValidateJsonSchema("NewMatch.json")
     public Response newGame(JsonNode jsonNode) {
         return responseGenerator.success(JsonUtil.fromPojo(matchFacade.createNewMatch(
-                        jsonNode.get("map").asText(),
                         jsonNode.get("ns_server_name").asText(),
+                        jsonNode.get("map").asText(),
                         jsonNode.get("gamemode").asText()), Views.Public.class));
     }
 

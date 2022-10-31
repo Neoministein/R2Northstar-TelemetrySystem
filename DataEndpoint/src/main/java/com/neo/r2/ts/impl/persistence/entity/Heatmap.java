@@ -34,7 +34,7 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
 
     @Column(name = C_HIGHEST_COUNT, nullable = false)
         @JsonView(Views.Public.class)
-    private Long highestCount;
+    private Long highestCount = 0L;
 
     @Column(name = C_MAP, nullable = false)
         @JsonView(Views.Public.class)
