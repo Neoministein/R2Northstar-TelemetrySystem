@@ -1,9 +1,9 @@
 package com.neo.r2.ts.impl.rest;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.neo.r2.ts.impl.match.MatchStateService;
-import com.neo.r2.ts.impl.match.GlobalMatchState;
-import com.neo.r2.ts.impl.match.MatchStateWrapper;
+import com.neo.r2.ts.impl.match.state.MatchStateService;
+import com.neo.r2.ts.impl.match.state.GlobalMatchState;
+import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
@@ -39,9 +39,6 @@ public class MatchStateResource {
     @Inject
     protected MatchStateService gameStateService;
 
-    @Inject
-    protected CustomRestRestResponse customRestRestResponse;
-
     @PUT
     @Secured
     @ValidateJsonSchema("MatchState.json")
@@ -61,7 +58,7 @@ public class MatchStateResource {
         } catch (IllegalArgumentException ignored) {
             //Happens when UUID is invalid 
         }
-        return responseGenerator.error(404, customRestRestResponse.getNotARunningMatch());
+        return responseGenerator.error(404, CustomConstants.EX_ALREADY_MATCH_ENDED);
 
     }
 
@@ -77,6 +74,6 @@ public class MatchStateResource {
             String searchResponse = JsonUtil.toJson(searchRepository.fetch("r2ts-match-state",searchQuery), Views.Public.class);
             return responseGenerator.success(JsonUtil.fromJson(searchResponse));
         }
-        return responseGenerator.error(503, customRestRestResponse.getService());
+        return responseGenerator.error(503, CustomConstants.EX_SERVICE_UNAVAILABLE);
     }
 }

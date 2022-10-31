@@ -1,9 +1,8 @@
 package com.neo.r2.ts.impl.security;
 
 import com.neo.r2.ts.impl.rest.AuthorizationEndpoint;
-import com.neo.util.common.impl.http.LazyHttpExecutor;
-import com.neo.util.common.impl.http.verify.DefaultSuccessResponse;
-import com.neo.util.common.impl.lazy.InternalLazyException;
+import com.neo.util.common.impl.exception.CommonRuntimeException;
+import com.neo.util.common.impl.retry.RetryHttpExecutor;
 import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpointConfig;
@@ -17,7 +16,7 @@ import java.util.List;
 
 public class BasicWebsocketAuthentication extends ServerEndpointConfig.Configurator {
 
-    protected static final LazyHttpExecutor LAZY_HTTP_EXECUTOR = new LazyHttpExecutor();
+    protected static final RetryHttpExecutor RETRY_HTTP_EXECUTOR = new RetryHttpExecutor();
 
     protected static final CloseableHttpClient HTTP_CLIENT = HttpClients.createDefault();
 
@@ -40,9 +39,9 @@ public class BasicWebsocketAuthentication extends ServerEndpointConfig.Configura
         try {
             HttpPost postRequest = new HttpPost("http://localhost:8090/" + AuthorizationEndpoint.RESOURCE_LOCATION);
             postRequest.addHeader(HttpHeaders.AUTHORIZATION, authenticationHeader);
-            LAZY_HTTP_EXECUTOR.execute(HTTP_CLIENT, postRequest, new DefaultSuccessResponse(), 5);
+            RETRY_HTTP_EXECUTOR.execute(HTTP_CLIENT, postRequest,5);
             return true;
-        } catch (InternalLazyException ex) {
+        } catch (CommonRuntimeException ex) {
             return false;
         }
     }

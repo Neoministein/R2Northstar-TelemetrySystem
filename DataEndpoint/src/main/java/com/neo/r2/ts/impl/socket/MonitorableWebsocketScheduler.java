@@ -48,9 +48,4 @@ public class MonitorableWebsocketScheduler extends AbstractScheduler {
     protected Logger getLogger() {
         return LOGGER;
     }
-
-    @Override
-    protected String getName() {
-        return getClass().getSimpleName();
-    }
 }

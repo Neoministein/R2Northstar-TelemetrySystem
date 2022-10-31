@@ -2,7 +2,7 @@ package com.neo.r2.ts.impl.socket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.api.socket.AbstractMonitorableWebsocket;
-import com.neo.r2.ts.impl.match.MatchStateService;
+import com.neo.r2.ts.impl.match.state.MatchStateService;
 import com.neo.r2.ts.impl.security.BasicWebsocketAuthentication;
 import com.neo.util.common.impl.json.JsonSchemaUtil;
 import com.neo.util.common.impl.json.JsonUtil;

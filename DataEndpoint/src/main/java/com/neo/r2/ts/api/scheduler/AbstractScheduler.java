@@ -16,8 +16,6 @@ public abstract class AbstractScheduler {
 
     protected abstract Logger getLogger();
 
-    protected abstract String getName();
-
     @Inject
     protected RequestDetailsProducer requestDetailsProducer;
 
@@ -28,7 +26,7 @@ public abstract class AbstractScheduler {
         RequestContextController requestContextController = requestContextControllerFactory.get();
         requestContextController.activate();
         try {
-            requestDetailsProducer.setRequestDetails(new SchedulerRequestDetails(UUID.randomUUID().toString(), new RequestContext.Scheduler(getName())));
+            requestDetailsProducer.setRequestDetails(new SchedulerRequestDetails(UUID.randomUUID().toString(), new RequestContext.Scheduler(this.getClass().getSimpleName())));
             scheduledAction();
         } catch (Exception ex) {
             getLogger().error("Unexpected error occurred while processing a scheduled action [{}], action won't be retried.", ex.getMessage());

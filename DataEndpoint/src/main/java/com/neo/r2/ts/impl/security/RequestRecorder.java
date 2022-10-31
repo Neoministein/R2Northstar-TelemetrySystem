@@ -2,7 +2,7 @@ package com.neo.r2.ts.impl.security;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.persistence.searchable.RequestLog;
-import com.neo.util.common.impl.exception.InternalJsonException;
+import com.neo.util.common.impl.exception.CommonRuntimeException;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.connection.RequestDetails;
 import com.neo.util.framework.api.persistence.search.SearchRepository;
@@ -73,7 +73,7 @@ public class RequestRecorder implements ContainerResponseFilter {
             if (responseBody.has("code")) {
                 return responseBody.get("code").asText();
             }
-        } catch (InternalJsonException ignored) {
+        } catch (CommonRuntimeException ignored) {
 
         } catch (Exception ex) {
             LOGGER.warn("Unable to parse response body [{}]", ex.getMessage());

@@ -1,10 +1,9 @@
 package com.neo.r2.ts.impl.rest.entity;
 
 import com.neo.r2.ts.impl.persistence.entity.UserToken;
-import com.neo.r2.ts.impl.rest.CustomRestRestResponse;
 import com.neo.r2.ts.impl.security.BasicAuthenticationProvider;
 import com.neo.util.common.api.json.Views;
-import com.neo.util.common.impl.exception.InternalJsonException;
+import com.neo.util.framework.api.FrameworkConstants;
 import com.neo.util.framework.api.persistence.entity.EntityQuery;
 import com.neo.util.framework.api.persistence.entity.EntityResult;
 import com.neo.util.framework.rest.api.security.Secured;
@@ -13,7 +12,6 @@ import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.RollbackException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -28,10 +26,8 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
 
     public static final String P_INIT = "/init";
 
-    @Inject BasicAuthenticationProvider authenticationService;
-
     @Inject
-    CustomRestRestResponse customRestRestResponse;
+    protected BasicAuthenticationProvider authenticationService;
 
     @POST
     @Secured
@@ -65,14 +61,10 @@ public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
             UserToken userToken = new UserToken();
             userToken.setDescription("Admin token");
             userToken.getRoles().add(PERM_INTERNAL);
-            try {
-                entityRepository.create(userToken);
-            } catch (RollbackException e) {
-                throw new InternalJsonException("Unable to create initial user");
-            }
+            entityRepository.create(userToken);
             return parseToResponse(userToken, Views.Internal.class);
         }
-        return responseGenerator.error(403,customRestRestResponse.getForbidden());
+        return responseGenerator.error(403, FrameworkConstants.EX_FORBIDDEN);
     }
 
 
