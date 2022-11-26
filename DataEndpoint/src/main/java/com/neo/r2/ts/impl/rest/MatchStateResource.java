@@ -5,12 +5,14 @@ import com.neo.r2.ts.impl.match.state.MatchStateService;
 import com.neo.r2.ts.impl.match.state.GlobalMatchState;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.util.common.api.json.Views;
-import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.common.impl.exception.ConfigurationException;
+import com.neo.util.common.impl.exception.NoContentFoundException;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.api.persistence.search.SearchQuery;
-import com.neo.util.framework.api.persistence.search.SearchRepository;
+import com.neo.util.framework.api.persistence.search.SearchResult;
+import com.neo.util.framework.rest.api.parser.OutboundJsonView;
 import com.neo.util.framework.rest.api.parser.ValidateJsonSchema;
-import com.neo.util.framework.rest.api.response.ResponseGenerator;
 import com.neo.util.framework.rest.api.security.Secured;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -28,10 +30,7 @@ public class MatchStateResource {
     public static final String RESOURCE_LOCATION = "api/v1/matchstate";
 
     @Inject
-    protected SearchRepository searchRepository;
-
-    @Inject
-    protected ResponseGenerator responseGenerator;
+    protected SearchProvider searchProvider;
 
     @Inject
     protected GlobalMatchState globalGameState;
@@ -44,36 +43,35 @@ public class MatchStateResource {
     @ValidateJsonSchema("MatchState.json")
     public Response put(JsonNode matchState) {
         gameStateService.updateGameState(matchState);
-        return responseGenerator.success();
+        return Response.ok().build();
     }
 
     @GET
     @Path("/{id}")
-    public Response get(@PathParam("id") String id) {
+    public JsonNode get(@PathParam("id") String id) {
         try {
             Optional<MatchStateWrapper> matchStateOptional = globalGameState.getCurrentMatchState(UUID.fromString(id));
             if (matchStateOptional.isPresent()) {
-                return responseGenerator.success(matchStateOptional.get().getJson());
+                return matchStateOptional.get().getJson();
             }
         } catch (IllegalArgumentException ignored) {
             //Happens when UUID is invalid 
         }
-        return responseGenerator.error(404, CustomConstants.EX_ALREADY_MATCH_ENDED);
-
+        throw new NoContentFoundException(CustomConstants.EX_ALREADY_MATCH_ENDED);
     }
 
     @GET
     @Path("/{id}/{offset}")
-    public Response replayData(@PathParam("id") String id, @PathParam("offset") int offset) {
-        if (searchRepository.enabled()) {
+    @OutboundJsonView(Views.Public.class)
+    public SearchResult replayData(@PathParam("id") String id, @PathParam("offset") int offset) {
+        if (searchProvider.enabled()) {
             SearchQuery searchQuery = new SearchQuery(100, List.of(new ExplicitSearchCriteria("matchId", id,false)));
             searchQuery.setFields(null);
             searchQuery.setOnlySource(true);
             searchQuery.setSorting(Map.of("timePassed",true));
             searchQuery.setOffset(offset);
-            String searchResponse = JsonUtil.toJson(searchRepository.fetch("r2ts-match-state",searchQuery), Views.Public.class);
-            return responseGenerator.success(JsonUtil.fromJson(searchResponse));
+            return searchProvider.fetch("r2ts-match-state",searchQuery);
         }
-        return responseGenerator.error(503, CustomConstants.EX_SERVICE_UNAVAILABLE);
+        throw new ConfigurationException(CustomConstants.EX_SERVICE_UNAVAILABLE);
     }
 }

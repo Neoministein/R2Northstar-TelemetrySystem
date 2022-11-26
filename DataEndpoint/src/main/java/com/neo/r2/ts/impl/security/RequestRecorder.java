@@ -5,7 +5,7 @@ import com.neo.r2.ts.impl.persistence.searchable.RequestLog;
 import com.neo.util.common.impl.exception.CommonRuntimeException;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.connection.RequestDetails;
-import com.neo.util.framework.api.persistence.search.SearchRepository;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.impl.connection.HttpRequestDetails;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class RequestRecorder implements ContainerResponseFilter {
     jakarta.inject.Provider<RequestDetails> requestDetailsProvider;
 
     @Inject
-    SearchRepository searchRepository;
+    SearchProvider searchProvider;
 
     @Override
     public void filter(ContainerRequestContext containerRequest,
@@ -53,7 +53,7 @@ public class RequestRecorder implements ContainerResponseFilter {
                         getErrorCodeIfPresent(containerResponse),
                         System.currentTimeMillis() - requestDetails.getRequestStartDate().getTime(),
                         containerRequest.getHeaders().get("User-Agent") != null ? containerRequest.getHeaders().get("User-Agent").toString() : "");
-                if (searchRepository.enabled()) {
+                if (searchProvider.enabled()) {
                     searchResolver(requestSegment);
                 } else {
                     logResolver(requestSegment);
@@ -65,7 +65,7 @@ public class RequestRecorder implements ContainerResponseFilter {
     }
 
     protected String getErrorCodeIfPresent(ContainerResponseContext containerResponse) {
-        if (!containerResponse.hasEntity() || containerResponse.getStatus() == 200) {
+        if (containerResponse.getStatus() == 200 || !containerResponse.hasEntity()) {
             return "";
         }
         try {
@@ -83,7 +83,7 @@ public class RequestRecorder implements ContainerResponseFilter {
 
     protected void searchResolver(RequestLog.RequestSegments requestSegments) {
         try {
-            searchRepository.index(new RequestLog(requestSegments));
+            searchProvider.index(new RequestLog(requestSegments));
         } catch (Exception ex) {
             LOGGER.warn("Unable to persist access log searchable [{}]", ex.getMessage());
         }

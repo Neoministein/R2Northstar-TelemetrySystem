@@ -4,10 +4,7 @@ import com.neo.r2.ts.api.scheduler.AbstractScheduler;
 import com.neo.r2.ts.impl.match.state.GlobalMatchState;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.impl.persistence.entity.Match;
-import com.neo.util.framework.api.persistence.criteria.DateSearchCriteria;
-import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
-import com.neo.util.framework.api.persistence.entity.EntityQuery;
-import com.neo.util.framework.api.persistence.entity.EntityRepository;
+import com.neo.r2.ts.impl.persistence.repository.MatchRepository;
 import io.helidon.microprofile.scheduling.FixedRate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -34,13 +29,13 @@ public class CloseOpenMatchScheduler extends AbstractScheduler {
     protected GlobalMatchState globalMatchState;
 
     @Inject
-    protected EntityRepository entityRepository;
+    protected MatchRepository matchRepository;
 
     @Override
     protected void scheduledAction() {
         Date cutOfDate = new Date(System.currentTimeMillis() - TWO_MINUTES);
 
-        for (Match match: entityRepository.find(getQuery(cutOfDate)).getHits()) {
+        for (Match match: matchRepository.getArePlaying(cutOfDate)) {
             Optional<MatchStateWrapper> matchStateOptional = globalMatchState.getCurrentMatchState(match.getId());
             if (matchStateOptional.isEmpty()) {
                 matchService.endMatch(match);
@@ -57,16 +52,6 @@ public class CloseOpenMatchScheduler extends AbstractScheduler {
     @FixedRate(initialDelay = 1, value = 1, timeUnit = TimeUnit.MINUTES)
     public void monitorSchedule() {
         super.runSchedule();
-    }
-
-    protected EntityQuery<Match> getQuery(Date cutOfDate) {
-        return new EntityQuery<>(Match.class,
-                0,
-                null,
-                List.of(
-                        new ExplicitSearchCriteria(Match.C_IS_PLAYING,true),
-                        new DateSearchCriteria(Match.C_START_DATE, null, cutOfDate)),
-                Map.of(Match.C_START_DATE, false));
     }
 
     @Override

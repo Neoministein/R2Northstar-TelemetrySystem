@@ -7,18 +7,18 @@ import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpointConfig;
 import jakarta.ws.rs.core.HttpHeaders;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.glassfish.tyrus.core.TyrusUpgradeResponse;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.util.List;
 
 public class BasicWebsocketAuthentication extends ServerEndpointConfig.Configurator {
 
     protected static final RetryHttpExecutor RETRY_HTTP_EXECUTOR = new RetryHttpExecutor();
 
-    protected static final CloseableHttpClient HTTP_CLIENT = HttpClients.createDefault();
+    protected static final URI ENDPOINT_URI = URI.create("http://localhost:8090/" + AuthorizationEndpoint.RESOURCE_LOCATION);
 
     @Override
     public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
@@ -37,9 +37,9 @@ public class BasicWebsocketAuthentication extends ServerEndpointConfig.Configura
 
     protected boolean isTokenValid(String authenticationHeader) {
         try {
-            HttpPost postRequest = new HttpPost("http://localhost:8090/" + AuthorizationEndpoint.RESOURCE_LOCATION);
-            postRequest.addHeader(HttpHeaders.AUTHORIZATION, authenticationHeader);
-            RETRY_HTTP_EXECUTOR.execute(HTTP_CLIENT, postRequest,5);
+            HttpRequest request = HttpRequest.newBuilder().uri(ENDPOINT_URI).POST(HttpRequest.BodyPublishers.noBody())
+                    .header(HttpHeaders.AUTHORIZATION, authenticationHeader).build();
+            RETRY_HTTP_EXECUTOR.execute(HttpClient.newHttpClient(), request,5);
             return true;
         } catch (CommonRuntimeException ex) {
             return false;

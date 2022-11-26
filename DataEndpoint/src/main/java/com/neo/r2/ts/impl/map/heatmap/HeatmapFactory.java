@@ -18,7 +18,7 @@ import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.criteria.LongRangeSearchCriteria;
 import com.neo.util.framework.api.persistence.criteria.SearchCriteria;
 import com.neo.util.framework.api.persistence.search.SearchQuery;
-import com.neo.util.framework.api.persistence.search.SearchRepository;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.api.persistence.search.SearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,7 @@ public class HeatmapFactory {
     protected static final SimpleFieldAggregation COUNT_AGGREGATION = new SimpleFieldAggregation(COUNT, MatchEventSearchable.F_MATCH_ID, SimpleFieldAggregation.Type.COUNT);
 
     @Inject
-    protected SearchRepository searchRepository;
+    protected SearchProvider searchProvider;
 
     public Heatmap createForMap(GameMap gameMap) {
         Heatmap heatmap = generateHeatmap(
@@ -85,7 +85,7 @@ public class HeatmapFactory {
     }
 
     protected Heatmap generateHeatmap(MapScale mapScale, List<SearchCriteria> basicCriteria, int resolution) {
-        if (!searchRepository.enabled()) {
+        if (!searchProvider.enabled()) {
             throw new ConfigurationException(CustomConstants.EX_SERVICE_UNAVAILABLE);
         }
         Heatmap heatmap = new Heatmap();
@@ -105,7 +105,7 @@ public class HeatmapFactory {
             searchCriteriaList.add(new LongRangeSearchCriteria(PLAYER_POS_X, mapScale.toGameScaleX(x),mapScale.toGameScaleX(x + PIXELS_PER_CALL) -1, false));
             searchQuery.setFilters(searchCriteriaList);
             searchQuery.setAggregations(List.of(new CriteriaAggregation("values", criteriaMap, COUNT_AGGREGATION)));
-            SearchResult searchResult = searchRepository.fetch("r2ts-match-event",searchQuery);
+            SearchResult searchResult = searchProvider.fetch("r2ts-match-event",searchQuery);
             for (Map.Entry<String, Object> entry: ((CriteriaAggregationResult) searchResult.getAggregations().get("values")).getCriteriaResult().entrySet()) {
                 long count = parseLongFromDouble(entry.getValue());
                 if (count != 0) {

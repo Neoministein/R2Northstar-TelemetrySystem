@@ -6,7 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.util.*;
 
 @ApplicationScoped
-public class MapScalingService {
+public class MapService {
 
     protected static final Map<String, GameMap> GAME_MAPS = new HashMap<>();
 

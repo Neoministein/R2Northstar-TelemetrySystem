@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.rest.dto;
+package com.neo.r2.ts.impl.rest.dto.outbound;
 
 import java.util.List;
 

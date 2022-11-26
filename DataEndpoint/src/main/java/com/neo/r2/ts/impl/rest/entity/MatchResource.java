@@ -1,22 +1,28 @@
 package com.neo.r2.ts.impl.rest.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.neo.r2.ts.impl.map.scaling.MapService;
 import com.neo.r2.ts.impl.match.MatchFacade;
 import com.neo.r2.ts.impl.match.MatchService;
 import com.neo.r2.ts.impl.match.state.MatchStateService;
-import com.neo.r2.ts.impl.rest.dto.HitsDto;
-import com.neo.r2.ts.impl.rest.dto.MatchDto;
+import com.neo.r2.ts.impl.persistence.entity.Heatmap;
+import com.neo.r2.ts.impl.persistence.entity.Match;
+import com.neo.r2.ts.impl.persistence.repository.MatchRepository;
+import com.neo.r2.ts.impl.rest.CustomConstants;
+import com.neo.r2.ts.impl.rest.dto.outbound.HitsDto;
+import com.neo.r2.ts.impl.rest.dto.outbound.MatchDto;
+import com.neo.r2.ts.impl.rest.dto.inbound.NewMatchDto;
 import com.neo.util.common.api.json.Views;
-import com.neo.util.common.impl.json.JsonUtil;
-import com.neo.util.framework.rest.api.parser.ValidateJsonSchema;
-import com.neo.util.framework.rest.api.response.ResponseGenerator;
+import com.neo.util.common.impl.exception.NoContentFoundException;
+import com.neo.util.common.impl.exception.ValidationException;
+import com.neo.util.framework.rest.api.parser.OutboundJsonView;
 import com.neo.util.framework.rest.api.security.Secured;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -24,6 +30,8 @@ import java.util.List;
 @Path(MatchResource.RESOURCE_LOCATION)
 @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
 public class MatchResource {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchResource.class);
 
     public static final String RESOURCE_LOCATION = "api/v1/match";
 
@@ -36,67 +44,88 @@ public class MatchResource {
     public static final String P_HEATMAP = "/heatmap";
 
     @Inject
-    protected MatchStateService matchStateService;
+    protected MapService mapService;
 
     @Inject
     protected MatchService matchService;
 
     @Inject
-    protected MatchFacade matchFacade;
+    protected MatchStateService matchStateService;
 
     @Inject
-    protected ResponseGenerator responseGenerator;
+    protected MatchRepository matchRepository;
+
+    @GET
+    @Path("/{id}")
+    @OutboundJsonView(Views.Public.class)
+    public Match getMatchById(@PathParam("id") String id) {
+        return matchRepository.getMatchById(id).orElseThrow(() ->
+                new NoContentFoundException(CustomConstants.EX_MATCH_NON_EXISTENT, id));
+    }
 
     @POST
     @Secured
     @Path(P_NEW)
-    @ValidateJsonSchema("NewMatch.json")
-    public Response newGame(JsonNode jsonNode) {
-        return responseGenerator.success(JsonUtil.fromPojo(matchFacade.createNewMatch(
-                        jsonNode.get("ns_server_name").asText(),
-                        jsonNode.get("map").asText(),
-                        jsonNode.get("gamemode").asText(),
-                        jsonNode.get("maxPlayers").asInt()), Views.Public.class));
+    @OutboundJsonView(Views.Public.class)
+    public Match createMatch(NewMatchDto newMatchDto) {
+        if (mapService.getMap(newMatchDto.map()).isEmpty()) {
+            throw new ValidationException(CustomConstants.EX_UNSUPPORTED_MAP, newMatchDto.map());
+        }
+
+        Match match = new Match();
+        match.setMap(newMatchDto.map());
+        match.setNsServerName(newMatchDto.nsServerName());
+        match.setGamemode(newMatchDto.gamemode());
+        match.setMaxPlayers(newMatchDto.maxPlayers());
+
+        matchRepository.create(match);
+        LOGGER.info("New match registered {}", match.getId());
+        return match;
     }
 
     @PUT
     @Secured
     @Path(P_END + "/{id}")
-    public Response endGame(@PathParam("id") String id) {
-        return responseGenerator.success(JsonUtil.fromPojo(
-                matchFacade.endMatch(id), Views.Public.class));
+    @OutboundJsonView(Views.Public.class)
+    @Transactional
+    public Match endMatch(@PathParam("id") String id) {
+        Match match = getMatchById(id);
+
+        if (!match.getIsRunning()) {
+            throw new ValidationException(CustomConstants.EX_ALREADY_MATCH_ENDED, id);
+        }
+
+        return matchService.endMatch(match);
     }
 
     @GET
     @Path(P_PLAYING)
     @Transactional
-    public Response playing() {
-        List<MatchDto> matchDtoList = matchService.getArePlaying().stream()
+    @OutboundJsonView(Views.Public.class)
+    public HitsDto playing() {
+        List<MatchDto> matchDtoList = matchRepository.getArePlaying().stream()
                 .map(match -> new MatchDto(match, matchStateService.getNumberOfPlayerInMatch(match.getId()))).toList();
 
-        return responseGenerator.success(JsonUtil.fromPojo(new HitsDto(matchDtoList), Views.Public.class));
-    }
-
-    @GET
-    @Path("/{id}")
-    public Response match(@PathParam("id") String id) {
-        return responseGenerator.success(JsonUtil.fromPojo(
-                matchFacade.getMatch(id), Views.Public.class));
+        return new HitsDto(matchDtoList);
     }
 
     @GET
     @Path(P_STOPPED)
     @Transactional
-    public Response stopped() {
-        return responseGenerator.success(JsonUtil.fromPojo(matchService.getStoppedPlaying(), Views.Public.class));
+    @OutboundJsonView(Views.Public.class)
+    public HitsDto stopped() {
+        return new HitsDto(matchRepository.getStoppedPlaying());
     }
 
     @GET
     @Path("/{id}" + P_HEATMAP)
     @Transactional
-    public Response getHeatmap(@PathParam("id") String id) {
-        return responseGenerator.success(
-          JsonUtil.fromPojo(matchFacade.getHeatmapOfMatch(id), Views.Public.class)
-        );
+    @OutboundJsonView(Views.Public.class)
+    public Heatmap getHeatmap(@PathParam("id") String id) {
+        List<Heatmap> heatmaps = getMatchById(id).getHeatmaps();
+        if (heatmaps.isEmpty()) {
+            throw new NoContentFoundException(CustomConstants.EX_NO_HEATMAP_FOR_MATCH, id);
+        }
+        return heatmaps.get(0);
     }
 }

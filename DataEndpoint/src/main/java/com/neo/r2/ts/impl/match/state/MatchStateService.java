@@ -8,7 +8,7 @@ import com.neo.r2.ts.impl.persistence.searchable.MatchStateSearchable;
 import com.neo.r2.ts.impl.socket.MatchStateOutputSocket;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.config.ConfigService;
-import com.neo.util.framework.api.persistence.search.SearchRepository;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -34,7 +34,7 @@ public class MatchStateService {
     protected final boolean shouldSaveNpcPosition;
 
     @Inject
-    protected SearchRepository searchRepository;
+    protected SearchProvider searchProvider;
 
     @Inject
     protected GlobalMatchState globalGameState;
@@ -53,10 +53,10 @@ public class MatchStateService {
         String matchId = matchState.get("matchId").asText();
         matchStateOutputSocket.broadcast(matchId, JsonUtil.toJson(matchState));
         globalGameState.setCurrentMatchState(matchId, matchStateWrapper);
-        if (searchRepository.enabled()) {
+        if (searchProvider.enabled()) {
             MatchStateSearchable searchable = new MatchStateSearchable(matchState.deepCopy());
-            searchRepository.index(searchable);
-            searchRepository.index(parseStateToEvents(matchState));
+            searchProvider.index(searchable);
+            searchProvider.index(parseStateToEvents(matchState));
         }
     }
 

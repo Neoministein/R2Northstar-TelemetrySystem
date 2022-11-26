@@ -3,7 +3,7 @@ package com.neo.r2.ts.impl.socket;
 import com.neo.r2.ts.api.scheduler.AbstractScheduler;
 import com.neo.r2.ts.api.socket.MonitorableWebsocket;
 import com.neo.r2.ts.api.socket.SocketLogSearchable;
-import com.neo.util.framework.api.persistence.search.SearchRepository;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
 import io.helidon.microprofile.scheduling.FixedRate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
@@ -22,7 +22,7 @@ public class MonitorableWebsocketScheduler extends AbstractScheduler {
     protected Instance<MonitorableWebsocket> monitorableWebsocketList;
 
     @Inject
-    protected SearchRepository searchRepository;
+    protected SearchProvider searchProvider;
 
     @Override
     protected void scheduledAction() {
@@ -30,7 +30,7 @@ public class MonitorableWebsocketScheduler extends AbstractScheduler {
         try {
             for (MonitorableWebsocket monitorableWebsocket: monitorableWebsocketList) {
                 for (SocketLogSearchable socketDataSearchable: monitorableWebsocket.getSocketData()) {
-                    searchRepository.index(socketDataSearchable);
+                    searchProvider.index(socketDataSearchable);
                 }
                 monitorableWebsocket.clearSocketData();
             }
