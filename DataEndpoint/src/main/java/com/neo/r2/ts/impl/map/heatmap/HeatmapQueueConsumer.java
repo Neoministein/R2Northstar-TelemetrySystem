@@ -60,13 +60,16 @@ public class HeatmapQueueConsumer implements QueueListener {
     }
 
     protected void createHeatmapForMatch(String matchId, HeatmapType type) {
-        Optional<Match> match = matchRepository.getMatchById(matchId);
-        if (match.isEmpty()) {
+        Optional<Match> optMatch = matchRepository.getMatchById(matchId);
+        if (optMatch.isEmpty()) {
             return;
         }
 
-        Heatmap heatmap = heatmapFactory.createForMatch(matchId, mapService.getMap(match.get().getMap()).get(), type);
-        heatmap.setMatch(match.get());
-        matchRepository.edit(match.get());
+        Match match = optMatch.get();
+
+        Heatmap heatmap = heatmapFactory.createForMatch(matchId, mapService.getMap(match.getMap()).get(), type);
+        heatmap.setMatch(match);
+        match.getHeatmaps().add(heatmap);
+        matchRepository.edit(match);
     }
 }
