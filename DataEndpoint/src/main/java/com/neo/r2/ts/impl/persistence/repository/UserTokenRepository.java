@@ -20,7 +20,7 @@ public class UserTokenRepository extends BaseRepositoryImpl<UserToken> {
         String query = """
                 SELECT t
                 FROM UserToken t
-                JOIN FETCH t.roles
+                LEFT JOIN FETCH t.roles
                 WHERE t.key =:""" + UserToken.C_KEY;
         try {
             return Optional.of(pcs.getEm().createQuery(query, UserToken.class)
@@ -34,7 +34,7 @@ public class UserTokenRepository extends BaseRepositoryImpl<UserToken> {
         String query = """
                 SELECT t
                 FROM UserToken t
-                JOIN FETCH t.roles
+                LEFT JOIN FETCH t.roles
                 WHERE t.owner =:""" + UserToken.C_OWNER;
         try {
             return Optional.of(pcs.getEm().createQuery(query, UserToken.class)
@@ -48,7 +48,7 @@ public class UserTokenRepository extends BaseRepositoryImpl<UserToken> {
         String query = """
                 SELECT t
                 FROM UserToken t
-                JOIN FETCH t.roles
+                LEFT JOIN FETCH t.roles
                 WHERE t.disabled =:""" + UserToken.C_KEY;
         return pcs.getEm().createQuery(query, UserToken.class)
                 .setParameter(UserToken.C_KEY, isDisabled).getResultList();
