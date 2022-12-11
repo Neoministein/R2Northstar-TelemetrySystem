@@ -22,6 +22,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <org.jboss.jandex.version>2.1.1.Final</org.jboss.jandex.version>
         <helidon.version>3.0.1</helidon.version>
+        <neoutil.version>1.0.0</neoutil.version>
         <mockito.core.version>4.8.0</mockito.core.version>
     </properties>
 
@@ -31,42 +32,42 @@
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-framework</artifactId>
-            <version>1.0.0</version>
+            <version>${neoutil.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-elastic</artifactId>
-            <version>1.0.0</version>
+            <version>${neoutil.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-startup</artifactId>
-            <version>1.0.0</version>
+            <version>${neoutil.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-database</artifactId>
-            <version>1.0.0</version>
+            <version>${neoutil.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-helidon-rest</artifactId>
-            <version>1.0.0</version>
+            <version>${neoutil.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-helidon-config</artifactId>
-            <version>1.0.0</version>
+            <version>${neoutil.version}</version>
         </dependency>
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-mp-queue</artifactId>
-            <version>1.0.0</version>
+            <version>${neoutil.version}</version>
         </dependency>
 
         <!-- Bean Discovery -->
@@ -218,6 +219,18 @@
                 <executions>
                     <execution>
                         <id>copy-libs</id>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.neo.util</groupId>
+                <artifactId>neoutil-rest-plugin</artifactId>
+                <version>${neoutil.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-inboundDto</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
