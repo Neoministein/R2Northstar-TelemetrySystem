@@ -1,7 +1,6 @@
 package com.neo.r2.ts.impl.rest.entity;
 
 import com.neo.r2.ts.impl.map.scaling.MapService;
-import com.neo.r2.ts.impl.match.MatchFacade;
 import com.neo.r2.ts.impl.match.MatchService;
 import com.neo.r2.ts.impl.match.state.MatchStateService;
 import com.neo.r2.ts.impl.persistence.entity.Heatmap;
