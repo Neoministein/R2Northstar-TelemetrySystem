@@ -41,15 +41,16 @@ public class MatchRepository extends BaseRepositoryImpl<Match> {
         String query = """
                 SELECT m
                 FROM Match m
-                WHERE m.isRunning = false 
+                WHERE m.isRunning = false
                 ORDER BY m.createdOn desc""";
         return pcs.getEm().createQuery(query, Match.class).getResultList();
     }
 
     public List<Match> getArePlaying(Date cutOfDate) {
         String query = """
-               SELECT m FROM
-               Match m WHERE m.isRunning = true AND m.createdOn < :cutOfDate
+               SELECT m
+               FROM Match m
+               WHERE m.isRunning = true AND m.createdOn < :cutOfDate
                ORDER BY m.createdOn desc""";
         return pcs.getEm().createQuery(query, Match.class).setParameter("cutOfDate", cutOfDate).getResultList();
     }

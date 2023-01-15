@@ -1,5 +1,5 @@
 untyped
-global function MapSystem_Init
+global function Telemetry_Init
 
 struct {
     bool isThreadRunning = false
@@ -7,7 +7,7 @@ struct {
 
 bool isMatchRunning = false
 
-void function MapSystem_Init()
+void function Telemetry_Init()
 {
     AddCallback_GameStateEnter( eGameState.WaitingForPlayers, OnWaitingForPlayers )
     AddCallback_GameStateEnter( eGameState.Playing, OnGameStartePlay )

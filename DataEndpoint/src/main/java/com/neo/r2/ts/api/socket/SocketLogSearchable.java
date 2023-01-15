@@ -1,14 +1,12 @@
 package com.neo.r2.ts.api.socket;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.util.common.impl.json.JsonUtil;
-import com.neo.util.framework.api.persistence.search.GenericSearchable;
+import com.neo.util.framework.api.persistence.search.AbstractSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
 import jakarta.websocket.Session;
 
 import java.util.Date;
 
-public class SocketLogSearchable extends GenericSearchable {
+public class SocketLogSearchable extends AbstractSearchable {
 
     private Date timestamp;
     private String socketId;
@@ -37,18 +35,6 @@ public class SocketLogSearchable extends GenericSearchable {
 
     public void addToOutgoing(long toAdd) {
         outgoing += toAdd;
-    }
-
-
-
-    @Override
-    public ObjectNode getJsonNode() {
-        return JsonUtil.fromPojo(this);
-    }
-
-    @Override
-    public String getClassName() {
-        return SocketLogSearchable.class.getSimpleName();
     }
 
     @Override

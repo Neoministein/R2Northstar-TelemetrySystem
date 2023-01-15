@@ -6,11 +6,18 @@
 
 	"Scripts": [		
         {
-			"Path": "_MapSystem.gnut",
+			"Path": "_Telemetry.gnut",
             "RunOn": "SERVER && MP",
             "ServerCallback": {
-                "Before": "MapSystem_Init"
+                "Before": "Telemetry_Init"
             }
+		},
+		{
+			"Path": "_PlayerScore.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"Before": "PlayerScore_Init"
+			}
 		}
 	]
 }

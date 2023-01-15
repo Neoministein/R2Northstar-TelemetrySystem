@@ -1,13 +1,13 @@
 package com.neo.r2.ts.impl.persistence.searchable;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.util.common.impl.json.JsonUtil;
-import com.neo.util.framework.api.persistence.search.GenericSearchable;
+import com.neo.util.framework.api.persistence.search.AbstractSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
 import com.neo.util.framework.api.persistence.search.Searchable;
+import jakarta.enterprise.context.Dependent;
 
-public class MatchEventSearchable extends GenericSearchable implements Searchable {
+@Dependent
+public class MatchEventSearchable extends AbstractSearchable implements Searchable {
 
     public static final String F_MATCH_ID = "matchId";
 
@@ -28,14 +28,8 @@ public class MatchEventSearchable extends GenericSearchable implements Searchabl
         this.eventType = eventType.fieldName;
     }
 
-    @Override
-    public ObjectNode getJsonNode() {
-        return JsonUtil.fromPojo(this);
-    }
+    protected MatchEventSearchable() {
 
-    @Override
-    public String getClassName() {
-        return MatchStateSearchable.class.getSimpleName();
     }
 
     @Override

@@ -1,37 +1,31 @@
 package com.neo.r2.ts.api.scheduler;
 
 import com.neo.util.framework.api.connection.RequestContext;
-import com.neo.util.framework.impl.connection.RequestDetailsProducer;
+import com.neo.util.framework.api.connection.RequestDetails;
+import com.neo.util.framework.impl.RequestContextExecutor;
 import com.neo.util.framework.impl.connection.SchedulerRequestDetails;
-import jakarta.enterprise.context.control.RequestContextController;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import org.slf4j.Logger;
 
 import java.util.UUID;
 
 public abstract class AbstractScheduler {
 
+    protected final RequestContext requestContext = new RequestContext.Scheduler(this.getClass().getSimpleName());
+
+    @Inject
+    protected RequestContextExecutor requestContextExecutor;
+
     protected abstract void scheduledAction();
 
     protected abstract Logger getLogger();
 
-    @Inject
-    protected RequestDetailsProducer requestDetailsProducer;
-
-    @Inject
-    protected Provider<RequestContextController> requestContextControllerFactory;
-
     protected void runSchedule() {
-        RequestContextController requestContextController = requestContextControllerFactory.get();
-        requestContextController.activate();
+        RequestDetails requestDetails = new SchedulerRequestDetails(UUID.randomUUID().toString(), requestContext);
         try {
-            requestDetailsProducer.setRequestDetails(new SchedulerRequestDetails(UUID.randomUUID().toString(), new RequestContext.Scheduler(this.getClass().getSimpleName())));
-            scheduledAction();
+            requestContextExecutor.execute(requestDetails,this::scheduledAction);
         } catch (Exception ex) {
             getLogger().error("Unexpected error occurred while processing a scheduled action [{}], action won't be retried.", ex.getMessage());
-        } finally {
-            requestContextController.deactivate();
         }
     }
 }

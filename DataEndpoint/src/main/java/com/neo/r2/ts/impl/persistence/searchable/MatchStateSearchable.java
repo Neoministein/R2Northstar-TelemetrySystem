@@ -1,11 +1,13 @@
 package com.neo.r2.ts.impl.persistence.searchable;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.util.framework.api.persistence.search.GenericSearchable;
+import com.neo.util.framework.api.persistence.search.AbstractSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
 import com.neo.util.framework.api.persistence.search.Searchable;
+import jakarta.enterprise.context.Dependent;
 
-public class MatchStateSearchable extends GenericSearchable implements Searchable {
+@Dependent
+public class MatchStateSearchable extends AbstractSearchable implements Searchable {
 
     public static final String F_ENTITY_ID = "entityId";
 
@@ -26,14 +28,15 @@ public class MatchStateSearchable extends GenericSearchable implements Searchabl
     public static final String F_PLAYER_ID = "playerId";
     public static final String F_NCP_ID = "npcId";
 
+    protected ObjectNode objectNode;
+
     public MatchStateSearchable(ObjectNode objectNode) {
-        setJsonNode(objectNode);
+        this.objectNode = objectNode;
         setBusinessId(objectNode.get(F_MATCH).asText() + ":" + objectNode.get(F_TIME_PASSED).asInt());
     }
 
-    @Override
-    public String getClassName() {
-        return MatchStateSearchable.class.getSimpleName();
+    protected MatchStateSearchable() {
+
     }
 
     @Override
@@ -44,5 +47,10 @@ public class MatchStateSearchable extends GenericSearchable implements Searchabl
     @Override
     public String getIndexName() {
         return "match-state";
+    }
+
+    @Override
+    public ObjectNode getObjectNode() {
+        return objectNode;
     }
 }

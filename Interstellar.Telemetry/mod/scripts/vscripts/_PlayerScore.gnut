@@ -1,0 +1,168 @@
+untyped
+
+global function PlayerScore_Init
+
+const table<int, string> pgTypeToString = {
+    [ PGS_ELIMINATED ]              = "PGS_ELIMINATED",
+	[ PGS_KILLS ] 					= "PGS_KILLS",
+	[ PGS_DEATHS ] 					= "PGS_DEATHS",
+	[ PGS_PILOT_KILLS ] 			= "PGS_PILOT_KILLS",
+	[ PGS_TITAN_KILLS ]				= "PGS_TITAN_KILLS",
+	[ PGS_NPC_KILLS ] 				= "PGS_NPC_KILLS",
+	[ PGS_ASSISTS ] 				= "PGS_ASSISTS",
+    [ PGS_SCORE ]                   = "PGS_SCORE",
+	[ PGS_ASSAULT_SCORE ] 			= "PGS_ASSAULT_SCORE",
+	[ PGS_DEFENSE_SCORE ]			= "PGS_DEFENSE_SCORE",
+	[ PGS_DISTANCE_SCORE ]			= "PGS_DISTANCE_SCORE",
+	[ PGS_DETONATION_SCORE ]		= "PGS_DETONATION_SCORE",
+}
+
+struct {
+    table < entity , table < int , int > > playerData
+} file
+
+void function PlayerScore_Init()
+{
+    print("1-------")
+    AddCallback_GameStateEnter( eGameState.Postmatch, OnGameFinished )
+
+    AddCallback_OnClientConnected( OnConnectionEvent )
+    AddCallback_OnClientDisconnected( OnConnectionEvent )
+
+    AddCallback_OnPlayerKilled( HandleScoreEvent )
+    AddCallback_OnNPCKilled( HandleScoreEvent )
+}
+
+void function OnGameFinished()
+{
+    print("2-------")
+    int winningTeam = GetWinningTeam();
+	table data
+	//data["matchId"] <- "anId"
+    data["map"] <- GetMapName()
+    data["gamemode"] <- GameRules_GetGameMode()
+
+    array players
+
+    data["players"] <- players
+	foreach( entity player in GetPlayerArray() )
+    {
+        table playerTable
+        playerTable["uId"] <- player.GetUID()
+        playerTable["playerName"] <- player.GetPlayerName()
+        playerTable["hasWon"] <- player.GetTeam() == winningTeam
+
+        foreach( int key, string value in pgTypeToString )
+        {
+            int val = player.GetPlayerGameStat( key );
+            print("3 " + key + " " + val  + " "  + player.GetPlayerName())
+            if (val != 0) {
+                playerTable[value] <- val
+            }
+            else
+            {
+                if (player in file.playerData && key in file.playerData[player]) {
+                    playerTable[value] <- file.playerData[player][key]
+                    print("3 " + " " + key + file.playerData[player][key]  + " "  + player.GetPlayerName())
+                }
+            }
+        }
+
+        players.append(playerTable)
+    }
+
+    print("3-------")
+    PrintTable(data)
+
+    HttpRequest request = { ... }
+    request.method = HttpRequestMethod.POST
+    request.url = "http://localhost:8090/api/v1/result"
+    request.body = EncodeJSON(data)
+    //request.headers["hello"] <- "world"
+    //request.queryParameters["uid"] <- GetPlayerArray()[0].GetUID()
+    //request.contentType = "application/json"
+
+    NSHttpRequest(request, __OnSuccess, __OnFailure)
+}
+
+void function __OnSuccess(HttpRequestResponse response )
+{
+    print("4-------")
+    printt(response.statusCode, response.body)
+}
+
+void function __OnFailure(HttpRequestFailure faluire )
+{
+    print("5-------")
+    printt(faluire.errorCode, faluire.errorMessage)
+}
+
+void function OnConnectionEvent( entity player )
+{
+    file.playerData[player] <- {}
+}
+
+void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
+{
+	// Basic checks
+	if ( victim == attacker || !( attacker.IsPlayer() || attacker.IsTitan() ) || GetGameState() != eGameState.Playing )
+		return
+
+    print("42-- " + GetGameState())
+	// NPC titans without an owner player will not count towards any team's score
+	if ( attacker.IsNPC() && attacker.IsTitan() && !IsValid( GetPetTitanOwner( attacker ) ) )
+    {
+        if (victim.IsPlayer())
+        {
+            HandleScoreIncrease(victim, PGS_DEATHS)
+        }
+        return
+    }
+
+
+	// Handle AI, marvins aren't setup so we check for them to prevent crash
+	if ( victim.IsNPC() && victim.GetClassName() != "npc_marvin" )
+	{
+        HandleScoreIncrease(attacker, PGS_NPC_KILLS)
+	}
+
+	if ( victim.IsPlayer() )
+    {
+		HandleScoreIncrease(attacker, PGS_PILOT_KILLS)
+        HandleScoreIncrease(victim, PGS_DEATHS)
+	}
+
+
+	// Player ejecting triggers this without the extra check
+	if ( victim.IsTitan() && victim.GetBossPlayer() != attacker )
+    {
+        HandleScoreIncrease(attacker, PGS_TITAN_KILLS)
+    }
+
+    // Assist
+    table<int, bool> alreadyAssisted
+    foreach( DamageHistoryStruct attackerInfo in victim.e.recentDamageHistory )
+    {
+        if ( !IsValid( attackerInfo.attacker ) || !attackerInfo.attacker.IsPlayer() || attackerInfo.attacker == victim )
+                    continue
+
+        if( attackerInfo.attacker != attacker && !( attackerInfo.attacker.GetEncodedEHandle() in alreadyAssisted ) )
+        {
+            alreadyAssisted[attackerInfo.attacker.GetEncodedEHandle()] <- true
+            HandleScoreIncrease(attacker, PGS_ASSISTS)
+        }
+    }
+}
+
+void function HandleScoreIncrease( entity player, int pgs )
+{
+    if (player in  file.playerData) {
+        if (pgs in file.playerData[player]) {
+            file.playerData[player][pgs] <- file.playerData[player][pgs]++
+        }
+        else
+        {
+            file.playerData[player][pgs] <- 1
+        }
+    }
+}
