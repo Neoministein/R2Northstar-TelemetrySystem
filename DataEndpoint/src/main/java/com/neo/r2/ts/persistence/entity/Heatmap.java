@@ -1,9 +1,9 @@
-package com.neo.r2.ts.impl.persistence.entity;
+package com.neo.r2.ts.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.neo.r2.ts.impl.persistence.entity.mapper.JsonNodeStringJavaDescriptor;
+import com.neo.r2.ts.impl.mapper.JsonNodeStringJavaDescriptor;
 import com.neo.util.common.api.json.Views;
 
 import com.neo.util.framework.api.persistence.entity.PersistenceEntity;
@@ -14,12 +14,12 @@ import jakarta.persistence.*;
 @Table(name = Heatmap.TABLE_NAME)
 public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntity {
 
-    public static final String TABLE_NAME = "heatmap";
-    public static final String C_DATA = "data";
-    public static final String C_HIGHEST_COUNT = "highestCount";
-    public static final String C_MAP = "map";
-    public static final String C_TYPE = "type";
-    public static final String C_DESCRIPTION = "description";
+    public static final String TABLE_NAME = "HEATMAP";
+    public static final String C_DATA = "DATA";
+    public static final String C_HIGHEST_COUNT = "HIGHEST_COUNT";
+    public static final String C_MAP = "MAP";
+    public static final String C_TYPE = "TYPE";
+    public static final String C_DESCRIPTION = "DESCRIPTION";
 
     @Id
     @Column(name = PersistenceEntity.C_ID, columnDefinition = "serial")
@@ -43,7 +43,7 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
     @Enumerated(EnumType.STRING)
     @Column(name = C_TYPE, nullable = false)
         @JsonView(Views.Public.class)
-    private HeatmapType type;
+    private String type;
 
     @Column(name = C_DESCRIPTION, nullable = false)
         @JsonView(Views.Public.class)
@@ -85,11 +85,11 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
         this.map = map;
     }
 
-    public HeatmapType getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(HeatmapType type) {
+    public void setType(String type) {
         this.type = type;
     }
 

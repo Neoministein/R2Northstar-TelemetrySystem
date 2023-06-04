@@ -2,9 +2,9 @@ package com.neo.r2.ts.impl.match.state;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.r2.ts.impl.persistence.searchable.MatchEvent;
-import com.neo.r2.ts.impl.persistence.searchable.MatchEventSearchable;
-import com.neo.r2.ts.impl.persistence.searchable.MatchStateSearchable;
+import com.neo.r2.ts.persistence.searchable.MatchEvent;
+import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
+import com.neo.r2.ts.persistence.searchable.MatchStateSearchable;
 import com.neo.r2.ts.impl.socket.MatchStateOutputSocket;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.config.ConfigService;
@@ -28,8 +28,7 @@ public class MatchStateService {
             MatchEvent.TITAN_BECOMES_PILOT,
             MatchEvent.JUMP,
             MatchEvent.DOUBLE_JUMP,
-            MatchEvent.MANTLE,
-            MatchEvent.NEW_LOADOUT);
+            MatchEvent.MANTLE);
 
     protected final boolean shouldSaveNpcPosition;
 

@@ -203,16 +203,53 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                    <!-- Enable preview features for compilation -->
                     <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
+                <!-- Custom compilation mode -->
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>generate-sources</phase>
+                    </execution>
+                    <execution>
+                        <id>build-generated-code</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <generatedSourcesDirectory>${project.build.directory}/generated-sources/java</generatedSourcesDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>default-test-compile</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>build-generated-test-code</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <generatedTestSourcesDirectory>${project.build.directory}/generated-test-sources/java</generatedTestSourcesDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <!-- Enable preview features for test run -->
                     <argLine>--enable-preview</argLine>
                 </configuration>
             </plugin>
+            <!-- Helidon specific copy lib -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -222,18 +259,21 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- NeoUtil Compile Time stuff -->
             <plugin>
                 <groupId>com.neo.util</groupId>
-                <artifactId>neoutil-rest-plugin</artifactId>
+                <artifactId>neoutil-maven-plugin</artifactId>
                 <version>${neoutil.version}</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>generate-inboundDto</goal>
+                            <goal>source-BuildStep</goal>
+                            <goal>test-BuildStep</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+            <!-- Generate Jandex index file -->
             <plugin>
                 <groupId>org.jboss.jandex</groupId>
                 <artifactId>jandex-maven-plugin</artifactId>

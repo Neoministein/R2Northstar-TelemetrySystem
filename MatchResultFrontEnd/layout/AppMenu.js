@@ -16,10 +16,10 @@ const AppMenu = () => {
             label: 'Global Top Categories',
             items: [
                 { label: 'Player Kills', icon: 'pi pi-fw pi-user', to: '/pages/player-kills' },
-                { label: 'Npc Kills', icon: 'pi pi-fw pi-android', to: '/uikit/input' },
+                { label: 'Npc Kills', icon: 'pi pi-fw pi-android', to: '/pages/npc-kills' },
                 { label: 'K/D', icon: 'pi pi-fw pi-users', to: '/uikit/floatlabel' },
                 { label: 'Wins', icon: 'pi pi-fw pi-exclamation-circle', to: '/uikit/invalidstate' },
-                { label: 'Win Ratio', icon: 'pi pi-fw pi-percentage', to: '/uikit/table' },
+                { label: 'Win Ratio', icon: 'pi pi-fw pi-percentage', to: '//pages/win-ratio' },
             ]
         },
         {

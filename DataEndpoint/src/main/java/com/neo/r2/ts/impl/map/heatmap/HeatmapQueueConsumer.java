@@ -2,11 +2,11 @@ package com.neo.r2.ts.impl.map.heatmap;
 
 import com.neo.r2.ts.impl.map.scaling.GameMap;
 import com.neo.r2.ts.impl.map.scaling.MapService;
-import com.neo.r2.ts.impl.persistence.entity.Heatmap;
-import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
-import com.neo.r2.ts.impl.persistence.entity.Match;
-import com.neo.r2.ts.impl.persistence.repository.HeatmapRepository;
-import com.neo.r2.ts.impl.persistence.repository.MatchRepository;
+import com.neo.r2.ts.persistence.entity.Heatmap;
+import com.neo.r2.ts.persistence.entity.HeatmapType;
+import com.neo.r2.ts.persistence.entity.Match;
+import com.neo.r2.ts.impl.repository.HeatmapRepository;
+import com.neo.r2.ts.impl.repository.MatchRepository;
 import com.neo.util.common.impl.exception.ConfigurationException;
 import com.neo.util.common.impl.exception.ValidationException;
 import com.neo.util.framework.api.queue.IncomingQueueConnection;
@@ -60,7 +60,7 @@ public class HeatmapQueueConsumer implements QueueListener {
     }
 
     protected void createHeatmapForMatch(String matchId, HeatmapType type) {
-        Optional<Match> optMatch = matchRepository.getMatchById(matchId);
+        Optional<Match> optMatch = matchRepository.fetch(matchId);
         if (optMatch.isEmpty()) {
             return;
         }

@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.persistence.entity;
+package com.neo.r2.ts.persistence.entity;
 
 public enum HeatmapType {
 

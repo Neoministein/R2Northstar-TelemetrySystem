@@ -30,9 +30,6 @@ public class MatchStateResource {
     public static final String RESOURCE_LOCATION = "api/v1/matchstate";
 
     @Inject
-    protected SearchProvider searchProvider;
-
-    @Inject
     protected GlobalMatchState globalGameState;
 
     @Inject
@@ -58,20 +55,5 @@ public class MatchStateResource {
             //Happens when UUID is invalid 
         }
         throw new NoContentFoundException(CustomConstants.EX_ALREADY_MATCH_ENDED);
-    }
-
-    @GET
-    @Path("/{id}/{offset}")
-    @OutboundJsonView(Views.Public.class)
-    public SearchResult replayData(@PathParam("id") String id, @PathParam("offset") int offset) {
-        if (searchProvider.enabled()) {
-            SearchQuery searchQuery = new SearchQuery(100, List.of(new ExplicitSearchCriteria("matchId", id,false)));
-            searchQuery.setFields(null);
-            searchQuery.setOnlySource(true);
-            searchQuery.setSorting(Map.of("timePassed",true));
-            searchQuery.setOffset(offset);
-            return searchProvider.fetch("r2ts-match-state",searchQuery);
-        }
-        throw new ConfigurationException(CustomConstants.EX_SERVICE_UNAVAILABLE);
     }
 }

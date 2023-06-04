@@ -1,11 +1,13 @@
 package com.neo.r2.ts.impl.rest.entity;
 
-import com.neo.r2.ts.impl.persistence.entity.UserToken;
-import com.neo.r2.ts.impl.persistence.repository.UserTokenRepository;
-import com.neo.util.common.api.json.Views;
+import com.neo.r2.ts.impl.rest.dto.GenericUserDto;
+import com.neo.r2.ts.persistence.entity.ApplicationUser;
+import com.neo.r2.ts.impl.repository.UserTokenRepository;
+import com.neo.util.common.impl.exception.CommonRuntimeException;
+import com.neo.util.common.impl.exception.ValidationException;
 import com.neo.util.framework.api.FrameworkConstants;
+import com.neo.util.framework.api.FrameworkMapping;
 import com.neo.util.framework.rest.api.security.Secured;
-import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
@@ -14,55 +16,68 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import static com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint.EX_ENTITY_NOT_FOUND;
+import static com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint.PERM_INTERNAL;
+
 @RequestScoped
 @Path(UserResource.RESOURCE_LOCATION)
 @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
-public class UserResource extends AbstractEntityRestEndpoint<UserToken> {
+public class UserResource {
 
     public static final String RESOURCE_LOCATION = "api/v1/user";
 
     public static final String P_INIT = "/init";
 
     @Inject
-    protected UserTokenRepository userTokenRepository;
+    protected UserTokenRepository applicationUserRepository;
 
     @POST
+    @Path("{displayName}")
     @Secured
-    @Override
     @RolesAllowed(PERM_INTERNAL)
-    public Response create(String x) {
-        return super.create(x);
+    public GenericUserDto create(@PathParam("displayName") String displayName) {
+        ApplicationUser applicationUser = new ApplicationUser();
+        applicationUser.setDisplayName(displayName);
+
+        return new GenericUserDto(applicationUser);
     }
 
     @PUT
     @Secured
     @RolesAllowed(PERM_INTERNAL)
-    @Override
-    public Response edit(String x) {
-        return super.edit((x));
+    public GenericUserDto edit(GenericUserDto genericUserDto) {
+        ApplicationUser user = applicationUserRepository.fetchByUid(genericUserDto.uId())
+                .orElseThrow(() -> new ValidationException(EX_ENTITY_NOT_FOUND, genericUserDto.uId()));
+        user.setDisplayName(genericUserDto.displayName());
+        user.setDescription(genericUserDto.description());
+        user.setDisabled(genericUserDto.disabled());
+        applicationUserRepository.edit(user);
+        return new GenericUserDto(user);
+    }
+
+    @PUT
+    @Path("{uId}")
+    @Secured
+    @RolesAllowed(PERM_INTERNAL)
+    public Response remove(@PathParam("uId") String uId) {
+        ApplicationUser user = FrameworkMapping.optionalUUID(uId)
+                .flatMap(id -> applicationUserRepository.fetchByUid(uId))
+                .orElseThrow(() -> new ValidationException(EX_ENTITY_NOT_FOUND, uId));
+
+        applicationUserRepository.remove(user);
+        return Response.ok().build();
     }
 
     @GET
     @Path(P_INIT)
-    public Response userInit() {
-        if (userTokenRepository.count() == 0) {
-            UserToken userToken = new UserToken();
+    public GenericUserDto userInit() {
+        if (applicationUserRepository.count() == 0) {
+            ApplicationUser userToken = new ApplicationUser();
             userToken.setDescription("Admin token");
-            userToken.getRoles().add(PERM_INTERNAL);
-            entityRepository.create(userToken);
-            return parseToResponse(userToken, Views.Internal.class);
+            userToken.getUserRoles().add(PERM_INTERNAL);
+            applicationUserRepository.create(userToken);
+            return new GenericUserDto(userToken);
         }
-        return responseGenerator.error(403, FrameworkConstants.EX_FORBIDDEN);
-    }
-
-
-    @Override
-    protected Object convertToPrimaryKey(String s) {
-        return Long.valueOf(s);
-    }
-
-    @Override
-    protected Class<UserToken> getEntityClass() {
-        return UserToken.class;
+        throw new CommonRuntimeException(FrameworkConstants.EX_FORBIDDEN);
     }
 }

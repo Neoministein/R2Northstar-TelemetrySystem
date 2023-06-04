@@ -2,8 +2,8 @@ package com.neo.r2.ts.impl.match;
 
 import com.neo.r2.ts.impl.map.heatmap.HeatmapQueueService;
 import com.neo.r2.ts.impl.match.state.MatchStateService;
-import com.neo.r2.ts.impl.persistence.entity.Match;
-import com.neo.r2.ts.impl.persistence.repository.MatchRepository;
+import com.neo.r2.ts.persistence.entity.Match;
+import com.neo.r2.ts.impl.repository.MatchRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;

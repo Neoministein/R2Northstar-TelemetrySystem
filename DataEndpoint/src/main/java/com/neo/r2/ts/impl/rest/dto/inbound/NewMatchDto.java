@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 
 @InboundDto
 public record NewMatchDto(
-        @JsonProperty(value = "ns_server_name",required = true)
+        @JsonProperty(required = true)
         @Size(max = DatabaseMappingConstants.VARCHAR)
         String nsServerName,
 

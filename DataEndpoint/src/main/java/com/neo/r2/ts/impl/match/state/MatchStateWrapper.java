@@ -2,16 +2,16 @@ package com.neo.r2.ts.impl.match.state;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.util.Date;
+import java.time.Instant;
 
 public class MatchStateWrapper {
 
     private final JsonNode matchState;
-    private final Date timeStamp;
+    private final Instant timeStamp;
 
     public MatchStateWrapper(JsonNode matchState) {
         this.matchState = matchState;
-        this.timeStamp = new Date();
+        this.timeStamp = Instant.now();
     }
 
     public String getMatchId() {
@@ -26,7 +26,7 @@ public class MatchStateWrapper {
         return matchState;
     }
 
-    public Date getTimeStamp() {
+    public Instant getTimeStamp() {
         return timeStamp;
     }
 }

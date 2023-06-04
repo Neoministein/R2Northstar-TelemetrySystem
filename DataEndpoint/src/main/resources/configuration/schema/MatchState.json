@@ -1,5 +1,5 @@
 {
-  "$schema" : "https://json-schema.org/draft/22019-09/schema",
+  "$schema" : "https://json-schema.org/draft/2019-09/schema",
   "type": "object",
   "properties": {
     "matchId": {
@@ -312,42 +312,6 @@
             "additionalProperties": false,
             "required": [
               "entityId"
-            ]
-          }
-        },
-        "playerGetsNewPilotLoadout": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "entityId": {
-                "type": "string",
-                "maxLength": 256
-              },
-              "primary": {
-                "type": "string",
-                "maxLength": 256
-              },
-              "secondary": {
-                "type": "string",
-                "maxLength": 256
-              },
-              "weapon3": {
-                "type": "string",
-                "maxLength": 256
-              },
-              "special": {
-                "type": "string",
-                "maxLength": 256
-              }
-            },
-            "additionalProperties": false,
-            "required": [
-              "entityId",
-              "primary",
-              "secondary",
-              "weapon3",
-              "special"
             ]
           }
         },

@@ -3,9 +3,9 @@ package com.neo.r2.ts.impl.rest.entity;
 import com.neo.r2.ts.impl.map.scaling.MapService;
 import com.neo.r2.ts.impl.match.MatchService;
 import com.neo.r2.ts.impl.match.state.MatchStateService;
-import com.neo.r2.ts.impl.persistence.entity.Heatmap;
-import com.neo.r2.ts.impl.persistence.entity.Match;
-import com.neo.r2.ts.impl.persistence.repository.MatchRepository;
+import com.neo.r2.ts.persistence.entity.Heatmap;
+import com.neo.r2.ts.persistence.entity.Match;
+import com.neo.r2.ts.impl.repository.MatchRepository;
 import com.neo.r2.ts.impl.rest.CustomConstants;
 import com.neo.r2.ts.impl.rest.dto.outbound.HitsDto;
 import com.neo.r2.ts.impl.rest.dto.outbound.MatchDto;
@@ -58,7 +58,7 @@ public class MatchResource {
     @Path("/{id}")
     @OutboundJsonView(Views.Public.class)
     public Match getMatchById(@PathParam("id") String id) {
-        return matchRepository.getMatchById(id).orElseThrow(() ->
+        return matchRepository.fetch(id).orElseThrow(() ->
                 new NoContentFoundException(CustomConstants.EX_MATCH_NON_EXISTENT, id));
     }
 
@@ -102,7 +102,7 @@ public class MatchResource {
     @Transactional
     @OutboundJsonView(Views.Public.class)
     public HitsDto playing() {
-        List<MatchDto> matchDtoList = matchRepository.getArePlaying().stream()
+        List<MatchDto> matchDtoList = matchRepository.fetchArePlaying().stream()
                 .map(match -> new MatchDto(match, matchStateService.getNumberOfPlayerInMatch(match.getId()))).toList();
 
         return new HitsDto(matchDtoList);
@@ -113,7 +113,7 @@ public class MatchResource {
     @Transactional
     @OutboundJsonView(Views.Public.class)
     public HitsDto stopped() {
-        return new HitsDto(matchRepository.getStoppedPlaying());
+        return new HitsDto(matchRepository.fetchStoppedPlaying());
     }
 
     @GET

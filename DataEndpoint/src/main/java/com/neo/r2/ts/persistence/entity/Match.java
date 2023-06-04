@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.persistence.entity;
+package com.neo.r2.ts.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -8,22 +8,21 @@ import com.neo.util.framework.api.persistence.entity.PersistenceEntity;
 import com.neo.util.framework.database.impl.AuditableDataBaseEntity;
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = Match.TABLE_NAME)
 public class Match extends AuditableDataBaseEntity implements PersistenceEntity {
-    public static final String TABLE_NAME = "match";
-    public static final String C_IS_PLAYING = "isRunning";
-    public static final String C_NS_SERVER_NAME = "nsServerName";
-    public static final String C_GAMEMODE = "gamemode";
-    public static final String C_MAP = "map";
-    public static final String C_START_DATE = "startDate";
-    public static final String C_OWNER = "owner";
-    public static final String C_MAX_PLAYERS = "maxPlayers";
+    public static final String TABLE_NAME = "MATCH";
+    public static final String C_IS_PLAYING = "IS_RUNNING";
+    public static final String C_NS_SERVER_NAME = "NS_SERVER_NAME";
+    public static final String C_GAMEMODE = "GAMEMODE";
+    public static final String C_MAP = "MAP";
+    public static final String C_START_DATE = "START_DATE";
+    public static final String C_MAX_PLAYERS = "MAX_PLAYERS";
 
     @Id
     @GeneratedValue
@@ -53,15 +52,16 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
 
     @Column(name = C_START_DATE, nullable = false, updatable = false)
         @JsonView(Views.Public.class)
-    private Date startDate = new Date();
+    private Instant startDate = Instant.now();
 
-    @Column(name = C_OWNER)
-        @JsonView(Views.Owner.class)
-    private String owner;
+    @ManyToOne
+        @JsonIgnore
+    private ApplicationUser user;
 
     @OneToMany(mappedBy = TABLE_NAME, orphanRemoval = true, cascade = CascadeType.ALL)
         @JsonIgnore
     private List<Heatmap> heatmaps = new ArrayList<>();
+
 
     public UUID getId() {
         return id;
@@ -111,20 +111,20 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
         this.maxPlayers = maxPlayers;
     }
 
-    public Date getStartDate() {
+    public Instant getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(Instant startDate) {
         this.startDate = startDate;
     }
 
-    public void setOwner(String matchOwner) {
-        this.owner = matchOwner;
+    public ApplicationUser getUser() {
+        return user;
     }
 
-    public String getOwner() {
-        return owner;
+    public void setUser(ApplicationUser owner) {
+        this.user = owner;
     }
 
     public List<Heatmap> getHeatmaps() {

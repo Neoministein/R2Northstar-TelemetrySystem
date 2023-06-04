@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.persistence.searchable;
+package com.neo.r2.ts.persistence.searchable;
 
 public enum MatchEvent {
 
@@ -13,7 +13,6 @@ public enum MatchEvent {
     JUMP("playerJump"),
     DOUBLE_JUMP("playerDoubleJump"),
     MANTLE("playerMantle"),
-    NEW_LOADOUT("playerGetsNewPilotLoadout"),
     ENTITY_KILLED("entityKilled"),
     NPC_LEECHED("npcLeeched"),
 

@@ -1,6 +1,6 @@
 package com.neo.r2.ts.impl.map.heatmap;
 
-import com.neo.r2.ts.impl.persistence.entity.HeatmapType;
+import com.neo.r2.ts.persistence.entity.HeatmapType;
 import com.neo.util.framework.api.connection.RequestDetails;
 import com.neo.util.framework.api.queue.OutgoingQueueConnection;
 import com.neo.util.framework.api.queue.QueueMessage;

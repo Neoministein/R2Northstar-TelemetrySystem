@@ -2,15 +2,39 @@ untyped
 global function Telemetry_Init
 
 struct {
-    bool isThreadRunning = false
+    string hostname,
+    string northstarVersion,
+    string modVersion,
+    string apiKey,
+    bool tls,
+
+    int timeBetweenState,
+
+    bool isClientCompatible = false,
+
+    string matchId = null,
+
+    table matchState,
 } file
 
-bool isMatchRunning = false
+global const WS_NAME = "Telemetry"
 
 void function Telemetry_Init()
 {
-    AddCallback_GameStateEnter( eGameState.WaitingForPlayers, OnWaitingForPlayers )
-    AddCallback_GameStateEnter( eGameState.Playing, OnGameStartePlay )
+    file.hostname = GetConVarString( "ts-hostname" )
+    file.apiKey = GetConVarString( "ts-apiKey" )
+    file.tls = GetConVarBool( "ts-tls" )
+    file.timeBetweenState = GetConVarInt( "ts-timeBetweenState" )
+    file.northstarVersion = NSGetModVersionByModName("Northstar.Client")
+    file.modVersion = NSGetModVersionByModName("Interstellar.Telemetry")
+
+    CheckForClientCompatibility()
+}
+
+void function SetupTelemetryCallbacks()
+{
+    AddCallback_GameStateEnter( eGameState.WaitingForPlayers, RegisterNewMatch )
+    AddCallback_GameStateEnter( eGameState.Playing, OnMatchStart )
     AddCallback_GameStateEnter( eGameState.Postmatch, OnGameFinished )
     AddCallback_GameStateEnter( eGameState.Prematch, PrintDebug )
 
@@ -31,23 +55,103 @@ void function Telemetry_Init()
     AddCallback_OnPlayerGetsNewPilotLoadout( Map_OnPlayerGetsNewPilotLoadout )
 }
 
-void function OnWaitingForPlayers()
+void function SendHttpToBackend(String path, HttpRequestMethod method, String body, void functionref( HttpRequestResponse ) onSuccess = null, void functionref( HttpRequestFailure ) onFailure = null)
 {
-    if ( isMatchRunning ) {
-        NSCloseNamedPipe( "2" )
-        isMatchRunning = false
+    HttpRequest request = { ... }
+    request.method = HttpRequestMethod.POST
+    request.url =  file.tls ? "https://" : "http://" + file.hostname + path
+
+    if(body == null) {
+        request.body = body
     }
-    NSOpenNamedPipe( "1|" + GetMapName() + "|" + GameRules_GetGameMode() + "|" + GetConVarString( "ns_server_name" ) + "|" + GetCurrentPlaylistVarInt( "max_players", 8 ), "2" )
-    isMatchRunning = true
+
+	request.headers["User-Agent"] <- []
+    request.headers["User-Agent"].append("R2Northstar/" + file.northstarVersion)
+    request.headers["User-Agent"].append("Interstellar.Telemetry/" + file.modVersion)
+    request.headers["Authorization"] <- []
+    request.headers["Authorization"].append(file.apiKey)
+
+    NSHttpRequest(request, onSuccess, onFailure)
 }
 
-
-void function OnGameStartePlay()
+void function GenericHttpFailure(HttpRequestFailure faluire )
 {
-    if ( !file.isThreadRunning ) {
-        file.isThreadRunning = true
-        thread printDynamicInfos()
+    file.isClientCompatible = false
+    file.matchId = false
+    NS_DisconnectFromWebsocket(WS_NAME)
+}
+
+void CheckForClientCompatibility()
+{
+    SendHttpToBackend("/api/compatibility/" + file.modVersion , HttpRequestMethod.GET, null ,CheckForClientCompatibility_Success, GenericHttpFailure)
+}
+
+void function CheckForClientCompatibility_Success(HttpRequestResponse response )
+{
+    file.isClientCompatible = DecodeJSON(response.body)["compatible"]
+
+    if(file.isClientCompatible) {
+        SetupTelemetryCallbacks()
     }
+}
+
+void function RegisterNewMatch()
+{
+    table body
+    body["nsServerName"] <- GetConVarString( "ns_server_name" )
+    body["maxPlayers"] <- GetCurrentPlaylistVarInt( "max_players", 8 )
+    body["map"] <- GetMapName()
+    body["gamemode"] <- GameRules_GetGameMode()
+
+    SendHttpToBackend("/api/v1/match", HttpRequestMethod.POST, EncodeJSON(body),RegisterNewMatch_Success, GenericHttpFailure)
+}
+
+void function RegisterNewMatch_Success(HttpRequestResponse response )
+{
+    file.matchId = DecodeJSON(response.body)["id"]
+
+    file.matchState["map"] <- GetMapName()
+    file.matchState["matchId"] <- file.matchId
+
+
+    string url = file.tls ? "wss://" : "ws://" + file.hostname + "/ws/state/input/" + file.matchId
+    table<string , string > headers
+    headers["Authorization"] <- file.apiKey
+
+    NS_ConnectToWebsocket(WS_NAME, url , WebsocketPool, 60, headers)
+}
+
+void function WebsocketPool(string data) {}
+
+void function OnMatchStart()
+{
+    if ( file.matchId != null ) {
+        thread MainTelemetryLoop()
+    }
+}
+
+void function MainTelemetryLoop()
+{
+	while ( file.matchId )
+	{
+        GetNpcData()
+
+        array<entity> players = GetPlayerArray()
+        string infos = "0|" + players.len()
+		foreach(entity player in GetPlayerArray())
+		{
+			infos += "|" + player.GetPlayerName()
+			infos += "|" + player.GetOrigin()
+			infos += "|" + player.GetAngles()
+			infos += "|" + player.GetVelocity()
+			infos += "|" + (100.0 * player.GetHealth() / player.GetMaxHealth())
+		}
+        file.matchState["timePassed"] <- Time() * 1000
+
+		NS_WriteToWebsocket(WS_NAME, EncodeJSON(file.matchState))
+        NSSendToNamedPipe( infos )
+		wait 0.001
+	}
 }
 
 void function OnGameFinished()
@@ -104,27 +208,6 @@ void function Map_PlayerDisconnect( entity player )
 
     RemoveButtonPressedPlayerInputCallback( player, 1, Map_StartShoot)
     RemoveButtonPressedPlayerInputCallback( player, 1, Map_EndShoot)
-}
-
-void function printDynamicInfos()
-{
-	while ( file.isThreadRunning )
-	{
-        GetNpcData()
-
-        array<entity> players = GetPlayerArray()
-        string infos = "0|" + players.len()
-		foreach(entity player in GetPlayerArray())
-		{
-			infos += "|" + player.GetPlayerName()
-			infos += "|" + player.GetOrigin()
-			infos += "|" + player.GetAngles()
-			infos += "|" + player.GetVelocity()
-			infos += "|" + (100.0 * player.GetHealth() / player.GetMaxHealth())
-		}
-        NSSendToNamedPipe( infos )
-		wait 0.001
-	}
 }
 
 void function GetNpcData()

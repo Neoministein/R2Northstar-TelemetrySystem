@@ -1,12 +1,12 @@
-package com.neo.r2.ts.impl.persistence.searchable;
+package com.neo.r2.ts.persistence.searchable;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.util.framework.api.persistence.search.AbstractSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
 import com.neo.util.framework.api.persistence.search.Searchable;
-import jakarta.enterprise.context.Dependent;
+import com.neo.util.framework.api.persistence.search.SearchableIndex;
 
-@Dependent
+@SearchableIndex(indexName = "match-state", indexPeriod = IndexPeriod.WEEKLY)
 public class MatchStateSearchable extends AbstractSearchable implements Searchable {
 
     public static final String F_ENTITY_ID = "entityId";
@@ -37,16 +37,6 @@ public class MatchStateSearchable extends AbstractSearchable implements Searchab
 
     protected MatchStateSearchable() {
 
-    }
-
-    @Override
-    public IndexPeriod getIndexPeriod() {
-        return IndexPeriod.MONTHLY;
-    }
-
-    @Override
-    public String getIndexName() {
-        return "match-state";
     }
 
     @Override

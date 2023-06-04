@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.persistence.entity.mapper;
+package com.neo.r2.ts.impl.mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.util.common.impl.json.JsonUtil;

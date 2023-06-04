@@ -23,7 +23,7 @@ public abstract class AbstractScheduler {
     protected void runSchedule() {
         RequestDetails requestDetails = new SchedulerRequestDetails(UUID.randomUUID().toString(), requestContext);
         try {
-            requestContextExecutor.execute(requestDetails,this::scheduledAction);
+            requestContextExecutor.execute(requestDetails, this::scheduledAction);
         } catch (Exception ex) {
             getLogger().error("Unexpected error occurred while processing a scheduled action [{}], action won't be retried.", ex.getMessage());
         }

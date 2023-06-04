@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.persistence.entity;
+package com.neo.r2.ts.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.neo.util.common.api.json.Views;
@@ -12,19 +12,21 @@ import javax.security.auth.Subject;
 import java.util.*;
 
 @Entity
-@Table(name = UserToken.TABLE_NAME, indexes = {
-        @Index(name = "key", columnList = UserToken.C_KEY, unique = true)})
-public class UserToken extends AuditableDataBaseEntity implements PersistenceEntity, RolePrincipal {
+@Table(name = ApplicationUser.TABLE_NAME, indexes = {
+        @Index(name = ApplicationUser.C_API_KEY, columnList = ApplicationUser.C_API_KEY, unique = true),
+        @Index(name = ApplicationUser.C_UID, columnList = ApplicationUser.C_UID, unique = true)})
+public class ApplicationUser extends AuditableDataBaseEntity implements PersistenceEntity, RolePrincipal {
 
-    public static final String TABLE_NAME = "user_token";
+    public static final String TABLE_NAME = "APPLICATION_USER";
 
-    public static final String C_KEY = "key";
-    public static final String C_OWNER = "owner";
-    public static final String C_DESCRIPTION = "description";
-    public static final String C_DISABLED = "disabled";
+    public static final String C_API_KEY = "API_KEY";
+    public static final String C_UID = "UID";
+    public static final String C_DISPLAY_NAME = "DISPLAY_NAME";
+    public static final String C_DESCRIPTION = "DESCRIPTION";
+    public static final String C_DISABLED = "DISABLED";
 
-    public static final String T_ROLE = TABLE_NAME + "_role";
-    public static final String C_ROLE = "role";
+    public static final String T_ROLE = TABLE_NAME + "_ROLE";
+    public static final String C_ROLE = "ROLE";
 
     @Id
     @Column(name = PersistenceEntity.C_ID, columnDefinition = "serial")
@@ -32,16 +34,20 @@ public class UserToken extends AuditableDataBaseEntity implements PersistenceEnt
         @JsonView(Views.Internal.class)
     private Long id;
 
-    @Column(name = C_KEY, nullable = false, unique = true, updatable = false)
-        @JsonView(Views.Owner.class)
-    private String key = new RandomString().nextString();
+    @Column(name = C_UID, nullable = false, unique = true, updatable = false)
+    @JsonView(Views.Owner.class)
+    private UUID uid = UUID.randomUUID();
 
-    @Column(name = C_OWNER, nullable = false, unique = true, updatable = false)
+    @Column(name = C_API_KEY, nullable = false, unique = true, updatable = false)
         @JsonView(Views.Owner.class)
-    private UUID owner = UUID.randomUUID();
+    private String apiKey = new RandomString().nextString();
+
+    @Column(name = C_DISPLAY_NAME, nullable = false)
+    @JsonView(Views.Owner.class)
+    private String displayName;
 
     @Column(name = C_DESCRIPTION, nullable = false)
-        @JsonView(Views.Owner.class)
+    @JsonView(Views.Owner.class)
     private String description;
 
     @Column(name = C_DISABLED)
@@ -62,20 +68,28 @@ public class UserToken extends AuditableDataBaseEntity implements PersistenceEnt
         this.id = id;
     }
 
-    public String getKey() {
-        return key;
+    public String getApiKey() {
+        return apiKey;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setApiKey(String key) {
+        this.apiKey = key;
     }
 
-    public UUID getOwner() {
-        return owner;
+    public UUID getUid() {
+        return uid;
     }
 
-    public void setOwner(UUID owner) {
-        this.owner = owner;
+    public void setUid(UUID owner) {
+        this.uid = owner;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getDescription() {
@@ -94,8 +108,8 @@ public class UserToken extends AuditableDataBaseEntity implements PersistenceEnt
         this.disabled = disabled;
     }
 
-    public Set<String> getRoles() {
-        return new HashSet<>(roles);
+    public List<String> getUserRoles() {
+        return roles;
     }
 
     public void setRoles(List<String> roles) {
@@ -108,12 +122,17 @@ public class UserToken extends AuditableDataBaseEntity implements PersistenceEnt
     }
 
     @Override
+    public Set<String> getRoles() {
+        return new HashSet<>(roles);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        UserToken that = (UserToken) o;
+        ApplicationUser that = (ApplicationUser) o;
         return that.getId().equals(this.getId());
     }
 
@@ -124,7 +143,7 @@ public class UserToken extends AuditableDataBaseEntity implements PersistenceEnt
 
     @Override
     public String getName() {
-        return getOwner().toString();
+        return getUid().toString();
     }
 
     @Override

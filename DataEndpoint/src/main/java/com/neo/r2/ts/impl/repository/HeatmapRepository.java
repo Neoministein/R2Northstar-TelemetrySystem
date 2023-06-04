@@ -1,13 +1,13 @@
-package com.neo.r2.ts.impl.persistence.repository;
+package com.neo.r2.ts.impl.repository;
 
-import com.neo.r2.ts.impl.persistence.entity.Heatmap;
-import com.neo.util.framework.database.impl.repository.BaseRepositoryImpl;
+import com.neo.r2.ts.persistence.entity.Heatmap;
+import com.neo.util.framework.database.impl.AbstractDatabaseRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.List;
 
 @ApplicationScoped
-public class HeatmapRepository extends BaseRepositoryImpl<Heatmap> {
+public class HeatmapRepository extends AbstractDatabaseRepository<Heatmap> {
 
     public HeatmapRepository() {
         super(Heatmap.class);

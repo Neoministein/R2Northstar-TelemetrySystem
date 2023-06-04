@@ -2,13 +2,15 @@ package com.neo.r2.ts.api.socket;
 
 import com.neo.util.framework.api.persistence.search.AbstractSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
+import com.neo.util.framework.api.persistence.search.SearchableIndex;
 import jakarta.websocket.Session;
 
-import java.util.Date;
+import java.time.Instant;
 
+@SearchableIndex(indexName = "socket-log", indexPeriod = IndexPeriod.MONTHLY)
 public class SocketLogSearchable extends AbstractSearchable {
 
-    private Date timestamp;
+    private Instant timestamp;
     private String socketId;
     private String protocolVersion;
     private String negotiatedSubProtocol;
@@ -19,7 +21,7 @@ public class SocketLogSearchable extends AbstractSearchable {
 
 
     public SocketLogSearchable(Session session) {
-        this.timestamp = new Date();
+        this.timestamp = Instant.now();
         this.socketId = session.getId();
         this.protocolVersion = session.getProtocolVersion();
         this.negotiatedSubProtocol = session.getNegotiatedSubprotocol();
@@ -37,17 +39,7 @@ public class SocketLogSearchable extends AbstractSearchable {
         outgoing += toAdd;
     }
 
-    @Override
-    public IndexPeriod getIndexPeriod() {
-        return IndexPeriod.MONTHLY;
-    }
-
-    @Override
-    public String getIndexName() {
-        return "socket-log";
-    }
-
-    public Date getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 

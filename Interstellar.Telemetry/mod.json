@@ -2,8 +2,13 @@
 	"Name" : "Interstellar.Telemetry",
 	"Description" : "",
     "Version": "1.0.0",
-	"LoadPriority": 0,
-
+	"LoadPriority": 10,
+	"ConVars": [
+		{
+			"Name": "ts-hostname",
+			"DefaultValue": "http://127.0.0.1:8100"
+		}
+	],
 	"Scripts": [		
         {
 			"Path": "_Telemetry.gnut",
@@ -11,13 +16,6 @@
             "ServerCallback": {
                 "Before": "Telemetry_Init"
             }
-		},
-		{
-			"Path": "_PlayerScore.gnut",
-			"RunOn": "SERVER && MP",
-			"ServerCallback": {
-				"Before": "PlayerScore_Init"
-			}
 		}
 	]
 }

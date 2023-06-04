@@ -28,5 +28,9 @@ public class CustomConstants {
             "r2ts/map/no-heatmap", "No Heatmap exists for the match {0}.", false
     );
 
+    public static final ExceptionDetails EX_PLAYER_FOUND = new ExceptionDetails(
+            "r2ts/result/no-player", "No player found with identifier {0}.", false
+    );
+
     private CustomConstants() {}
 }

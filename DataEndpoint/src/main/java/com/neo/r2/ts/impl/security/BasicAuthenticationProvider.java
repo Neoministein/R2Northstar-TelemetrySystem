@@ -1,7 +1,7 @@
 package com.neo.r2.ts.impl.security;
 
-import com.neo.r2.ts.impl.persistence.entity.UserToken;
-import com.neo.r2.ts.impl.persistence.repository.UserTokenRepository;
+import com.neo.r2.ts.persistence.entity.ApplicationUser;
+import com.neo.r2.ts.impl.repository.UserTokenRepository;
 import com.neo.util.framework.api.PriorityConstants;
 import com.neo.util.framework.api.security.AuthenticationProvider;
 import com.neo.util.framework.api.security.AuthenticationScheme;
@@ -31,7 +31,7 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
     protected static final long TEN_SEC = 1000L * 60L;
 
 
-    protected Map<String, UserToken> tokenCache = new HashMap<>();
+    protected Map<String, ApplicationUser> tokenCache = new HashMap<>();
     protected long lastCheck = 0;
 
     @Inject
@@ -40,9 +40,9 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
     @PostConstruct
     public void init() {
         LOGGER.info("Loading user tokens");
-        Map<String, UserToken> newTokenCache = new HashMap<>();
-        for (UserToken userToken: userTokenRepository.fetchByState(false)) {
-            newTokenCache.put(userToken.getKey(), userToken);
+        Map<String, ApplicationUser> newTokenCache = new HashMap<>();
+        for (ApplicationUser userToken: userTokenRepository.fetchByState(false)) {
+            newTokenCache.put(userToken.getApiKey(), userToken);
         }
         LOGGER.debug("There are {} new user tokens and the last update was {} milliseconds ago", newTokenCache.size() - tokenCache.size(),  System.currentTimeMillis() - lastCheck);
         tokenCache = newTokenCache;

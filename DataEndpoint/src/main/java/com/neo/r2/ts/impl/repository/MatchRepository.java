@@ -1,34 +1,26 @@
-package com.neo.r2.ts.impl.persistence.repository;
+package com.neo.r2.ts.impl.repository;
 
-import com.neo.r2.ts.impl.persistence.entity.Match;
-import com.neo.util.common.impl.StringUtils;
-import com.neo.util.framework.database.impl.repository.BaseRepositoryImpl;
+import com.neo.r2.ts.persistence.entity.Match;
+import com.neo.util.framework.api.FrameworkMapping;
+import com.neo.util.framework.database.impl.AbstractDatabaseRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @ApplicationScoped
-public class MatchRepository extends BaseRepositoryImpl<Match> {
+public class MatchRepository extends AbstractDatabaseRepository<Match> {
 
     public MatchRepository() {
         super(Match.class);
     }
 
-    public Optional<Match> getMatchById(String id) {
-        if (StringUtils.isEmpty(id)) {
-            return Optional.empty();
-        }
-        try {
-            return fetch(UUID.fromString(id));
-        } catch (IllegalArgumentException ex) {
-            return Optional.empty();
-        }
+    public Optional<Match> fetch(String id) {
+        return FrameworkMapping.optionalUUID(id).flatMap(super::fetch);
     }
 
-    public List<Match> getArePlaying() {
+    public List<Match> fetchArePlaying() {
         String query = """
                 SELECT m
                 FROM Match m
@@ -37,7 +29,7 @@ public class MatchRepository extends BaseRepositoryImpl<Match> {
         return pcs.getEm().createQuery(query, Match.class).getResultList();
     }
 
-    public List<Match> getStoppedPlaying() {
+    public List<Match> fetchStoppedPlaying() {
         String query = """
                 SELECT m
                 FROM Match m
@@ -46,7 +38,7 @@ public class MatchRepository extends BaseRepositoryImpl<Match> {
         return pcs.getEm().createQuery(query, Match.class).getResultList();
     }
 
-    public List<Match> getArePlaying(Date cutOfDate) {
+    public List<Match> fetchArePlaying(Instant cutOfDate) {
         String query = """
                SELECT m
                FROM Match m
