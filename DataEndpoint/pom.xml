@@ -5,8 +5,8 @@
 	<modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.helidon.applications</groupId>
-        <artifactId>helidon-applications-project</artifactId>
-        <version>3.0.1</version>
+        <artifactId>helidon-mp</artifactId>
+        <version>3.2.1</version>
     </parent>
     
     <groupId>com.neo.r2</groupId>
@@ -21,7 +21,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <org.jboss.jandex.version>2.1.1.Final</org.jboss.jandex.version>
-        <helidon.version>3.0.1</helidon.version>
+        <helidon.version>3.2.1</helidon.version>
         <neoutil.version>1.0.0</neoutil.version>
         <mockito.core.version>4.8.0</mockito.core.version>
     </properties>
@@ -82,7 +82,7 @@
         <!-- Helidon -->
         <dependency>
             <groupId>io.helidon.microprofile.bundles</groupId>
-            <artifactId>helidon-microprofile</artifactId>
+            <artifactId>helidon-microprofile-core</artifactId>
             <version>${helidon.version}</version>
         </dependency>
         <dependency>

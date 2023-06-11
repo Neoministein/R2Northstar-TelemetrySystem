@@ -33,13 +33,14 @@ public class BasicWebsocketAuthentication extends ServerEndpointConfig.Configura
         }
         TyrusUpgradeResponse tyrusUpgradeResponse = (TyrusUpgradeResponse) response;
         tyrusUpgradeResponse.setStatus(403);
+        response.getHeaders().remove(HandshakeResponse.SEC_WEBSOCKET_ACCEPT);
     }
 
     protected boolean isTokenValid(String authenticationHeader) {
         try {
             HttpRequest request = HttpRequest.newBuilder().uri(ENDPOINT_URI).POST(HttpRequest.BodyPublishers.noBody())
                     .header(HttpHeaders.AUTHORIZATION, authenticationHeader).build();
-            RETRY_HTTP_EXECUTOR.execute(HttpClient.newHttpClient(), request,5);
+            RETRY_HTTP_EXECUTOR.execute(HttpClient.newHttpClient(), request,0);
             return true;
         } catch (CommonRuntimeException ex) {
             return false;

@@ -40,7 +40,6 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
         @JsonView(Views.Public.class)
     private String map;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = C_TYPE, nullable = false)
         @JsonView(Views.Public.class)
     private String type;

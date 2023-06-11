@@ -73,7 +73,8 @@ public class UserResource {
     public GenericUserDto userInit() {
         if (applicationUserRepository.count() == 0) {
             ApplicationUser userToken = new ApplicationUser();
-            userToken.setDescription("Admin token");
+            userToken.setDisplayName("Admin");
+            userToken.setDescription("Auto Generated Admin Token");
             userToken.getUserRoles().add(PERM_INTERNAL);
             applicationUserRepository.create(userToken);
             return new GenericUserDto(userToken);

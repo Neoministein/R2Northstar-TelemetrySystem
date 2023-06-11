@@ -6,7 +6,27 @@
 	"ConVars": [
 		{
 			"Name": "ts-hostname",
-			"DefaultValue": "http://127.0.0.1:8100"
+			"DefaultValue": "127.0.0.1:8090"
+		},
+		{
+			"Name": "ts-apiKey",
+			"DefaultValue": "EgaSr6SEacwcAFFfLz8DWfkXava9IPZ42qPdQLIc3FIHZhD"
+		},
+		{
+			"Name": "ts-tls",
+			"DefaultValue": "false"
+		},
+		{
+			"Name": "ts-timeBetweenState",
+			"DefaultValue": "10"
+		},
+		{
+			"Name": "ts-ignoreEventsAfterDelay",
+			"DefaultValue": "1"
+		},
+		{
+			"Name": "ts-recordNpcs",
+			"DefaultValue": "1"
 		}
 	],
 	"Scripts": [		

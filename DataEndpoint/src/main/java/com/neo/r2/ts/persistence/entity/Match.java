@@ -58,7 +58,7 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
         @JsonIgnore
     private ApplicationUser user;
 
-    @OneToMany(mappedBy = TABLE_NAME, orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
         @JsonIgnore
     private List<Heatmap> heatmaps = new ArrayList<>();
 

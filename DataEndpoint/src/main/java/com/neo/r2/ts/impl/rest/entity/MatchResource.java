@@ -3,6 +3,7 @@ package com.neo.r2.ts.impl.rest.entity;
 import com.neo.r2.ts.impl.map.scaling.MapService;
 import com.neo.r2.ts.impl.match.MatchService;
 import com.neo.r2.ts.impl.match.state.MatchStateService;
+import com.neo.r2.ts.persistence.entity.ApplicationUser;
 import com.neo.r2.ts.persistence.entity.Heatmap;
 import com.neo.r2.ts.persistence.entity.Match;
 import com.neo.r2.ts.impl.repository.MatchRepository;
@@ -13,6 +14,8 @@ import com.neo.r2.ts.impl.rest.dto.inbound.NewMatchDto;
 import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.exception.NoContentFoundException;
 import com.neo.util.common.impl.exception.ValidationException;
+import com.neo.util.framework.api.connection.RequestDetails;
+import com.neo.util.framework.impl.connection.HttpRequestDetails;
 import com.neo.util.framework.rest.api.parser.OutboundJsonView;
 import com.neo.util.framework.rest.api.security.Secured;
 import jakarta.enterprise.context.RequestScoped;
@@ -54,6 +57,9 @@ public class MatchResource {
     @Inject
     protected MatchRepository matchRepository;
 
+    @Inject
+    protected RequestDetails requestDetails;
+
     @GET
     @Path("/{id}")
     @OutboundJsonView(Views.Public.class)
@@ -76,6 +82,7 @@ public class MatchResource {
         match.setNsServerName(newMatchDto.nsServerName());
         match.setGamemode(newMatchDto.gamemode());
         match.setMaxPlayers(newMatchDto.maxPlayers());
+        match.setUser((ApplicationUser) ((HttpRequestDetails) requestDetails).getUser().orElseThrow());
 
         matchRepository.create(match);
         LOGGER.info("New match registered {}", match.getId());

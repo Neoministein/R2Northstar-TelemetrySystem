@@ -1,43 +1,83 @@
 untyped
+
 global function Telemetry_Init
-
-struct {
-    string hostname,
-    string northstarVersion,
-    string modVersion,
-    string apiKey,
-    bool tls,
-
-    int timeBetweenState,
-
-    bool isClientCompatible = false,
-
-    string matchId = null,
-
-    table matchState,
-} file
 
 global const WS_NAME = "Telemetry"
 
+global const NO_MATCH = "NO_MATCH"
+
+global const NO_BODY = "NO_BODY"
+
+global const UNKNOWN = "UNKNOWN"
+
+struct {
+    //GameInfo
+    string northstarVersion,
+    string modVersion,
+
+    //Configuration
+    string hostname,
+    string apiKey,
+    bool tls,
+
+    float timeBetweenState,
+    float ignoreEventsAfterDelay,
+
+    bool recordNpcs,
+
+    //Internal values
+    bool isClientCompatible = false,
+
+    string matchId = NO_MATCH,
+
+    table matchState,
+    table players,
+} file
+
+//onTitanDoomedCallbacks
+//onPlayerAssistCallbacks
+//onEntityChangedTeamCallbacks
+
+//AddOnRodeoStartedCallback
+//AddOnRodeoEndedCallback
+
 void function Telemetry_Init()
 {
-    file.hostname = GetConVarString( "ts-hostname" )
-    file.apiKey = GetConVarString( "ts-apiKey" )
-    file.tls = GetConVarBool( "ts-tls" )
-    file.timeBetweenState = GetConVarInt( "ts-timeBetweenState" )
     file.northstarVersion = NSGetModVersionByModName("Northstar.Client")
     file.modVersion = NSGetModVersionByModName("Interstellar.Telemetry")
 
-    CheckForClientCompatibility()
-}
+    file.hostname = GetConVarString( "ts-hostname" )
+    file.apiKey = GetConVarString( "ts-apiKey" )
+    file.tls = GetConVarBool( "ts-tls" )
+    file.timeBetweenState = GetConVarFloat( "ts-timeBetweenState" )
 
-void function SetupTelemetryCallbacks()
-{
+    file.ignoreEventsAfterDelay = GetConVarFloat( "ts-ignoreEventsAfterDelay" )
+    file.recordNpcs = GetConVarBool( "ts-recordNpcs" )
+
+    file.matchState["map"] <- GetMapName()
+    file.matchState["players"] <- []
+    file.matchState["npcs"] <- []
+
+    table events
+
+    events["playerConnect"] <- []
+    events["playerDisconnect"] <- []
+    events["entityKilled"] <- []
+    events["playerRespawned"] <- []
+    events["pilotBecomesTitan"] <- []
+    events["titanBecomesPilot"] <- []
+    events["playerJump"] <- []
+    events["playerDoubleJump"] <- []
+    events["playerMantle"] <- []
+    events["npcLeeched"] <- []
+
+    file.matchState["events"] <- events
+
+    CheckForClientCompatibility()
+
     AddCallback_GameStateEnter( eGameState.WaitingForPlayers, RegisterNewMatch )
     AddCallback_GameStateEnter( eGameState.Playing, OnMatchStart )
     AddCallback_GameStateEnter( eGameState.Postmatch, OnGameFinished )
-    AddCallback_GameStateEnter( eGameState.Prematch, PrintDebug )
-
 
     AddCallback_OnClientConnected( Map_PlayerConnect )
     AddCallback_OnClientDisconnected( Map_PlayerDisconnect )
@@ -55,13 +95,13 @@ void function SetupTelemetryCallbacks()
     AddCallback_OnPlayerGetsNewPilotLoadout( Map_OnPlayerGetsNewPilotLoadout )
 }
 
-void function SendHttpToBackend(String path, HttpRequestMethod method, String body, void functionref( HttpRequestResponse ) onSuccess = null, void functionref( HttpRequestFailure ) onFailure = null)
+void function SendHttpToBackend(string path, int method, string body, void functionref( HttpRequestResponse ) onSuccess = null, void functionref( HttpRequestFailure ) onFailure = null)
 {
     HttpRequest request = { ... }
-    request.method = HttpRequestMethod.POST
+    request.method = method
     request.url =  file.tls ? "https://" : "http://" + file.hostname + path
 
-    if(body == null) {
+    if(body != NO_BODY) {
         request.body = body
     }
 
@@ -69,7 +109,7 @@ void function SendHttpToBackend(String path, HttpRequestMethod method, String bo
     request.headers["User-Agent"].append("R2Northstar/" + file.northstarVersion)
     request.headers["User-Agent"].append("Interstellar.Telemetry/" + file.modVersion)
     request.headers["Authorization"] <- []
-    request.headers["Authorization"].append(file.apiKey)
+    request.headers["Authorization"].append("BEARER " + file.apiKey)
 
     NSHttpRequest(request, onSuccess, onFailure)
 }
@@ -77,22 +117,26 @@ void function SendHttpToBackend(String path, HttpRequestMethod method, String bo
 void function GenericHttpFailure(HttpRequestFailure faluire )
 {
     file.isClientCompatible = false
-    file.matchId = false
+    file.matchId = NO_MATCH
+
+    wait file.timeBetweenState + 0.1
+
     NS_DisconnectFromWebsocket(WS_NAME)
 }
 
-void CheckForClientCompatibility()
+void function GenericHttpSuccess( HttpRequestResponse response )
 {
-    SendHttpToBackend("/api/compatibility/" + file.modVersion , HttpRequestMethod.GET, null ,CheckForClientCompatibility_Success, GenericHttpFailure)
+
+}
+
+void function CheckForClientCompatibility()
+{
+    SendHttpToBackend("/api/client/compatibility/" + file.modVersion , HttpRequestMethod.GET, NO_BODY ,CheckForClientCompatibility_Success, GenericHttpFailure)
 }
 
 void function CheckForClientCompatibility_Success(HttpRequestResponse response )
 {
-    file.isClientCompatible = DecodeJSON(response.body)["compatible"]
-
-    if(file.isClientCompatible) {
-        SetupTelemetryCallbacks()
-    }
+    file.isClientCompatible = expect bool (DecodeJSON(response.body)["compatible"])
 }
 
 void function RegisterNewMatch()
@@ -103,20 +147,17 @@ void function RegisterNewMatch()
     body["map"] <- GetMapName()
     body["gamemode"] <- GameRules_GetGameMode()
 
-    SendHttpToBackend("/api/v1/match", HttpRequestMethod.POST, EncodeJSON(body),RegisterNewMatch_Success, GenericHttpFailure)
+    SendHttpToBackend("/api/v1/match/new", HttpRequestMethod.POST, EncodeJSON(body),RegisterNewMatch_Success, GenericHttpFailure)
 }
 
 void function RegisterNewMatch_Success(HttpRequestResponse response )
 {
-    file.matchId = DecodeJSON(response.body)["id"]
-
-    file.matchState["map"] <- GetMapName()
+    file.matchId = expect string (DecodeJSON(response.body)["id"])
     file.matchState["matchId"] <- file.matchId
 
-
-    string url = file.tls ? "wss://" : "ws://" + file.hostname + "/ws/state/input/" + file.matchId
+    string url = file.tls ? "wss://" : "ws://" + file.hostname + "/ws/state/input"
     table<string , string > headers
-    headers["Authorization"] <- file.apiKey
+    headers["Authorization"] <- "BEARER " + file.apiKey
 
     NS_ConnectToWebsocket(WS_NAME, url , WebsocketPool, 60, headers)
 }
@@ -125,46 +166,84 @@ void function WebsocketPool(string data) {}
 
 void function OnMatchStart()
 {
-    if ( file.matchId != null ) {
+    if ( file.matchId != NO_MATCH ) {
         thread MainTelemetryLoop()
     }
 }
 
 void function MainTelemetryLoop()
 {
-	while ( file.matchId )
+	while ( file.matchId != NO_MATCH )
 	{
-        GetNpcData()
 
         array<entity> players = GetPlayerArray()
-        string infos = "0|" + players.len()
 		foreach(entity player in GetPlayerArray())
 		{
-			infos += "|" + player.GetPlayerName()
-			infos += "|" + player.GetOrigin()
-			infos += "|" + player.GetAngles()
-			infos += "|" + player.GetVelocity()
-			infos += "|" + (100.0 * player.GetHealth() / player.GetMaxHealth())
+
+		   	if(player.GetUID() in file.players ) {
+                table playerTable = expect table( file.players[player.GetUID()] )
+		   	    playerTable["health"] <- (100.0 * player.GetHealth() / player.GetMaxHealth())
+		   	    VectorToTable( expect table( playerTable["position"] ),  player.GetOrigin() )
+		   	    VectorToTable( expect table( playerTable["rotation"] ),  player.GetAngles() )
+		   	    VectorToTable( expect table( playerTable["velocity"] ),  player.GetVelocity() )
+
+		   	} else {
+		   	    print("Player " + player.GetUID() + " does not exist in the telemetry system")
+		   	}
 		}
-        file.matchState["timePassed"] <- Time() * 1000
+
+		file.matchState["players"] <- TableValuesToArray( file.players )
+        file.matchState["timePassed"] <- (Time() * 1000).tointeger()
 
 		NS_WriteToWebsocket(WS_NAME, EncodeJSON(file.matchState))
-        NSSendToNamedPipe( infos )
-		wait 0.001
+
+        table events = expect table( file.matchState["events"] )
+		events["playerConnect"].clear()
+        events["playerDisconnect"].clear()
+        events["entityKilled"].clear()
+        events["playerRespawned"].clear()
+        events["pilotBecomesTitan"].clear()
+        events["titanBecomesPilot"].clear()
+        events["playerJump"].clear()
+        events["playerDoubleJump"].clear()
+        events["playerMantle"].clear()
+        events["npcLeeched"].clear()
+
+		wait file.timeBetweenState
 	}
 }
 
 void function OnGameFinished()
 {
-    file.isThreadRunning = false
-    wait 0.1
-    NSCloseNamedPipe( "2" )
-    isMatchRunning = false
+    SendHttpToBackend("/api/v1/match/end/" + file.matchId, HttpRequestMethod.POST, NO_BODY , GenericHttpSuccess, GenericHttpFailure)
+
+    file.matchId = NO_MATCH
+
+    wait file.timeBetweenState + 0.1
+
+    NS_DisconnectFromWebsocket(WS_NAME)
 }
 
 void function Map_PlayerConnect( entity player )
 {
-	NSSendToNamedPipe( "3|" + player.GetPlayerName() + "|" + player.GetTeam() )
+	table playerTable
+	playerTable["entityId"] <- player.GetPlayerName()
+	playerTable["team"] <- player.GetTeam()
+	playerTable["titanClass"] <- UNKNOWN
+	playerTable["isTitan"] <- false
+	playerTable["isWallRunning"] <- false
+	playerTable["isShooting"] <- false
+	playerTable["isGrounded"] <- false
+	playerTable["isHanging"] <- false
+	playerTable["isCrouching"] <- false
+	playerTable["isAlive"] <- true
+
+	playerTable["position"] <- {}
+	playerTable["rotation"] <- {}
+	playerTable["velocity"] <- {}
+	playerTable["equipment"] <- {}
+
+	file.players[player.GetUID()] <- playerTable
 
     AddPlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
     AddPlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
@@ -190,7 +269,7 @@ void function Map_PlayerConnect( entity player )
 
 void function Map_PlayerDisconnect( entity player )
 {
-	NSSendToNamedPipe( "4|" + player.GetPlayerName() )
+	file.players[player.GetUID()] <- {}
 
     RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.BEGIN_WALLRUN, Map_OnPlayerBeginWallrun )
     RemovePlayerMovementEventCallback( player, ePlayerMovementEvents.END_WALLRUN, Map_OnPlayerEndWallrun )
@@ -212,6 +291,7 @@ void function Map_PlayerDisconnect( entity player )
 
 void function GetNpcData()
 {
+    /*
     string entityInfo = ""
     int numberOfEntities = 0;
     array<entity> npc = GetNPCArrayByClass( "npc_soldier" )
@@ -260,10 +340,12 @@ void function GetNpcData()
     entityInfo += GetNpcTitanClassData( npc, "npc_titan" )
 
     NSSendToNamedPipe("32|" + numberOfEntities + entityInfo)
+    */
 }
 
 string function GetNpcClassData(array< entity > entities, string npcClass)
 {
+    /*
     string info = ""
 	foreach ( ent in entities )
 	{
@@ -276,10 +358,13 @@ string function GetNpcClassData(array< entity > entities, string npcClass)
         info += "|" + (100.0 * ent.GetHealth() / ent.GetMaxHealth())
     }
     return info;
+    */
+    return "";
 }
 
 string function GetNpcClassDataWithWeapon(array< entity > entities, string npcClass)
 {
+    /*
     string info = ""
 	foreach ( ent in entities )
 	{
@@ -302,10 +387,13 @@ string function GetNpcClassDataWithWeapon(array< entity > entities, string npcCl
         }
     }
     return info;
+    */
+    return "";
 }
 
 string function GetNpcTitanClassData(array< entity > entities, string npcClass)
 {
+    /*
     string info = ""
 	foreach ( ent in entities )
 	{
@@ -319,147 +407,180 @@ string function GetNpcTitanClassData(array< entity > entities, string npcClass)
         info += "|" + GetSoulTitanSubClass( ent.GetTitanSoul() )
     }
     return info;
+    */
+    return "";
 }
 
 void function Map_OnSpectreLeeched( entity spectre, entity player )
 {
-    string info = "40"
-    info += "|" + player.GetPlayerName()
-    info += "|" + spectre.GetEncodedEHandle()
-    NSSendToNamedPipe( info )
+    table leachEvent = { playerId = player.GetUID(), npcId = spectre.GetEncodedEHandle()}
+
+
+    file.matchState["events"]["npcLeeched"].append(leachEvent)
 }
 
 void function Map_EntityKilled( entity victim, entity attacker, var damageInfo )
 {
-    string infos = "5|" + attacker.IsPlayer()
+    table killEvent
+
+    killEvent["damageType"] <- DamageInfo_GetDamageWeaponName( damageInfo )
+
     if (attacker.IsPlayer()) {
-        infos += "|" + attacker.GetPlayerName()
-    }
-    else
-    {
+        killEvent["isAttackerPlayer"] <- true
+        killEvent["attackerId"] <- attacker.GetUID()
+    } else {
+        killEvent["isAttackerPlayer"] <- false
         try
         {
-            infos += "|" + attacker.GetEncodedEHandle()
+            killEvent["attackerId"] <- attacker.GetEncodedEHandle()
         } catch (exception) {
-            infos += "|UNKOWN"
-        }
-    }
-    infos += "|" + victim.IsPlayer()
-    if (victim.IsPlayer()) {
-        infos += "|" + victim.GetPlayerName()
-    }
-    else
-    {
-        try {
-            infos += "|" + victim.GetEncodedEHandle()
-        } catch (exception) {
-            infos += "|UNKOWN"
+            killEvent["attackerId"] <- UNKNOWN
         }
     }
 
-    infos += "|" + DamageInfo_GetDamageWeaponName( damageInfo )
-    NSSendToNamedPipe( infos )
+    if (victim.IsPlayer()) {
+        killEvent["isVictimPlayer"] <- true
+        killEvent["victimId"] <- victim.GetUID()
+        file.players[victim.GetUID()]["isAlive"] <- false
+        file.players[victim.GetUID()]["isTitan"] <- false
+        file.players[victim.GetUID()]["titanClass"] <- UNKNOWN
+    }
+    else
+    {
+        killEvent["isVictimPlayer"] <- false
+        try {
+            killEvent["victimId"] <- attacker.GetEncodedEHandle()
+        } catch (exception) {
+            killEvent["victimId"] <- UNKNOWN
+        }
+    }
+    file.matchState["events"]["entityKilled"].append(killEvent)
 }
 
 void function Map_PlayerRespawned( entity player )
 {
-    NSSendToNamedPipe( "6|" + player.GetPlayerName() )
+    table playerRespawned = { entityId = player.GetUID() }
+
+    file.matchState["events"]["playerRespawned"].append(playerRespawned)
+    file.players[player.GetUID()]["isAlive"] <- true
+
 }
 
 void function Map_PilotBecomesTitan( entity player, entity titan )
 {
-	string infos = "7"
-    infos += "|" + player.GetPlayerName()
-    infos += "|" + GetActiveTitanLoadout( player ).titanClass
-    NSSendToNamedPipe( infos )
+	table pilotBecomesTitan = { entityId = player.GetUID(), titanClass = GetActiveTitanLoadout( player ).titanClass }
+    file.matchState["events"]["pilotBecomesTitan"].append(pilotBecomesTitan)
+    file.players[player.GetUID()]["isTitan"] <- true
 }
 
 void function Map_TitanBecomesPilot( entity player, entity titan )
 {
-    NSSendToNamedPipe( "8|" + player.GetPlayerName() )
+    table titanBecomesTitan = { entityId = player.GetUID() }
+
+    file.matchState["events"]["titanBecomesPilot"].append(titanBecomesTitan)
+    file.players[player.GetUID()]["isTitan"] <- false
+    file.players[player.GetUID()]["titanClass"] <- UNKNOWN
 }
 
-void function Map_OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef newTitanLoadout )
+void function Map_OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef newPilotLoadout )
 {
-    PilotLoadoutDef modifiedLoadout = GetActivePilotLoadout( player )
-
-    string infos = "9"
-	infos += "|" + player.GetPlayerName()
-	infos += "|" + modifiedLoadout.primary
-	infos += "|" + modifiedLoadout.secondary
-	infos += "|" + modifiedLoadout.weapon3
-    infos += "|" + modifiedLoadout.special
-    NSSendToNamedPipe( infos )
+    table playerLoadout = expect table( file.players[player.GetUID()]["equipment"] )
+    playerLoadout["primary"] <- newPilotLoadout.primary
+    playerLoadout["secondary"] <- newPilotLoadout.secondary
+    playerLoadout["weapon3"] <- newPilotLoadout.weapon3
+    playerLoadout["special"] <- newPilotLoadout.special
 }
 
 void function Map_OnPlayerBeginWallrun( entity player )
 {
-    NSSendToNamedPipe( "10|" + player.GetPlayerName() + "|true" )
+    file.players[player.GetUID()]["isWallRunning"] <- true
 }
 
 void function Map_OnPlayerEndWallrun( entity player )
 {
-    NSSendToNamedPipe( "10|" + player.GetPlayerName() + "|false" )
+    file.players[player.GetUID()]["isWallRunning"] <- false
 }
 
 void function Map_StartShoot( entity player )
 {
-    NSSendToNamedPipe( "11|" + player.GetPlayerName() + "|true" )
+    file.players[player.GetUID()]["isShooting"] <- true
 }
 
 void function Map_EndShoot( entity player )
 {
-    NSSendToNamedPipe( "11|" + player.GetPlayerName() + "|false" )
+    file.players[player.GetUID()]["isShooting"] <- false
 }
-
-/**/
 
 void function Map_OnPlayerJump( entity player )
 {
-    NSSendToNamedPipe( "12|" + player.GetPlayerName() )
+    table playerJump = { entityId = player.GetUID() }
+
+    file.matchState["events"]["playerJump"].append(playerJump)
 }
 
 void function Map_OnPlayerDoubleJump( entity player )
 {
-    NSSendToNamedPipe( "13|" + player.GetPlayerName() )
+    table playerJump = { entityId = player.GetUID() }
+
+    file.matchState["events"]["playerDoubleJump"].append(playerJump)
 }
 
 void function Map_OnPlayerLeaveGround( entity player )
 {
-    NSSendToNamedPipe( "14|" + player.GetPlayerName() + "|true" )
+    file.players[player.GetUID()]["isGrounded"] <- false
 }
 
 void function Map_OnPlayerTochGround( entity player )
 {
-    NSSendToNamedPipe( "14|" + player.GetPlayerName() + "|false" )
+    file.players[player.GetUID()]["isGrounded"] <- true
 }
 
 void function Map_OnPlayerMantle( entity player )
 {
-    NSSendToNamedPipe( "15|" + player.GetPlayerName() )
+    table mantle = { entityId = player.GetUID() }
+
+    file.matchState["events"]["playerJump"].append(mantle)
 }
 
 void function Map_OnPlayerBeginWallHang( entity player )
 {
-    NSSendToNamedPipe( "16|" + player.GetPlayerName() + "|true" )
+    file.players[player.GetUID()]["isHanging"] <- true
 }
 
 void function Map_OnPlayerEndWallHang( entity player )
 {
-    NSSendToNamedPipe( "16|" + player.GetPlayerName() + "|false" )
+    file.players[player.GetUID()]["isHanging"] <- false
 }
 
 void function Map_OnPlayerBeginCrouch( entity player )
 {
-    NSSendToNamedPipe( "17|" + player.GetPlayerName() + "|true" )
+    file.players[player.GetUID()]["isCrouching"] <- false
 }
 
 void function Map_OnPlayerEndCrouch( entity player )
 {
-    NSSendToNamedPipe( "17|" + player.GetPlayerName() + "|false" )
+    file.players[player.GetUID()]["isCrouching"] <- false
 }
 
-void function PrintDebug()
+function TableValuesToArray( tab )
 {
-    NSSendToNamedPipe( "99|DebugText" )
+	Assert( type( tab ) == "table", "Not a table" )
+
+	local resultArray = []
+	resultArray.resize( tab.len() )
+	int currentArrayIndex = 0
+	foreach ( key, val in tab )
+	{
+		resultArray[ currentArrayIndex ] = val
+		++currentArrayIndex
+	}
+
+	return resultArray
+}
+
+void function VectorToTable(table t, vector vec)
+{
+    t.rawset("x", (vec.x).tointeger())
+    t.rawset("y", (vec.y).tointeger())
+    t.rawset("z", (vec.z).tointeger())
 }

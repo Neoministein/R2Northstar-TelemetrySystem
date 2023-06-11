@@ -19,7 +19,7 @@ services:
       AMQ_USER: admin
       AMQ_PASSWORD: admin
   r2-ts-es01:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
     environment:
       - node.name=es01
       - discovery.type=single-node
@@ -27,7 +27,7 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - http.cors.enabled=true
-      - http.cors.allow-origin=*
+      - http.cors.allow-origin='*'
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
       - xpack.security.transport.ssl.enabled=false
@@ -42,7 +42,7 @@ services:
     networks:
       - esnet
   r2-ts-kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.3
+    image: docker.elastic.co/kibana/kibana:8.6.2
     volumes:
       - ../services/kibanadata:/usr/share/kibana/data
     ports:

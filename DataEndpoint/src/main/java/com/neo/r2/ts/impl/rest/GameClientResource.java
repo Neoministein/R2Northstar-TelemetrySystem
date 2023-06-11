@@ -20,7 +20,7 @@ public class GameClientResource {
     public static final String RESOURCE_LOCATION = "api/client";
 
     @GET
-    @Path("compatibility/{version}")
+    @Path("/compatibility/{version}")
     public JsonNode isCompatible(@PathParam("version") String version) {
         LOGGER.info("Checking for client version compatibility [{}] compatible [true]", version);
         ObjectNode response =  JsonUtil.emptyObjectNode();

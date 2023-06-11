@@ -393,7 +393,6 @@
         "playerRespawned",
         "pilotBecomesTitan",
         "titanBecomesPilot",
-        "playerGetsNewPilotLoadout",
         "playerJump",
         "playerDoubleJump",
         "playerMantle",
