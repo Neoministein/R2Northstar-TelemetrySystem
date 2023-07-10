@@ -12,6 +12,21 @@ global const ITS_UNKNOWN = "UNKNOWN"
 
 global const ITS_IGNORE_PLAYER_EVENTS_ON_STATE_DELAY = 1500
 
+const table<int, string> ITS_GAME_STAT_TYPES = {
+    [ PGS_ELIMINATED ]              = "PGS_ELIMINATED",
+	[ PGS_KILLS ] 					= "PGS_KILLS",
+	[ PGS_DEATHS ] 					= "PGS_DEATHS",
+	[ PGS_PILOT_KILLS ] 			= "PGS_PILOT_KILLS",
+	[ PGS_TITAN_KILLS ]				= "PGS_TITAN_KILLS",
+	[ PGS_NPC_KILLS ] 				= "PGS_NPC_KILLS",
+	[ PGS_ASSISTS ] 				= "PGS_ASSISTS",
+    [ PGS_SCORE ]                   = "PGS_SCORE",
+	[ PGS_ASSAULT_SCORE ] 			= "PGS_ASSAULT_SCORE",
+	[ PGS_DEFENSE_SCORE ]			= "PGS_DEFENSE_SCORE",
+	[ PGS_DISTANCE_SCORE ]			= "PGS_DISTANCE_SCORE",
+	[ PGS_DETONATION_SCORE ]		= "PGS_DETONATION_SCORE",
+}
+
 global struct ITS_ConfigStruct {
     string northstarVersion,
     string modVersion,
@@ -19,12 +34,13 @@ global struct ITS_ConfigStruct {
     //Configuration
     string hostname,
     string apiKey,
+    string tags,
     bool tls,
 
     int milliSecBetweenState,
     int secToWaitForBackend,
 
-    bool recordNpcs,
+    bool recordNpc,
 }
 
 struct {
@@ -35,6 +51,8 @@ struct {
     bool isWebsocketRunning = false,
 
     string matchId = ITS_NO_MATCH,
+
+    table < entity , table < int , int > > scoreData,
 } file
 
 void function ITS_init()
@@ -48,6 +66,7 @@ void function ITS_init()
     AddCallback_GameStateEnter( eGameState.WaitingForPlayers, ITS_RegisterNewMatch )
     AddCallback_GameStateEnter( eGameState.Playing, ITS_MatchStart )
     AddCallback_GameStateEnter( eGameState.Postmatch, ITS_GameFinished )
+    AddCallback_GameStateEnter( eGameState.Postmatch, ITS_Score_GameFinished )
 
     AddCallback_OnClientConnected( ITS_PlayerConnect )
     AddCallback_OnClientDisconnected( ITS_PlayerDisconnect )
@@ -71,7 +90,7 @@ void function ITS_init()
 
     AddSpawnCallback("npc_titan", ITS_NpcTitanSpawn)
     AddCallback_EntityChangedTeam( "npc_titan", ITS_EntityChangedTeam )
-    if (file.config.recordNpcs)
+    if (file.config.recordNpc)
     {
         AddSpawnCallback("npc_soldier", ITS_NpcWithWeaponSpawn)
         AddCallback_EntityChangedTeam("npc_soldier", ITS_EntityChangedTeam )
@@ -119,6 +138,9 @@ void function ITS_RegisterNewMatch()
     body["maxPlayers"] <- GetCurrentPlaylistVarInt( "max_players", 8 )
     body["map"] <- GetMapName()
     body["gamemode"] <- GameRules_GetGameMode()
+    body["milliSecBetweenState"] <- file.config.milliSecBetweenState
+    body["recordNpc"] <- file.config.recordNpc
+    body["tags"] <- file.config.tags
 
     ITS_SendRequestToBackend("/api/v1/match/new", HttpRequestMethod.POST, EncodeJSON(body), ITS_RegisterNewMatch_Success, ITS_GenericHttpFailure)
 }
@@ -168,7 +190,7 @@ void function ITS_MainTelemetryLoop()
         {
             array<string> npcTypes = ["npc_titan"]
 
-            if(file.config.recordNpcs)
+            if(file.config.recordNpc)
             {
                 npcTypes.append("npc_soldier")
                 npcTypes.append("npc_spectre")
@@ -208,18 +230,17 @@ void function ITS_MainTelemetryLoop()
 
 
         ITS_SendToWebsocket(EncodeJSON({eventType = "StateEnd", timePassed = (Time() * 1000).tointeger()}))
-
-		wait file.config.milliSecBetweenState
+		wait file.config.milliSecBetweenState / 1000
 	}
 }
 
 void function ITS_GameFinished()
 {
-    ITS_SendRequestToBackend("/api/v1/match/end/" + file.matchId, HttpRequestMethod.POST, ITS_NO_BODY , ITS_GenericHttpSuccess, ITS_GenericHttpFailure)
+    ITS_SendRequestToBackend("/api/v1/match/end/" + file.matchId, HttpRequestMethod.PUT, ITS_NO_BODY , ITS_GenericHttpSuccess, ITS_GenericHttpFailure)
 
     file.matchId = ITS_NO_MATCH
 
-    wait file.config.milliSecBetweenState + 0.1
+    wait file.config.milliSecBetweenState / 1000 + 0.1
 
     NS_DisconnectFromWebsocket(ITS_WS_NAME)
     file.isWebsocketRunning = false
@@ -502,6 +523,100 @@ void function ITS_PlayerEndCrouch( entity player )
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Util Functions which require gamestate
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void function ITS_KILL_SCORE_EVENT( entity victim, entity attacker, var damageInfo )
+{
+	// Basic checks
+	if ( victim == attacker || !( attacker.IsPlayer() || attacker.IsTitan() ) || GetGameState() != eGameState.Playing )
+		return
+
+	// NPC titans without an owner player will not count towards any team's score
+	if ( attacker.IsNPC() && attacker.IsTitan() && !IsValid( GetPetTitanOwner( attacker ) ) )
+    {
+        if (victim.IsPlayer())
+        {
+            ITS_SCORE_EVENT(victim, PGS_DEATHS)
+        }
+        return
+    }
+
+
+	// Handle AI, marvins aren't setup so we check for them to prevent crash
+	if ( victim.IsNPC() && victim.GetClassName() != "npc_marvin" )
+	{
+        ITS_SCORE_EVENT(attacker, PGS_NPC_KILLS)
+	}
+
+	if ( victim.IsPlayer() )
+    {
+		ITS_SCORE_EVENT(attacker, PGS_PILOT_KILLS)
+        ITS_SCORE_EVENT(victim, PGS_DEATHS)
+	}
+
+
+	// Player ejecting triggers this without the extra check
+	if ( victim.IsTitan() && victim.GetBossPlayer() != attacker )
+    {
+        ITS_SCORE_EVENT(attacker, PGS_TITAN_KILLS)
+    }
+
+    // Assist
+    table<int, bool> alreadyAssisted
+    foreach( DamageHistoryStruct attackerInfo in victim.e.recentDamageHistory )
+    {
+        if ( !IsValid( attackerInfo.attacker ) || !attackerInfo.attacker.IsPlayer() || attackerInfo.attacker == victim )
+                    continue
+
+        if( attackerInfo.attacker != attacker && !( attackerInfo.attacker.GetEncodedEHandle() in alreadyAssisted ) )
+        {
+            alreadyAssisted[attackerInfo.attacker.GetEncodedEHandle()] <- true
+            ITS_SCORE_EVENT(attacker, PGS_ASSISTS)
+        }
+    }
+}
+
+void function ITS_SCORE_EVENT( entity player, int pgs )
+{
+    if (player in  file.scoreData) {
+        if (pgs in file.scoreData[player]) {
+            file.scoreData[player][pgs] <- file.scoreData[player][pgs]++
+        }
+        else
+        {
+            file.scoreData[player][pgs] <- 1
+        }
+    }
+}
+
+void function ITS_Score_GameFinished()
+{
+    int winningTeam = GetWinningTeam();
+
+	foreach( entity player in GetPlayerArray() )
+    {
+        table matchResult
+        matchResult["eventType"] <- "MatchResult"
+        matchResult["entityId"] <- player.GetUID()
+        matchResult["hasWon"] <- player.GetTeam() == winningTeam
+
+        foreach( int key, string value in ITS_GAME_STAT_TYPES )
+        {
+            int val = player.GetPlayerGameStat( key );
+            if (val != 0) {
+                matchResult[value] <- val
+            }
+            else
+            {
+                if (player in file.scoreData && key in file.scoreData[player]) {
+                    matchResult[value] <- file.scoreData[player][key]
+                }
+            }
+        }
+        ITS_SendToWebsocket( EncodeJSON(matchResult) )
+    }
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Util Functions which require gamestate
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void function ITS_SendToWebsocket(string body)
 {
     if ( file.isWebsocketRunning)
@@ -515,7 +630,7 @@ void function ITS_GenericHttpFailure(HttpRequestFailure faluire )
     file.isClientCompatible = false
     file.matchId = ITS_NO_MATCH
 
-    wait file.config.milliSecBetweenState + 0.1
+    wait file.config.milliSecBetweenState / 1000 + 0.1
 
     NS_DisconnectFromWebsocket(ITS_WS_NAME)
 }

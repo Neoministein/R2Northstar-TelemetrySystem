@@ -19,13 +19,14 @@ ITS_ConfigStruct function ITS_LoadConfiguration()
     config.modVersion = NSGetModVersionByModName("Interstellar.Telemetry")
 
     config.hostname = GetConVarString( "ts-hostname" )
+    config.tags = GetConVarString( "ts-tags" )
     config.apiKey = GetConVarString( "ts-apiKey" )
     config.tls = GetConVarBool( "ts-tls" )
 
     config.milliSecBetweenState = GetConVarInt( "ts-milliSecBetweenState" )
-    config.secToWaitForBackend = GetConvVar("ts-secToWaitForBackend")
+    config.secToWaitForBackend = GetConVarInt("ts-secToWaitForBackend")
 
-    config.recordNpcs = GetConVarBool( "ts-recordNpcs" )
+    config.recordNpc = GetConVarBool( "ts-recordNpc" )
 
 
     file.config = config

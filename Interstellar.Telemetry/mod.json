@@ -10,7 +10,11 @@
 		},
 		{
 			"Name": "ts-apiKey",
-			"DefaultValue": "EgaSr6SEacwcAFFfLz8DWfkXava9IPZ42qPdQLIc3FIHZhD"
+			"DefaultValue": ""
+		},
+		{
+			"Name": "ts-tags",
+			"DefaultValue": ""
 		},
 		{
 			"Name": "ts-tls",
@@ -18,15 +22,19 @@
 		},
 		{
 			"Name": "ts-milliSecBetweenState",
-			"DefaultValue": "5000"
+			"DefaultValue": "100"
+		},
+		{
+			"Name": "ts-stopEventsAfterMilliSec",
+			"DefaultValue": "1500"
 		},
 		{
 			"Name": "ts-secToWaitForBackend",
 			"DefaultValue": "5"
 		},
 		{
-			"Name": "ts-recordNpcs",
-			"DefaultValue": "true"
+			"Name": "ts-recordNpc",
+			"DefaultValue": "1"
 		}
 	],
 	"Scripts": [
