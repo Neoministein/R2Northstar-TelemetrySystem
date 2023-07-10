@@ -11,7 +11,7 @@ public class MatchStateSearchable extends AbstractSearchable implements Searchab
 
     public static final String F_ENTITY_ID = "entityId";
 
-    public static final String F_PLAYERS = "players";
+    public static final String F_PLAYERS = "playerUIds";
     public static final String F_MATCH = "matchId";
     public static final String F_MAP = "map";
     public static final String F_TIME_PASSED = "timePassed";

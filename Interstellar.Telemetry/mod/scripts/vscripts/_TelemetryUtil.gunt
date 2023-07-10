@@ -1,0 +1,85 @@
+global function ITS_LoadConfiguration;
+global function ITS_SendRequestToBackend;
+global function ITS_VectorIntoTable;
+global function ITS_CreateGenericEvent;
+global function ITS_GetEntityId;
+global function ITS_CreateStateEvent;
+global function ITS_WebsocketPooling;
+global function ITS_GenericHttpSuccess;
+
+struct {
+    ITS_ConfigStruct& config
+} file
+
+ITS_ConfigStruct function ITS_LoadConfiguration()
+{
+    ITS_ConfigStruct config
+
+    config.northstarVersion = NSGetModVersionByModName("Northstar.Client")
+    config.modVersion = NSGetModVersionByModName("Interstellar.Telemetry")
+
+    config.hostname = GetConVarString( "ts-hostname" )
+    config.apiKey = GetConVarString( "ts-apiKey" )
+    config.tls = GetConVarBool( "ts-tls" )
+
+    config.milliSecBetweenState = GetConVarInt( "ts-milliSecBetweenState" )
+    config.secToWaitForBackend = GetConvVar("ts-secToWaitForBackend")
+
+    config.recordNpcs = GetConVarBool( "ts-recordNpcs" )
+
+
+    file.config = config
+
+    return config;
+}
+
+void function ITS_SendRequestToBackend(string path, int method, string body, void functionref( HttpRequestResponse ) onSuccess = null, void functionref( HttpRequestFailure ) onFailure = null)
+{
+    HttpRequest request = { ... }
+    request.method = method
+    request.url =  file.config.tls ? "https://" : "http://" + file.config.hostname + path
+
+    if(body != ITS_NO_BODY) {
+        request.body = body
+    }
+
+	request.headers["User-Agent"] <- []
+    request.headers["User-Agent"].append("R2Northstar/" + file.config.northstarVersion)
+    request.headers["User-Agent"].append("Interstellar.Telemetry/" + file.config.modVersion)
+    request.headers["Authorization"] <- []
+    request.headers["Authorization"].append("BEARER " + file.config.apiKey)
+
+    NSHttpRequest(request, onSuccess, onFailure)
+}
+
+table function ITS_VectorIntoTable(vector vec)
+{
+    table t
+    t.rawset("x", (vec.x).tointeger())
+    t.rawset("y", (vec.y).tointeger())
+    t.rawset("z", (vec.z).tointeger())
+    return t
+}
+
+table function ITS_CreateGenericEvent(string eventType, entity ent)
+{
+    return {eventType = eventType, entityId = ITS_GetEntityId(ent) }
+}
+
+table function ITS_CreateStateEvent(string eventType, entity ent, bool state)
+{
+    return {eventType = eventType, entityId = ITS_GetEntityId(ent), state = state }
+}
+
+string function ITS_GetEntityId(entity ent)
+{
+    if ( ent.IsNPC() ) {
+        return ent.GetEncodedEHandle() + ""
+    }
+    return ent.GetUID();
+}
+
+void function ITS_WebsocketPooling(string data) {}
+
+void function ITS_GenericHttpSuccess( HttpRequestResponse response ) {}
+

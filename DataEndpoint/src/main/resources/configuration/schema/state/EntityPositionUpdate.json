@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "positions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "health": {
+            "type": "integer",
+            "minimum" : -128,
+            "maximum" : 127
+
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer",
+                "minimum" : -9223372036854775808,
+                "maximum" : 9223372036854775807
+              },
+              "y": {
+                "type": "integer",
+                "minimum" : -9223372036854775808,
+                "maximum" : 9223372036854775807
+              },
+              "z": {
+                "type": "integer",
+                "minimum" : -9223372036854775808,
+                "maximum" : 9223372036854775807
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "rotation": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer",
+                "minimum" : -9223372036854775808,
+                "maximum" : 9223372036854775807
+              },
+              "y": {
+                "type": "integer",
+                "minimum" : -9223372036854775808,
+                "maximum" : 9223372036854775807
+              },
+              "z": {
+                "type": "integer",
+                "minimum" : -9223372036854775808,
+                "maximum" : 9223372036854775807
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "velocity": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer",
+                "minimum" : -9223372036854775808,
+                "maximum" : 9223372036854775807
+              },
+              "y": {
+                "type": "integer",
+                "minimum" : -9223372036854775808,
+                "maximum" : 9223372036854775807
+              },
+              "z": {
+                "type": "integer",
+                "minimum" : -9223372036854775808,
+                "maximum" : 9223372036854775807
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y",
+              "z"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "entityId",
+          "health",
+          "position",
+          "rotation",
+          "velocity"
+        ]
+      }
+    }
+  },
+  "required" : [ "eventType", "positions"],
+  "additionalProperties": true
+}

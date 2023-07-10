@@ -20,7 +20,7 @@ export default function HeatmapListPage() {
                         e => {
                             navigate("/heatmap/map", {state: e.value});
                         }}>
-                        <Column field="name" header="Map"></Column>
+                        <Column field="displayName" header="Map"></Column>
                         <Column field="type" header="Type"></Column>
                     </DataTable>
                 </div>

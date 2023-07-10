@@ -1,25 +1,28 @@
 package com.neo.r2.ts.impl.match.state;
 
+import com.neo.util.framework.api.cache.Cache;
+import com.neo.util.framework.api.cache.spi.CacheName;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.util.Map;
+import jakarta.inject.Inject;
+
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
 public class GlobalMatchState {
 
-    protected Map<UUID, MatchStateWrapper> currentMatchState = new ConcurrentHashMap<>();
+    @Inject
+    @CacheName("currentMatchState")
+    protected Cache currentMatchState;
 
     public void setCurrentMatchState(String matchId, MatchStateWrapper state) {
-        currentMatchState.put(UUID.fromString(matchId), state);
+        currentMatchState.put(matchId, state);
     }
 
-    public Optional<MatchStateWrapper> getCurrentMatchState(UUID uuid) {
-        return Optional.ofNullable(currentMatchState.get(uuid));
+    public Optional<MatchStateWrapper> getCurrentMatchState(String matchId) {
+        return currentMatchState.get(matchId);
     }
 
-    public void removeGameState(UUID uuid) {
-        currentMatchState.remove(uuid);
+    public void removeGameState(String matchState) {
+        currentMatchState.invalidate(matchState);
     }
 }

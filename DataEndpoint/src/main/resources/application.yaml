@@ -16,30 +16,31 @@ javax:
                     url: ${javax.persistence.jdbc.url}
                     user: ${javax.persistence.jdbc.user}
                     password: ${javax.persistence.jdbc.password}
-mp:
-  messaging:
-    connector.helidon-jms:
-      jndi:
-        jms-factory: ConnectionFactory
-        env-properties:
-          java.naming:
-            factory.initial: org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory
-            provider.url: ${org.apache.activemq.url}
-    incoming:
-      from-indexingQueue:
-        connector: helidon-jms
-        destination: indexingQueue
-        type: queue
-      from-heatmapGeneration:
-        connector: helidon-jms
-        destination: heatmapGeneration
-        type: queue
-    outgoing:
-      to-indexingQueue:
-        connector: helidon-jms
-        destination: indexingQueue
-        type: queue
-      to-heatmapGeneration:
-        connector: helidon-jms
-        destination: heatmapGeneration
-        type: queue
+scheduler.CloseOpenMatchScheduler: false
+#mp:
+#  messaging:
+#    connector.helidon-jms:
+#      jndi:
+#        jms-factory: ConnectionFactory
+#        env-properties:
+#          java.naming:
+#            factory.initial: org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory
+#            provider.url: ${org.apache.activemq.url}
+#    incoming:
+#      from-indexingQueue:
+#        connector: helidon-jms
+#        destination: indexingQueue
+#        type: queue
+#      from-heatmapGeneration:
+#        connector: helidon-jms
+#        destination: heatmapGeneration
+#        type: queue
+#    outgoing:
+#      to-indexingQueue:
+#        connector: helidon-jms
+#        destination: indexingQueue
+#        type: queue
+#      to-heatmapGeneration:
+#        connector: helidon-jms
+#        destination: heatmapGeneration
+#        type: queue

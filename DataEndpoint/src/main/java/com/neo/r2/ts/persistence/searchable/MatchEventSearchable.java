@@ -1,6 +1,7 @@
 package com.neo.r2.ts.persistence.searchable;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.util.framework.api.persistence.search.AbstractSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
 import com.neo.util.framework.api.persistence.search.Searchable;
@@ -8,10 +9,6 @@ import com.neo.util.framework.api.persistence.search.SearchableIndex;
 
 @SearchableIndex(indexName = "match-event", indexPeriod = IndexPeriod.WEEKLY)
 public class MatchEventSearchable extends AbstractSearchable implements Searchable {
-
-    public static final String F_MATCH_ID = "matchId";
-
-    public static final String F_VICTIM = "victim";
 
     private String matchId;
     private String map;
@@ -21,11 +18,12 @@ public class MatchEventSearchable extends AbstractSearchable implements Searchab
     private String eventType;
     private JsonNode data;
 
-    public MatchEventSearchable(JsonNode matchState, MatchEvent eventType) {
-        this.matchId = matchState.get(MatchStateSearchable.F_MATCH).asText();
-        this.map = matchState.get(MatchStateSearchable.F_MAP).asText();
-        this.timePassed = matchState.get(MatchStateSearchable.F_TIME_PASSED).asInt();
-        this.eventType = eventType.fieldName;
+    public MatchEventSearchable(MatchStateWrapper matchState, String eventType, JsonNode entity) {
+        this.matchId = matchState.getMatchId();
+        this.map = matchState.getMap();
+        this.timePassed = matchState.getTimePassed();
+        this.eventType = eventType;
+        this.entity = entity;
     }
 
     protected MatchEventSearchable() {

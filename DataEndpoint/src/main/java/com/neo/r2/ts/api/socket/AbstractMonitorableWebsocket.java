@@ -1,7 +1,7 @@
 package com.neo.r2.ts.api.socket;
 
+import com.neo.r2.ts.persistence.searchable.metric.SocketLogSearchable;
 import jakarta.websocket.EncodeException;
-import jakarta.websocket.OnMessage;
 import jakarta.websocket.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +18,6 @@ public abstract class AbstractMonitorableWebsocket implements MonitorableWebsock
 
     protected Map<Session, SocketLogSearchable> socketData = new ConcurrentHashMap<>();
 
-    protected abstract void handleIncomingMessage(String message);
-
     public Collection<SocketLogSearchable> getSocketData() {
         return socketData.values();
     }
@@ -28,10 +26,8 @@ public abstract class AbstractMonitorableWebsocket implements MonitorableWebsock
         socketData.clear();
     }
 
-    @OnMessage
-    public void onMessage(Session session, String message) {
+    public void updateIncomingSocketLog(Session session, String message) {
         modifySearchableData(session, val -> val.addToIncoming(message.length()));
-        handleIncomingMessage(message);
     }
 
     @SuppressWarnings("java:S2445") //Based on oracle guide

@@ -5,58 +5,56 @@ import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.RandomString;
 import com.neo.util.framework.api.persistence.entity.PersistenceEntity;
 import com.neo.util.framework.api.security.RolePrincipal;
-
-import com.neo.util.framework.database.impl.AuditableDataBaseEntity;
+import com.neo.util.framework.database.persistence.AuditableDataBaseEntity;
 import jakarta.persistence.*;
+
 import javax.security.auth.Subject;
 import java.util.*;
 
 @Entity
-@Table(name = ApplicationUser.TABLE_NAME, indexes = {
-        @Index(name = ApplicationUser.C_API_KEY, columnList = ApplicationUser.C_API_KEY, unique = true),
-        @Index(name = ApplicationUser.C_UID, columnList = ApplicationUser.C_UID, unique = true)})
+@Table(name = "APPLICATION_USER", indexes = {
+        @Index(name = "API_KEY", columnList = "API_KEY", unique = true),
+        @Index(name = "UID", columnList = "UID", unique = true)})
 public class ApplicationUser extends AuditableDataBaseEntity implements PersistenceEntity, RolePrincipal {
 
-    public static final String TABLE_NAME = "APPLICATION_USER";
+    public static final String TABLE_NAME = "ApplicationUser";
 
-    public static final String C_API_KEY = "API_KEY";
-    public static final String C_UID = "UID";
-    public static final String C_DISPLAY_NAME = "DISPLAY_NAME";
-    public static final String C_DESCRIPTION = "DESCRIPTION";
-    public static final String C_DISABLED = "DISABLED";
-
-    public static final String T_ROLE = TABLE_NAME + "_ROLE";
-    public static final String C_ROLE = "ROLE";
+    public static final String C_UID = "uid";
+    public static final String C_API_KEY = "apiKey";
+    public static final String C_DISPLAY_NAME = "displayName";
+    public static final String C_DESCRIPTION = "description";
+    public static final String C_DISABLED = "disabled";
+    public static final String C_ROLE = "roles";
 
     @Id
-    @Column(name = PersistenceEntity.C_ID, columnDefinition = "serial")
+    @Column(name = "ID", columnDefinition = "serial")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
         @JsonView(Views.Internal.class)
     private Long id;
 
-    @Column(name = C_UID, nullable = false, unique = true, updatable = false)
+    @Column(name = "UID", nullable = false, unique = true, updatable = false)
     @JsonView(Views.Owner.class)
     private UUID uid = UUID.randomUUID();
 
-    @Column(name = C_API_KEY, nullable = false, unique = true, updatable = false)
+    @Column(name = "API_KEY", nullable = false, unique = true, updatable = false)
         @JsonView(Views.Owner.class)
     private String apiKey = new RandomString().nextString();
 
-    @Column(name = C_DISPLAY_NAME, nullable = false)
+    @Column(name = "DISPLAY_NAME", nullable = false)
     @JsonView(Views.Owner.class)
     private String displayName;
 
-    @Column(name = C_DESCRIPTION, nullable = false)
+    @Column(name = "DESCRIPTION", nullable = false)
     @JsonView(Views.Owner.class)
     private String description;
 
-    @Column(name = C_DISABLED)
+    @Column(name = "DISABLED")
         @JsonView(Views.Owner.class)
     private boolean disabled = false;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = T_ROLE, joinColumns = @JoinColumn(name = PersistenceEntity.C_ID))
-    @Column(name = C_ROLE)
+    @CollectionTable(name = "APPLICATION_USER_ROLE", joinColumns = @JoinColumn(name = "ID"))
+    @Column(name = "ROLE")
         @JsonView(Views.Owner.class)
     private List<String> roles = new ArrayList<>();
 

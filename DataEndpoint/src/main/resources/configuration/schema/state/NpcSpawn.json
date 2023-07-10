@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "entityId": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "entityType": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "team": {
+      "type": "integer",
+      "minimum" : -128,
+      "maximum" : 127
+    },
+    "titanClass": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "primary": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "secondary": {
+      "type": "string",
+      "maxLength": 256
+    }
+  },
+  "required" : [ "eventType", "entityId", "entityType", "team"],
+  "additionalProperties": false
+}

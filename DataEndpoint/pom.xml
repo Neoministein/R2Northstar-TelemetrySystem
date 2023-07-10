@@ -6,13 +6,13 @@
     <parent>
         <groupId>io.helidon.applications</groupId>
         <artifactId>helidon-mp</artifactId>
-        <version>3.2.1</version>
+        <version>3.2.2</version>
     </parent>
     
     <groupId>com.neo.r2</groupId>
     <artifactId>r2-telemetry-system-endpoint</artifactId>
     <name>R2 Telemetry System Data Endpoint</name>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -20,15 +20,13 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <org.jboss.jandex.version>2.1.1.Final</org.jboss.jandex.version>
-        <helidon.version>3.2.1</helidon.version>
+        <helidon.version>3.2.2</helidon.version>
         <neoutil.version>1.0.0</neoutil.version>
         <mockito.core.version>4.8.0</mockito.core.version>
     </properties>
 
     <dependencies>
         <!-- NeoUtil -->
-
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-framework</artifactId>
@@ -38,6 +36,12 @@
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-elastic</artifactId>
+            <version>${neoutil.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-cache-caffeine</artifactId>
             <version>${neoutil.version}</version>
         </dependency>
 
@@ -64,20 +68,20 @@
             <artifactId>neoutil-helidon-config</artifactId>
             <version>${neoutil.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-jobrunr-queue</artifactId>
+            <version>${neoutil.version}</version>
+        </dependency>
+
+        <!--
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-mp-queue</artifactId>
             <version>${neoutil.version}</version>
         </dependency>
-
-        <!-- Bean Discovery -->
-        <dependency>
-            <groupId>org.jboss</groupId>
-            <artifactId>jandex</artifactId>
-            <version>2.1.1.Final</version>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
+        -->
 
         <!-- Helidon -->
         <dependency>
@@ -112,14 +116,16 @@
             <artifactId>helidon-logging-slf4j</artifactId>
             <version>${helidon.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.helidon.microprofile.messaging</groupId>
-            <artifactId>helidon-microprofile-messaging</artifactId>
-            <version>${helidon.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>io.helidon.microprofile.websocket</groupId>
             <artifactId>helidon-microprofile-websocket</artifactId>
+            <version>${helidon.version}</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>io.helidon.microprofile.messaging</groupId>
+            <artifactId>helidon-microprofile-messaging</artifactId>
             <version>${helidon.version}</version>
         </dependency>
         <dependency>
@@ -127,6 +133,12 @@
             <artifactId>helidon-messaging-jms</artifactId>
             <version>${helidon.version}</version>
         </dependency>
+        dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-jakarta-client</artifactId>
+            <version>2.26.0</version>
+        </dependency>
+        -->
         <dependency>
             <groupId>io.helidon.microprofile.bean-validation</groupId>
             <artifactId>helidon-microprofile-bean-validation</artifactId>
@@ -136,11 +148,6 @@
             <groupId>io.helidon.microprofile.scheduling</groupId>
             <artifactId>helidon-microprofile-scheduling</artifactId>
             <version>${helidon.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-jakarta-client</artifactId>
-            <version>2.26.0</version>
         </dependency>
 
         <!-- Drivers -->

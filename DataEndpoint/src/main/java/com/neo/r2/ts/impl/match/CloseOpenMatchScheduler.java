@@ -3,8 +3,8 @@ package com.neo.r2.ts.impl.match;
 import com.neo.r2.ts.api.scheduler.AbstractScheduler;
 import com.neo.r2.ts.impl.match.state.GlobalMatchState;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
-import com.neo.r2.ts.persistence.entity.Match;
 import com.neo.r2.ts.impl.repository.MatchRepository;
+import com.neo.r2.ts.persistence.entity.Match;
 import io.helidon.microprofile.scheduling.FixedRate;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -35,7 +35,7 @@ public class CloseOpenMatchScheduler extends AbstractScheduler {
         Instant cutOfDate = Instant.now().minus(Duration.ofMinutes(2));
 
         for (Match match: matchRepository.fetchArePlaying(cutOfDate)) {
-            Optional<MatchStateWrapper> matchStateOptional = globalMatchState.getCurrentMatchState(match.getId());
+            Optional<MatchStateWrapper> matchStateOptional = globalMatchState.getCurrentMatchState(match.getId().toString());
             if (matchStateOptional.isEmpty()) {
                 matchService.endMatch(match);
                 break;

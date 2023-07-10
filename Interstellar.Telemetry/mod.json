@@ -1,7 +1,7 @@
 {
 	"Name" : "Interstellar.Telemetry",
 	"Description" : "",
-    "Version": "1.0.0",
+	"Version": "1.0.0",
 	"LoadPriority": 10,
 	"ConVars": [
 		{
@@ -17,25 +17,29 @@
 			"DefaultValue": "false"
 		},
 		{
-			"Name": "ts-timeBetweenState",
-			"DefaultValue": "10"
+			"Name": "ts-milliSecBetweenState",
+			"DefaultValue": "5000"
 		},
 		{
-			"Name": "ts-ignoreEventsAfterDelay",
-			"DefaultValue": "1"
+			"Name": "ts-secToWaitForBackend",
+			"DefaultValue": "5"
 		},
 		{
 			"Name": "ts-recordNpcs",
-			"DefaultValue": "1"
+			"DefaultValue": "true"
 		}
 	],
-	"Scripts": [		
-        {
+	"Scripts": [
+		{
 			"Path": "_Telemetry.gnut",
-            "RunOn": "SERVER && MP",
-            "ServerCallback": {
-                "Before": "Telemetry_Init"
-            }
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"Before": "ITS_init"
+			}
+		},
+		{
+			"Path": "_TelemetryUtil.gnut",
+			"RunOn": "SERVER && MP"
 		}
 	]
 }

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "entityId": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "primary": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "secondary": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "weapon3": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "special": {
+      "type": "string",
+      "maxLength": 256
+    }
+  },
+  "required" : [ "eventType", "entityId", "primary", "secondary", "weapon3", "special"],
+  "additionalProperties": false
+}

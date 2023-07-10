@@ -262,7 +262,7 @@
             ]
           }
         },
-        "playerRespawned": {
+        "pilotRespawned": {
           "type": "array",
           "items": {
             "type": "object",
@@ -315,7 +315,7 @@
             ]
           }
         },
-        "playerJump": {
+        "pilotJump": {
           "type": "array",
           "items": {
             "type": "object",
@@ -331,7 +331,7 @@
             ]
           }
         },
-        "playerDoubleJump": {
+        "pilotDoubleJump": {
           "type": "array",
           "items": {
             "type": "object",
@@ -363,7 +363,7 @@
             ]
           }
         },
-        "npcLeeched": {
+        "entityLeached": {
           "type": "array",
           "items": {
             "type": "object",
@@ -390,13 +390,13 @@
         "playerConnect",
         "playerDisconnect",
         "entityKilled",
-        "playerRespawned",
+        "pilotRespawned",
         "pilotBecomesTitan",
         "titanBecomesPilot",
-        "playerJump",
-        "playerDoubleJump",
+        "pilotJump",
+        "pilotDoubleJump",
         "playerMantle",
-        "npcLeeched"
+        "entityLeached"
       ]
     },
     "npcs": {

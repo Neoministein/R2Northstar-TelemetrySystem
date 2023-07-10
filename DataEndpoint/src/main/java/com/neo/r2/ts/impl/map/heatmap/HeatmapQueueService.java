@@ -1,11 +1,10 @@
 package com.neo.r2.ts.impl.map.heatmap;
 
-import com.neo.r2.ts.persistence.entity.HeatmapType;
-import com.neo.util.framework.api.connection.RequestDetails;
+import com.neo.r2.ts.persistence.HeatmapType;
 import com.neo.util.framework.api.queue.OutgoingQueueConnection;
 import com.neo.util.framework.api.queue.QueueMessage;
 import com.neo.util.framework.api.queue.QueueService;
-
+import com.neo.util.framework.api.request.RequestDetails;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -21,16 +20,12 @@ public class HeatmapQueueService {
     @Inject
     protected RequestDetails requestDetails;
 
-    public void addToQueue(QueueMessage queueMessage) {
-        queueService.addToQueue(QUEUE_NAME, queueMessage);
-    }
-
     public void addMatchToQueue(String matchId) {
         QueueableHeatmapInstruction queueableHeatmapInstruction = new QueueableHeatmapInstruction();
         queueableHeatmapInstruction.setMatchId(matchId);
         queueableHeatmapInstruction.setType(HeatmapType.PLAYER_POSITION);
-        addToQueue(new QueueMessage(
-                requestDetails, QueueableHeatmapInstruction.QUEUE_MESSAGE_TYPE, queueableHeatmapInstruction));
+        queueService.addToQueue(QUEUE_NAME,(new QueueMessage(
+                requestDetails, QueueableHeatmapInstruction.QUEUE_MESSAGE_TYPE, queueableHeatmapInstruction)));
     }
 
 }

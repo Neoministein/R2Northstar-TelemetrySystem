@@ -8,6 +8,31 @@
   },
   "mappings": {
     "properties": {
+      "incoming": {
+        "type": "long"
+      },
+      "outgoing": {
+        "type": "long"
+      },
+      "negotiatedSubProtocol": {
+        "type": "keyword"
+      },
+      "protocolVersion": {
+        "type": "keyword"
+      },
+      "requestUri": {
+        "type": "keyword"
+      },
+      "searchable": {
+        "type": "keyword"
+      },
+      "socketId": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type": "date",
+        "format": "epoch_millis"
+      }
     }
   },
   "aliases": {

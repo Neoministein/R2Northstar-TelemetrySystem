@@ -1,32 +1,38 @@
 package com.neo.r2.ts.impl.map.heatmap;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.impl.map.scaling.GameMap;
 import com.neo.r2.ts.impl.map.scaling.MapScale;
+import com.neo.r2.ts.impl.match.event.processor.player.movement.PlayerPositionEventProcessor;
+import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
+import com.neo.r2.ts.persistence.HeatmapType;
 import com.neo.r2.ts.persistence.entity.Heatmap;
-import com.neo.r2.ts.persistence.entity.HeatmapType;
-import com.neo.r2.ts.persistence.searchable.MatchEvent;
-import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
-import com.neo.r2.ts.impl.rest.CustomConstants;
 import com.neo.util.common.impl.exception.ConfigurationException;
 import com.neo.util.common.impl.exception.ExceptionDetails;
 import com.neo.util.common.impl.exception.ValidationException;
 import com.neo.util.common.impl.json.JsonUtil;
-import com.neo.util.framework.api.persistence.aggregation.*;
+import com.neo.util.framework.api.persistence.aggregation.CriteriaAggregation;
+import com.neo.util.framework.api.persistence.aggregation.CriteriaAggregationResult;
+import com.neo.util.framework.api.persistence.aggregation.SimpleAggregationResult;
+import com.neo.util.framework.api.persistence.aggregation.SimpleFieldAggregation;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.criteria.LongRangeSearchCriteria;
 import com.neo.util.framework.api.persistence.criteria.SearchCriteria;
-import com.neo.util.framework.api.persistence.search.SearchQuery;
 import com.neo.util.framework.api.persistence.search.SearchProvider;
+import com.neo.util.framework.api.persistence.search.SearchQuery;
 import com.neo.util.framework.api.persistence.search.SearchResult;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @ApplicationScoped
 public class HeatmapFactory {
@@ -43,7 +49,7 @@ public class HeatmapFactory {
             "r2ts/map/heatmap/unsupported-type", "Unsupported heatmap type {0}", false
     );
 
-    protected static final SimpleFieldAggregation COUNT_AGGREGATION = new SimpleFieldAggregation(COUNT, MatchEventSearchable.F_MATCH_ID, SimpleFieldAggregation.Type.COUNT);
+    protected static final SimpleFieldAggregation COUNT_AGGREGATION = new SimpleFieldAggregation(COUNT, MatchStateWrapper.MATCH_ID, SimpleFieldAggregation.Type.COUNT);
 
     @Inject
     protected SearchProvider searchProvider;
@@ -53,7 +59,7 @@ public class HeatmapFactory {
                 gameMap.scale(),
                 List.of(
                         new ExplicitSearchCriteria("map", gameMap.name()),
-                        new ExplicitSearchCriteria("eventType", MatchEvent.PLAYER_POSITION.fieldName)),
+                        new ExplicitSearchCriteria("eventType", PlayerPositionEventProcessor.EVENT_NAME)),
                 PIXELS_PER_CALL
         );
 
@@ -68,8 +74,8 @@ public class HeatmapFactory {
         List<SearchCriteria> searchCriteriaList = new ArrayList<>();
         switch (heatmapType) {
             case PLAYER_POSITION:
-                searchCriteriaList.add(new ExplicitSearchCriteria(MatchEventSearchable.F_MATCH_ID, matchId));
-                searchCriteriaList.add(new ExplicitSearchCriteria("eventType", MatchEvent.PLAYER_POSITION.fieldName));
+                searchCriteriaList.add(new ExplicitSearchCriteria(MatchStateWrapper.MATCH_ID, matchId));
+                searchCriteriaList.add(new ExplicitSearchCriteria("eventType", PlayerPositionEventProcessor.EVENT_NAME));
                 break;
             case FULL_MAP_AGGREGATION:
             case CUSTOM:
@@ -105,7 +111,7 @@ public class HeatmapFactory {
             searchCriteriaList.add(new LongRangeSearchCriteria(PLAYER_POS_X, mapScale.toGameScaleX(x),mapScale.toGameScaleX(x + PIXELS_PER_CALL) -1, false));
             searchQuery.setFilters(searchCriteriaList);
             searchQuery.setAggregations(List.of(new CriteriaAggregation("values", criteriaMap, COUNT_AGGREGATION)));
-            SearchResult searchResult = searchProvider.fetch("r2ts-match-event",searchQuery);
+            SearchResult<JsonNode> searchResult = searchProvider.fetch("r2ts-match-event",searchQuery);
             for (Map.Entry<String, Object> entry: ((CriteriaAggregationResult) searchResult.getAggregations().get("values")).getCriteriaResult().entrySet()) {
                 long count = parseLongFromDouble(entry.getValue());
                 if (count != 0) {

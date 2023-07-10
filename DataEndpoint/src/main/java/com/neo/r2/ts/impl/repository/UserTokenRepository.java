@@ -25,7 +25,7 @@ public class UserTokenRepository extends AbstractDatabaseRepository<ApplicationU
                 WHERE t.apiKey =:apiKey""";
         try {
             return Optional.of(pcs.getEm().createQuery(query, ApplicationUser.class)
-                    .setParameter("apiKey", key).getSingleResult());
+                    .setParameter(ApplicationUser.C_API_KEY, key).getSingleResult());
         } catch (NoResultException ex) {
             return Optional.empty();
         }
@@ -41,10 +41,10 @@ public class UserTokenRepository extends AbstractDatabaseRepository<ApplicationU
                 SELECT t
                 FROM ApplicationUser t
                 LEFT JOIN FETCH t.roles
-                WHERE t.uid =:uId""";
+                WHERE t.uid =:uid""";
         try {
             return Optional.of(pcs.getEm().createQuery(query, ApplicationUser.class)
-                    .setParameter("uId", optUId.get()).getSingleResult());
+                    .setParameter(ApplicationUser.C_UID, optUId.get()).getSingleResult());
         } catch (NoResultException ex) {
             return Optional.empty();
         }
@@ -57,6 +57,6 @@ public class UserTokenRepository extends AbstractDatabaseRepository<ApplicationU
                 LEFT JOIN FETCH t.roles
                 WHERE t.disabled =:disabled""";
         return pcs.getEm().createQuery(query, ApplicationUser.class)
-                .setParameter("disabled", isDisabled).getResultList();
+                .setParameter(ApplicationUser.C_DISABLED, isDisabled).getResultList();
     }
 }

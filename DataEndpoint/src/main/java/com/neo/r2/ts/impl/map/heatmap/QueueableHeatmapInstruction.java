@@ -1,6 +1,6 @@
 package com.neo.r2.ts.impl.map.heatmap;
 
-import com.neo.r2.ts.persistence.entity.HeatmapType;
+import com.neo.r2.ts.persistence.HeatmapType;
 
 import java.io.Serializable;
 

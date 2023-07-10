@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "timePassed": {
+      "type": "integer",
+      "minimum" : -9223372036854775808,
+      "maximum" : 9223372036854775807
+    }
+  },
+  "required" : [ "eventType", "timePassed"],
+  "additionalProperties": true
+}

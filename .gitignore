@@ -1,3 +1,11 @@
 
 Other/PipeServerBuild/
 DataFrontend/node_modules
+
+Frontend/build
+Frontend/coverage
+Frontend/dist
+Frontend/out
+Frontend/node_modules
+Frontend/.next
+Frontend/.vscode

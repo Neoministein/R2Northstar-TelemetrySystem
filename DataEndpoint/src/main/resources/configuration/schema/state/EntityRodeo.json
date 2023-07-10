@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "entityId": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "state": {
+      "type": "boolean"
+    },
+    "rodeoEntityId": {
+      "type": "string",
+      "maxLength": 255
+    }
+  },
+  "required" : [ "eventType", "entityId", "state"],
+  "additionalProperties": false
+}

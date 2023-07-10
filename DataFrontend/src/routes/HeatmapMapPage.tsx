@@ -19,7 +19,7 @@ export default function HeatmapMapPage() {
             navigate("/heatmap");
             return;
         }
-    })
+    }, [])
 
     return (
         <div>

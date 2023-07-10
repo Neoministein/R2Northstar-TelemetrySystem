@@ -1,6 +1,6 @@
 package com.neo.r2.ts.impl.security;
 
-import com.neo.r2.ts.impl.rest.AuthorizationEndpoint;
+import com.neo.r2.ts.web.rest.AuthorizationEndpoint;
 import com.neo.util.common.impl.exception.CommonRuntimeException;
 import com.neo.util.common.impl.retry.RetryHttpExecutor;
 import jakarta.websocket.HandshakeResponse;

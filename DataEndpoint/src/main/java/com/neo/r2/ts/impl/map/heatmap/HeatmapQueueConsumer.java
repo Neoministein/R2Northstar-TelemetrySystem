@@ -2,17 +2,16 @@ package com.neo.r2.ts.impl.map.heatmap;
 
 import com.neo.r2.ts.impl.map.scaling.GameMap;
 import com.neo.r2.ts.impl.map.scaling.MapService;
-import com.neo.r2.ts.persistence.entity.Heatmap;
-import com.neo.r2.ts.persistence.entity.HeatmapType;
-import com.neo.r2.ts.persistence.entity.Match;
 import com.neo.r2.ts.impl.repository.HeatmapRepository;
 import com.neo.r2.ts.impl.repository.MatchRepository;
+import com.neo.r2.ts.persistence.HeatmapType;
+import com.neo.r2.ts.persistence.entity.Heatmap;
+import com.neo.r2.ts.persistence.entity.Match;
 import com.neo.util.common.impl.exception.ConfigurationException;
 import com.neo.util.common.impl.exception.ValidationException;
 import com.neo.util.framework.api.queue.IncomingQueueConnection;
 import com.neo.util.framework.api.queue.QueueListener;
 import com.neo.util.framework.api.queue.QueueMessage;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -47,7 +46,7 @@ public class HeatmapQueueConsumer implements QueueListener {
                 QueueableHeatmapInstruction heatmapInstruction = (QueueableHeatmapInstruction) queueMessage.getPayload();
                 if (HeatmapType.FULL_MAP_AGGREGATION.equals(heatmapInstruction.getType())) {
 
-                    Optional<GameMap> gameMap = mapService.getMap(heatmapInstruction.getMap());
+                    Optional<GameMap> gameMap = mapService.fetchMap(heatmapInstruction.getMap());
                     gameMap.ifPresent(map -> heatmapRepository.create(heatmapFactory.createForMap(map)));
 
                 } else {
@@ -67,7 +66,7 @@ public class HeatmapQueueConsumer implements QueueListener {
 
         Match match = optMatch.get();
 
-        Heatmap heatmap = heatmapFactory.createForMatch(matchId, mapService.getMap(match.getMap()).get(), type);
+        Heatmap heatmap = heatmapFactory.createForMatch(matchId, mapService.fetchMap(match.getMap()).get(), type);
         heatmap.setMatch(match);
         match.getHeatmaps().add(heatmap);
         matchRepository.edit(match);

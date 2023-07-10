@@ -1,1 +1,0 @@
-dotnet publish ../CSNamedPipeServer/CSNamedPipeServer/CSNamedPipeServer.csproj -p:PublishProfile=FolderProfile

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "object",
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "entityId": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "team": {
+      "type": "integer",
+      "minimum" : -128,
+      "maximum" : 127
+    }
+  },
+  "required" : [ "eventType", "entityId", "team"],
+  "additionalProperties": false
+}

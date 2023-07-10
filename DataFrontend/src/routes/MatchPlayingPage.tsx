@@ -123,20 +123,29 @@ export default function MatchPlayingPage() {
     function renderNpcs(p5Instance : P5Instance) : void {
         const imageScale : number = mapScale.scale / 8
         for(const npc of matchState.npcs) {
-            const npcIcon = imageContainer.getNpcIcon(npc.npcClass, npc.team)
+            const npcIcon = imageContainer.getNpcIcon(npc.entityType, npc.team)
+            let scale = [30, 30, 30, 30]
+            if (npc.entityType === "npc_titan") {
+                scale = [22.5 , 28.5 , 34.5, 43.5]
+            } else if (npc.entityType === "npc_dropship"){
+                scale = [36 , 33 , 36, 33]
+            }
+
             p5Instance.push()
             p5Instance.translate(
                 scalePosition((npc.position.x + mapScale.xOffset) / mapScale.scale),
                 scalePosition((npc.position.y * -1 + mapScale.yOffset) / mapScale.scale));
 
-            if (npc.npcClass === "npc_titan" || npc.npcClass === "npc_dropship") {
+            if (npc.entityType === "npc_titan" || npc.entityType === "npc_dropship") {
                 p5Instance.rotate(Math.PI / 180 * (90 - npc.rotation.y));
             }
+
+
             p5Instance.image(npcIcon,
-                scalePosition(-(30 / imageScale)),
-                scalePosition(-(30 / imageScale)),
-                scalePosition(30 / imageScale),
-                scalePosition(30 / imageScale));
+                scalePosition(-(scale[0] / imageScale)),
+                scalePosition(-(scale[1] / imageScale)),
+                scalePosition(scale[2] / imageScale),
+                scalePosition(scale[3] / imageScale));
             p5Instance.pop();
         }
     }

@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "CSNamedPipeServer": {
-      "commandName": "Project",
-      "commandLineArgs": "POXWQwjbB9YUfbgdGoTNRYAZOfQracmtWE2wHO6JBst5CvQ http://localhost:8090/api/v1"
-    }
-  }
-}
