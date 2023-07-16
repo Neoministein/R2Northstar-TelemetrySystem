@@ -56,6 +56,10 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
         @JsonView(Views.Public.class)
     private Instant startDate = Instant.now();
 
+    @Column(name = "END_DATE")
+        @JsonView(Views.Public.class)
+    private Instant endDate = Instant.now();
+
     @Column(name = "MILLI_SEC_BETWEEN_STATE", nullable = false)
         @JsonView(Views.Public.class)
     private Integer milliSecBetweenState;
@@ -70,11 +74,11 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
         @JsonView(Views.Public.class)
     private List<String> tags = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(optional = false)
         @JsonIgnore
     private ApplicationUser user;
 
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "match")
         @JsonIgnore
     private List<Heatmap> heatmaps = new ArrayList<>();
 
@@ -173,6 +177,14 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
 
     public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    public Instant getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Instant endDate) {
+        this.endDate = endDate;
     }
 
     @Override

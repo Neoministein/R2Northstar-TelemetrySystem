@@ -9,9 +9,10 @@ const AppMenu = () => {
             items: [{ label: 'Home', icon: 'pi pi-fw pi-home', to: '/' }]
         },
         {
-            label: 'Live Data',
+            label: 'Matches',
             items: [
-                { label: 'Find Matches', icon: 'pi pi-fw pi-search', to: '/live/match' }
+                { label: 'Live Matches', icon: 'pi pi-fw pi-search', to: '/live/match' },
+                { label: 'Ended Matches', icon: 'pi pi-fw pi-history', to: '/finished/match' }
             ]
         },
         {

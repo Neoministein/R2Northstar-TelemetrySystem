@@ -34,7 +34,10 @@ export default function InputTextTags({onChange, lable} : InputTextTag){
 
     return <div>
                 <form onSubmit = {afterSubmission}>
-                    <label> {lable}:
+                    <label>
+                        <div>
+                            {lable}:
+                        </div>
                         <InputText
                             type = "text"
                             name = "itemName"

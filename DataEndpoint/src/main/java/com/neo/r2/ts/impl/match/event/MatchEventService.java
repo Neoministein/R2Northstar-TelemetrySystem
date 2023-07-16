@@ -46,7 +46,6 @@ public class MatchEventService {
 
     public void delegateToEventProcessor(String matchId, JsonNode event) {
         String eventType = event.get("eventType").asText();
-        LOGGER.info("{}", eventType);
 
         MatchEventProcessor processor = eventProcessorMap.get(eventType);
         if (processor == null) {

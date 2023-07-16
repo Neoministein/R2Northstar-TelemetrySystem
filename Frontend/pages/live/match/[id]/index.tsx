@@ -9,7 +9,7 @@ import dynamic from "next/dynamic";
 import useQuery from "../../../../src/utils/useQuery";
 import {MatchStateWrapper} from "../../../../src/utils/MatchStateWrapper";
 
-const MatchPage = () => {
+const LiveMatchPage = () => {
 
     const ReactP5Wrapper = dynamic<typeof import("@p5-wrapper/react").ReactP5Wrapper>(
         // @ts-ignore
@@ -22,14 +22,10 @@ const MatchPage = () => {
     const router = useRouter();
     const query = useQuery();
     const [match, setMatch] = useState<MatchEntity>();
-    const [matchStateWrapper, setMatchStateWrapper] = useState<MatchStateWrapper>(new MatchStateWrapper())
+    const [matchStateWrapper] = useState<MatchStateWrapper>(new MatchStateWrapper())
     let wsClient = null;
-    //let currentMatchState = null;
-    let lazyCanvastHolder = null;
+    let lazyCanvasHolder = null;
     let imageContainer : ImageContainer;
-
-
-
 
     useEffect(() => {
         if (!query) {
@@ -45,24 +41,19 @@ const MatchPage = () => {
         wsClient = MatchStateService.getMatchStateSocket(query.id as string)
         wsClient.onmessage = (message) => {
             if (message.data === "MATCH_END") {
-                router.push('/live/match')
+                router.push('/finished/match/' + query.id)
             } else {
                 matchStateWrapper.setState(JSON.parse(message.data));
-                //const timePassedFormatted = millisToMinutesAndSeconds(matchState.timePassed);
-                //if (timePassedFormatted != time) {
-                //    //Currently disabled because it causes p5 to reload every time
-                //    //setTime(timePassedFormatted);
-                //}
             }
         }
 
     },[query])
 
     function getCanvasSize() : number {
-        if (lazyCanvastHolder === null) {
-            lazyCanvastHolder = window.screen.height - 200
+        if (lazyCanvasHolder === null) {
+            lazyCanvasHolder = window.screen.height - 200
         }
-        return lazyCanvastHolder;
+        return lazyCanvasHolder;
     }
 
     function sketch(p5Instance : P5CanvasInstance) {
@@ -181,5 +172,5 @@ const MatchPage = () => {
     );
 };
 
-export default MatchPage;
+export default LiveMatchPage;
 

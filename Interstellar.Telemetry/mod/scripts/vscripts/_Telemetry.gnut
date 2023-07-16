@@ -65,8 +65,8 @@ void function ITS_init()
     //Initlize callbacks for the Telemetry System
     AddCallback_GameStateEnter( eGameState.WaitingForPlayers, ITS_RegisterNewMatch )
     AddCallback_GameStateEnter( eGameState.Playing, ITS_MatchStart )
+    AddCallback_GameStateEnter( eGameState.Epilogue, ITS_Score_GameFinished )
     AddCallback_GameStateEnter( eGameState.Postmatch, ITS_GameFinished )
-    AddCallback_GameStateEnter( eGameState.Postmatch, ITS_Score_GameFinished )
 
     AddCallback_OnClientConnected( ITS_PlayerConnect )
     AddCallback_OnClientDisconnected( ITS_PlayerDisconnect )

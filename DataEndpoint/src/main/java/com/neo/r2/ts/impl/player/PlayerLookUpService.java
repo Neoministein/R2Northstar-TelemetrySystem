@@ -1,6 +1,8 @@
 package com.neo.r2.ts.impl.player;
 
 import com.neo.r2.ts.persistence.searchable.PlayerUidSearchable;
+import com.neo.util.framework.api.cache.spi.CacheInvalidate;
+import com.neo.util.framework.api.cache.spi.CacheKeyParameterPositions;
 import com.neo.util.framework.api.cache.spi.CacheResult;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.search.SearchProvider;
@@ -55,6 +57,8 @@ public class PlayerLookUpService {
         return result.getHits().stream().findFirst();
     }
 
+    @CacheKeyParameterPositions(value = 0)
+    @CacheInvalidate(cacheName = PLAYER_LOOK_UP_CACHE)
     public void updatePlayerLookUp(String uid, String playerName) {
         LOGGER.debug("Updating player PlayerLookUp uid [{}], playerName [{}]", uid, playerName);
         searchProvider.update(new PlayerUidSearchable(uid, playerName), true);

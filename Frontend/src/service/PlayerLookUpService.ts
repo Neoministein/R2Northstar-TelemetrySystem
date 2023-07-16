@@ -50,7 +50,7 @@ const PlayerLookUpService = {
         const lookUpObject = await fetch(AppConfig.apiUrl + "/player/uid/search", {
             method: "POST",
             body: JSON.stringify({
-                players: uIdsToLookUp
+                playerUIds: uIdsToLookUp
             }),
             headers: {
                 "Content-type": "application/json; charset=UTF-8"

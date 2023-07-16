@@ -2,10 +2,12 @@ package com.neo.r2.ts.web.rest;
 
 import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.impl.map.heatmap.HeatmapFactory;
+import com.neo.r2.ts.impl.map.heatmap.HeatmapService;
 import com.neo.r2.ts.impl.map.scaling.GameMap;
 import com.neo.r2.ts.impl.map.scaling.MapScale;
 import com.neo.r2.ts.impl.map.scaling.MapService;
 import com.neo.r2.ts.impl.repository.HeatmapRepository;
+import com.neo.r2.ts.persistence.HeatmapEnums;
 import com.neo.r2.ts.persistence.entity.Heatmap;
 import com.neo.r2.ts.web.rest.dto.outbound.HitsDto;
 import com.neo.util.common.api.json.Views;
@@ -34,6 +36,9 @@ public class MapResource {
 
     @Inject
     protected HeatmapRepository heatmapRepository;
+
+    @Inject
+    protected HeatmapService heatmapService;
 
     @GET
     public HitsDto getAllMaps() {
@@ -65,7 +70,8 @@ public class MapResource {
     @Secured
     @RolesAllowed(AbstractEntityRestEndpoint.PERM_INTERNAL)
     public Heatmap createHeatmapData(@PathParam("map") String map) {
-        Heatmap heatmap = heatmapFactory.createForMap(getMapByName(map));
+        Heatmap heatmap = heatmapFactory.createForMap(getMapByName(map).name(), HeatmapEnums.Type.PLAYER_POSITION);
+        heatmapService.calculateHeatmap(heatmap);
         heatmapRepository.create(heatmap);
         return heatmap;
     }

@@ -14,6 +14,14 @@ export interface MapScale {
     scale: number
 }
 
+export interface HeatmapEntity {
+    data: any
+    highestCount: number
+    map: string
+    type: string
+    description: string
+}
+
 type CachedGameMap = GameMap | Promise<GameMap>;
 
 const MapService = {
@@ -38,6 +46,10 @@ const MapService = {
         }
 
         return Promise.resolve(cachedPlayer);
+    },
+
+    getMapHeatmap(map : string) : Promise<HeatmapEntity> {
+        return fetch(AppConfig.apiUrl + "/map/" + map + "/heatmap").then(response => response.json());
     }
 }
 

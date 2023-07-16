@@ -1,7 +1,6 @@
 import {AppConfig} from "../AppConfig";
-import MapService, {GameMap} from "./MapService";
+import MapService, {GameMap, HeatmapEntity} from "./MapService";
 import BackendErrorUtils from "../utils/BackendErrorUtils";
-
 
 export interface MatchEntity {
     id: string
@@ -16,8 +15,8 @@ export interface MatchEntity {
 
 const MatchService = {
 
-    async getMatch(id : string) : Promise<MatchEntity>{
-        return fetch(AppConfig.apiUrl + "/match/" + id )
+    getMatch(matchId : string) : Promise<MatchEntity>{
+        return fetch(AppConfig.apiUrl + "/match/" + matchId )
             .then(resp => { return BackendErrorUtils.parseResponse(resp);})
             .then(async match => {
                 match.mapDetails = await MapService.getMapDetails(match.map)
@@ -36,6 +35,24 @@ const MatchService = {
                 }
                 return hits;
             });
+    },
+
+    getFinishedMatches() : Promise<MatchEntity[]> {
+        return fetch(AppConfig.apiUrl + "/match/stopped")
+            .then(resp => { return BackendErrorUtils.parseResponse(resp);})
+            .then(d => {
+                return d.hits;
+            }).then(async hits => {
+                for (const hit of hits) {
+                    hit.mapDetails = await MapService.getMapDetails(hit.map);
+                }
+                return hits;
+            });
+    },
+
+    getHeatmap(matchId : string) : Promise<HeatmapEntity>{
+        return fetch(AppConfig.apiUrl + "/match/" + matchId + "/heatmap")
+            .then(resp => { return BackendErrorUtils.parseResponse(resp);});
     }
 }
 

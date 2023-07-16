@@ -1,7 +1,9 @@
 package com.neo.r2.ts.persistence.searchable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
+import com.neo.r2.ts.web.rest.result.MatchResultDto;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.search.AbstractSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
@@ -24,18 +26,53 @@ public class MatchResultSearchable extends AbstractSearchable implements Searcha
 
     protected String uId;
     protected Boolean hasWon;
+    @JsonProperty(value = "PGS_ELIMINATED")
     protected Integer pgsEliminated;
+    @JsonProperty(value = "PGS_KILLS")
     protected Integer pgsKills;
+    @JsonProperty(value = "PGS_DEATHS")
     protected Integer pgsDeaths;
+    @JsonProperty(value = "PGS_PILOT_KILLS")
     protected Integer pgsPilotKills;
+    @JsonProperty(value = "PGS_TITAN_KILLS")
     protected Integer pgsTitanKills;
+    @JsonProperty(value = "PGS_NPC_KILLS")
     protected Integer pgsNpcKills;
+    @JsonProperty(value = "PGS_ASSISTS")
     protected Integer pgsAssists;
+    @JsonProperty(value = "PGS_SCORE")
     protected Integer pgsScore;
+    @JsonProperty(value = "PGS_ASSAULT_SCORE")
     protected Integer pgsAssaultScore;
+    @JsonProperty(value = "PGS_DEFENSE_SCORE")
     protected Integer pgsDefenseScore;
+    @JsonProperty(value = "PGS_DISTANCE_SCORE")
     protected Integer pgsDistanceScore;
+    @JsonProperty(value = "PGS_DETONATION_SCORE")
     protected Integer pgsDetonationScore;
+
+    public MatchResultSearchable(MatchResultDto matchResultDto, MatchResultDto.Player player) {
+        this.matchId = matchResultDto.matchId().orElse(null);
+        this.map = matchResultDto.map();
+        this.gamemode = matchResultDto.gamemode();
+        matchResultDto.tags().ifPresent(tags -> this.tags = List.of(tags.replaceAll("\\s+", "").split(",")));
+
+        this.uId = player.uId();
+        this.hasWon = player.hasWon();
+
+        player.pgsEliminated().ifPresent(v -> this.pgsEliminated = v);
+        player.pgsKills().ifPresent(v -> this.pgsKills = v);
+        player.pgsDeaths().ifPresent(v -> this.pgsDeaths = v);
+        player.pgsPilotKills().ifPresent(v -> this.pgsPilotKills = v);
+        player.pgsTitanKills().ifPresent(v -> this.pgsTitanKills = v);
+        player.pgsNpcKills().ifPresent(v -> this.pgsNpcKills = v);
+        player.pgsAssists().ifPresent(v -> this.pgsAssists = v);
+        player.pgsScore().ifPresent(v -> this.pgsScore = v);
+        player.pgsAssaultScore().ifPresent(v -> this.pgsAssaultScore = v);
+        player.pgsDefenseScore().ifPresent(v -> this.pgsDefenseScore = v);
+        player.pgsDistanceScore().ifPresent(v -> this.pgsDistanceScore = v);
+        player.pgsDetonationScore().ifPresent(v -> this.pgsDetonationScore = v);
+    }
 
     public MatchResultSearchable(JsonNode event, MatchStateWrapper matchStateWrapper) {
         this.matchId = matchStateWrapper.getMatchId();
@@ -64,5 +101,10 @@ public class MatchResultSearchable extends AbstractSearchable implements Searcha
 
     protected MatchResultSearchable() {
 
+    }
+
+    public MatchResultSearchable addMatchId(String matchId) {
+        this.matchId = matchId;
+        return this;
     }
 }

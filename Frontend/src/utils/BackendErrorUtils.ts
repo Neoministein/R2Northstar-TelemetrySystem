@@ -6,12 +6,18 @@ export interface BackendError {
 const BackendErrorUtils = {
 
     async parseResponse(resp : Response) : Promise<any> {
+        const data = await resp.json();
+
         if (resp.ok) {
-            return resp.json();
+            return data;
         } else {
-            const backendError = resp.headers.get("validBackendError");
+            resp.headers.forEach(val => console.log(val))
+
+            const backendError = resp.headers.get('validBackendError');
+            console.log(resp.headers)
+            console.log(backendError)
             if (backendError === "true") {
-                throw (await resp.json() as BackendError);
+                throw data as BackendError;
             }
             throw Error();
         }

@@ -1,11 +1,11 @@
 import {Column} from 'primereact/column';
 import StatsService from '../../../src/service/StatsService';
-import TopResultTable from '../../../src/components/TopResultTable';
+import TopResultTableV2 from "../../../src/components/TopResultTableV2";
 
 const PlayerKillPage = () => {
 
     return (
-        <TopResultTable
+        <TopResultTableV2
             title="Top Player Kills"
             getGlobalRanking={(tags) => StatsService.getTopPlayerKills(tags)}
             columns={

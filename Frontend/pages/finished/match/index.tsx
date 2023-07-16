@@ -11,7 +11,7 @@ const MatchListPage = () => {
     const router = useRouter();
 
     useEffect(() => {
-        MatchService.getRunningMatches()
+        MatchService.getFinishedMatches()
             .then(data => setMatches(data))
             .then(() => setLoading(false));
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -20,12 +20,8 @@ const MatchListPage = () => {
         return new Date(rowData.startDate).toISOString().replace("T", " ").split(".")[0];
     }
 
-    const numberOfPlayers = (rowData: MatchEntity) => {
-        return rowData.numberOfPlayers + "/" + rowData.maxPlayers;
-    }
-
     const handleClick = (value : any) => {
-        router.push('/live/match/[id]', '/live/match/' + value.id );
+        router.push('/finished/match/[id]', '/finished/match/' + value.id );
     };
 
     return (
@@ -34,7 +30,6 @@ const MatchListPage = () => {
                 <div className="card">
                     <DataTable value={matches} loading={loading} scrollable={true} selectionMode="single" onSelectionChange={e => {handleClick(e.value);}}>
                         <Column header="Ns Server Name" sortable field="nsServerName"/>
-                        <Column header="Players"        sortable field="numberOfPlayers" body={numberOfPlayers}/>
                         <Column header="Map"            sortable field="mapDetails.displayName"/>
                         <Column header="Gamemode"       sortable field="gamemode"/>
                         <Column header="Start date"     sortable field="startDate" body={toDateString}/>

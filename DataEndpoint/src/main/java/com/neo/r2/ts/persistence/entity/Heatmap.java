@@ -27,7 +27,7 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
     private Long id;
 
     @Convert(converter = JsonNodeStringJavaDescriptor.class)
-    @Column(name = "DATA", nullable = false, columnDefinition = "text")
+    @Column(name = "DATA", columnDefinition = "text")
         @JsonView(Views.Public.class)
     private JsonNode data;
 
@@ -43,11 +43,16 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
         @JsonView(Views.Public.class)
     private String type;
 
-    @Column(name = "DESCRIPTION", nullable = false)
+    @Column(name = "STATUS", nullable = false)
+    @JsonView(Views.Public.class)
+    private String status;
+
+    @Column(name = "DESCRIPTION")
         @JsonView(Views.Public.class)
     private String description;
 
     @ManyToOne
+    @JoinColumn(name = "MATCH_ID")
         @JsonIgnore
     private Match match;
 
@@ -89,6 +94,14 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getDescription() {

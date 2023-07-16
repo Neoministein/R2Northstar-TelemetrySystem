@@ -1,6 +1,6 @@
 import {Column} from 'primereact/column';
 import StatsService, {WinRatioBucket} from '../../../src/service/StatsService';
-import TopResultTable from '../../../src/components/TopResultTable';
+import TopResultTableV2 from "../../../src/components/TopResultTableV2";
 
 const ButtonDemo = () => {
 
@@ -12,7 +12,7 @@ const ButtonDemo = () => {
     }
 
     return (
-        <TopResultTable
+        <TopResultTableV2
             title="Top Player Kills"
             getGlobalRanking={(tags) => StatsService.getTopWinRatio(tags)}
             columns={
