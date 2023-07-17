@@ -33,23 +33,24 @@ public class NpcSpawnEventProcessor extends AbstractBasicEventProcessor implemen
         npc.set("entityType", event.get("entityType"));
         npc.set("titanClass", event.get("titanClass"));
         npc.put("health", 100);
+        npc.put("distance", 0);
 
-        ObjectNode position = npc.with("position");
+        ObjectNode position = npc.withObject("/position");
         position.put("x", 0);
         position.put("y", 0);
         position.put("z", 0);
 
-        ObjectNode rotation = npc.with("rotation");
+        ObjectNode rotation = npc.withObject("/rotation");
         rotation.put("x", 0);
         rotation.put("y", 0);
         rotation.put("z", 0);
 
-        ObjectNode velocity = npc.with("velocity");
+        ObjectNode velocity = npc.withObject("/velocity");
         velocity.put("x", 0);
         velocity.put("y", 0);
         velocity.put("z", 0);
 
-        ObjectNode equipment = npc.with("equipment");
+        ObjectNode equipment = npc.withObject("/equipment");
         equipment.put("primary", CustomConstants.UNKNOWN);
         equipment.put("secondary", CustomConstants.UNKNOWN);
 

@@ -36,6 +36,7 @@ public abstract class AbstractPositionEventProcessor extends AbstractBasicEventP
 
             if (entityOpt.isPresent()) {
                 ObjectNode entity = entityOpt.get();
+                entity.put("distance", calculateDistance(entity.get("position"), newEntityData.get("position")));
                 entity.set("position",newEntityData.get("position"));
                 entity.set("rotation",newEntityData.get("rotation"));
                 entity.set("velocity",newEntityData.get("velocity"));
@@ -52,5 +53,22 @@ public abstract class AbstractPositionEventProcessor extends AbstractBasicEventP
             matchEventSearchableList.add(new MatchEventSearchable(endMatchState, getEventName(), player));
         }
         return matchEventSearchableList;
+    }
+
+    protected long calculateDistance(JsonNode oldPosition, JsonNode newPosition) {
+        long x = oldPosition.get("x").asLong();
+        long y = oldPosition.get("y").asLong();
+        long z = oldPosition.get("z").asLong();
+
+        //Skip because of first position is default spawn position
+        if (x == 0 && y == 0 && z == 0) {
+            return 0;
+        }
+
+        x -= newPosition.get("x").asLong();
+        y -= newPosition.get("y").asLong();
+        z -= newPosition.get("z").asLong();
+
+        return Math.round(Math.sqrt(x * x + y * y + z * z));
     }
 }

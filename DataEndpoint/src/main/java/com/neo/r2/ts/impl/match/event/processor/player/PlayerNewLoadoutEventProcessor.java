@@ -27,7 +27,7 @@ public class PlayerNewLoadoutEventProcessor extends AbstractBasicEventProcessor 
         super.updateMatchState(event, matchStateToUpdate);
         Optional<ObjectNode> optPlayer = matchStateToUpdate.getPlayer(event.get("entityId").asText());
         if (optPlayer.isPresent()) {
-            ObjectNode equipment = optPlayer.get().with("equipment");
+            ObjectNode equipment = optPlayer.get().withObject("/equipment");
             equipment.set("primary",   event.get("primary"));
             equipment.set("secondary", event.get("secondary"));
             equipment.set("weapon3",   event.get("weapon3"));

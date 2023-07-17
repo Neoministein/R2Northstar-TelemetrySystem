@@ -50,7 +50,7 @@ public class MatchStateService {
         matchState.put(MatchStateWrapper.TIME_PASSED, 0);
         matchState.putArray(MatchStateWrapper.PLAYERS);
         matchState.putArray(MatchStateWrapper.NPCS);
-        ObjectNode events = matchState.with(MatchStateWrapper.EVENTS);
+        ObjectNode events = matchState.withObject("/" + MatchStateWrapper.EVENTS);
 
         for (MatchEventProcessor processor: matchEventService.getAllProcessors()) {
             if (processor.shouldBeAddedToMatchState()) {

@@ -42,22 +42,24 @@ public class PlayerConnectEventProcessor extends AbstractBasicEventProcessor imp
         player.put("isAlive", false);
         player.put("isRodeoing", false);
 
-        ObjectNode position = player.with("position");
+        player.put("/distance", 0);
+
+        ObjectNode position = player.withObject("/position");
         position.put("x", 0);
         position.put("y", 0);
         position.put("z", 0);
 
-        ObjectNode rotation = player.with("rotation");
+        ObjectNode rotation = player.withObject("/rotation");
         rotation.put("x", 0);
         rotation.put("y", 0);
         rotation.put("z", 0);
 
-        ObjectNode velocity = player.with("velocity");
+        ObjectNode velocity = player.withObject("/velocity");
         velocity.put("x", 0);
         velocity.put("y", 0);
         velocity.put("z", 0);
 
-        ObjectNode equipment = player.with("equipment");
+        ObjectNode equipment = player.withObject("/equipment");
         equipment.put("primary", CustomConstants.UNKNOWN);
         equipment.put("secondary", CustomConstants.UNKNOWN);
         equipment.put("weapon3", CustomConstants.UNKNOWN);

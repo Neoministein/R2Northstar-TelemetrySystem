@@ -101,11 +101,11 @@ public class MatchStateWrapper {
     }
 
     public void addEvent(String eventName, JsonNode event) {
-        matchState.with(EVENTS).withArray(eventName).add(event);
+        matchState.withObject("/" + EVENTS).withArray(eventName).add(event);
     }
 
     public void clearEvents(String eventName) {
-        matchState.with(EVENTS).withArray(eventName).removeAll();
+        matchState.withObject("/" + EVENTS).withArray(eventName).removeAll();
     }
 
     public ObjectNode getState() {
