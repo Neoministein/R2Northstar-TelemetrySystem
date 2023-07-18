@@ -5,6 +5,7 @@ import useQuery from "../../../../src/utils/useQuery";
 import MatchService, {MatchEntity} from "../../../../src/service/MatchService";
 import Heatmap from "../../../../src/components/Heatmap";
 import {HeatmapEntity} from "../../../../src/service/MapService";
+import {retry} from "../../../../src/utils/retry";
 
 const FinishedMatchPage = () => {
 
@@ -23,17 +24,19 @@ const FinishedMatchPage = () => {
                 // @ts-ignore
                 window.PrimeToast.show({ severity: 'error', summary: 'Match not found', detail: `The match that you tried to navigate to does not exist:`, life: 3000 });
                 router.push('/live/match')
-            })
-        MatchService.getHeatmap(query.id as string)
+            });
+
+        const a = () => MatchService.getHeatmap(query.id as string)
             .then( result => {
-                return result
+                if (result.status === "FINISHED") {
+                    console.log("S")
+                    setHeatmap(result)
+                } else {
+                    console.log("E")
+                    throw Error();
+                }
             })
-            .then( result => setHeatmap(result))
-            .catch( ex => {
-                // @ts-ignore
-                window.PrimeToast.show({ severity: 'error', summary: 'Match not found', detail: `The match that you tried to navigate to does not exist:`, life: 3000 });
-                //router.push('/live/match')
-            })
+        retry(a, { retries: 6, retryIntervalMs: 10_000 })
 
     },[query])
 

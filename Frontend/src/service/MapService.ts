@@ -19,6 +19,7 @@ export interface HeatmapEntity {
     highestCount: number
     map: string
     type: string
+    status: string
     description: string
 }
 
