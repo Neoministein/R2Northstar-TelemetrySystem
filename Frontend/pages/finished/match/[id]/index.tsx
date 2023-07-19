@@ -6,6 +6,11 @@ import MatchService, {MatchEntity} from "../../../../src/service/MatchService";
 import Heatmap from "../../../../src/components/Heatmap";
 import {HeatmapEntity} from "../../../../src/service/MapService";
 import {retry} from "../../../../src/utils/retry";
+import {primeToast} from "../../../../layout/AppTopbar";
+import ErrorUtils from "../../../../src/utils/ErrorUtils";
+import {Card} from "primereact/card";
+import {ProgressSpinner} from "primereact/progressspinner";
+import MatchResultTable from "../../../../src/components/MatchResultTable";
 
 const FinishedMatchPage = () => {
 
@@ -13,6 +18,7 @@ const FinishedMatchPage = () => {
     const query = useQuery();
     const [match, setMatch] = useState<MatchEntity>();
     const [heatmap, setHeatmap] = useState<HeatmapEntity>();
+    const [heatmapFailed, setHeatmapFailed] = useState<boolean>(false)
 
     useEffect(() => {
         if (!query) {
@@ -20,36 +26,59 @@ const FinishedMatchPage = () => {
         }
         MatchService.getMatch(query.id as string)
             .then( result => setMatch(result))
-            .catch( ex => {
-                // @ts-ignore
-                window.PrimeToast.show({ severity: 'error', summary: 'Match not found', detail: `The match that you tried to navigate to does not exist:`, life: 3000 });
+            .catch( () => {
+                primeToast.show({ severity: 'error', summary: 'Match not found', detail: 'The match that you tried to navigate to does not exist', life: 3000 });
                 router.push('/live/match')
             });
 
-        const a = () => MatchService.getHeatmap(query.id as string)
+        const getHeatmap = () => MatchService.getHeatmap(query.id as string)
             .then( result => {
                 if (result.status === "FINISHED") {
-                    console.log("S")
                     setHeatmap(result)
+                } else if (result.status === "FAILED") {
+                    throw Error("Heatmap generation failed");
                 } else {
-                    console.log("E")
-                    throw Error();
+                    throw Error("The server is still processing try again later");
                 }
             })
-        retry(a, { retries: 6, retryIntervalMs: 10_000 })
-
+        retry(getHeatmap, { retries: 6, retryIntervalMs: 10_000 })
+            .catch(ex => {
+                setHeatmapFailed(true)
+                ErrorUtils.displayError(ex)
+            });
     },[query])
 
 
     return (
         <div>
-            <h2>{match?.nsServerName}</h2>
-            {
-                heatmap != null && match != null ? (
-                    <Heatmap heatmap={heatmap} map={match.mapDetails}/>
-                    ) :
-                    <div/>
-            }
+            <Card title={match?.nsServerName}>
+                <div>
+                    {
+                        match?.id != null ? <MatchResultTable matchId={match.id}/> : null
+                    }
+                </div>
+                { heatmapFailed ?
+                    <div>
+                        Cannot load heatmap
+                    </div>
+                    :
+                    <div>
+                        {
+                            heatmap != null && match != null ? (
+                                    <Heatmap heatmap={heatmap} map={match.mapDetails}/>
+                                ) :
+                                <div>
+                                    <div>
+                                        Waiting for the heatmap to be generated...
+                                    </div>
+                                    <ProgressSpinner/>
+                                </div>
+
+                        }
+                    </div>
+                }
+            </Card>
+
         </div>
     );
 };

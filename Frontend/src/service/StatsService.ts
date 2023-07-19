@@ -33,7 +33,29 @@ export interface WinsBucket extends PlayerBucket {
     win: number
 }
 
+export interface MatchResult {
+    uId: string
+    playerName: string
+    PGS_ELIMINATED: number
+    PGS_KILLS: number
+    PGS_DEATHS: number
+    PGS_PILOT_KILLS: number
+    PGS_TITAN_KILLS: number
+    PGS_NPC_KILLS: number
+    PGS_ASSISTS: number
+    PGS_SCORE: number
+    PGS_ASSAULT_SCORE: number
+    PGS_DEFENSE_SCORE: number
+    PGS_DISTANCE_SCORE: number
+    PGS_DETONATION_SCORE: number
+}
+
 const StatsService = {
+
+    getMatchResult(matchId: string) : Promise<MatchResult[]> {
+        return fetch(AppConfig.apiUrl + "/result/match/" + matchId).then(response => response.json())
+            .then(data => data.hits);
+    },
 
     getTopPlayerKills(tags : string[] = []) : Promise<PlayerKillBucket[]> {
         return fetch(AppConfig.apiUrl + "/result/top/player-kills?max=1000" + this.formatTagParam(tags)).then(response => response.json())

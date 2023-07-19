@@ -1,5 +1,5 @@
 import {AppConfig} from "../AppConfig";
-import BackendErrorUtils from "../utils/BackendErrorUtils";
+import ErrorUtils from "../utils/ErrorUtils";
 
 export interface GameMap {
     name: string
@@ -33,7 +33,7 @@ const MapService = {
         const cachedPlayer = this.cachedMapDetails.get(mapId);
         if(cachedPlayer === undefined) {
             const promise = fetch(AppConfig.apiUrl + "/map/" + mapId )
-                .then(resp => { return BackendErrorUtils.parseResponse(resp);})
+                .then(resp => { return ErrorUtils.parseResponse(resp);})
                 .then(playerLookUp => {
                     this.cachedMapDetails.set(mapId, playerLookUp);
                     return playerLookUp;

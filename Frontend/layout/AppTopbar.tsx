@@ -3,6 +3,8 @@ import React, {forwardRef, useContext, useEffect, useImperativeHandle, useRef} f
 import {LayoutContext} from './context/layoutcontext';
 import {Toast} from "primereact/toast";
 
+export let primeToast;
+
 const AppTopbar = forwardRef((props, ref) => {
     const { onMenuToggle } = useContext(LayoutContext);
     const menubuttonRef = useRef(null);
@@ -18,7 +20,7 @@ const AppTopbar = forwardRef((props, ref) => {
 
     useEffect(() => {
         // @ts-ignore
-        window.PrimeToast = toast.current || {};
+        primeToast = toast.current || {};
     }, []);
 
     return (

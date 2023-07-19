@@ -8,6 +8,7 @@ import {P5CanvasInstance, ReactP5Wrapper} from "@p5-wrapper/react";
 import dynamic from "next/dynamic";
 import useQuery from "../../../../src/utils/useQuery";
 import {MatchStateWrapper} from "../../../../src/utils/MatchStateWrapper";
+import {primeToast} from "../../../../layout/AppTopbar";
 
 const LiveMatchPage = () => {
 
@@ -34,8 +35,7 @@ const LiveMatchPage = () => {
         MatchService.getMatch(query.id as string)
             .then( result => setMatch(result))
             .catch( ex => {
-                // @ts-ignore
-                window.PrimeToast.show({ severity: 'error', summary: 'Match not found', detail: `The match that you tried to navigate to does not exist:`, life: 3000 });
+                primeToast.show({ severity: 'error', summary: 'Match not found', detail: `The match that you tried to navigate to does not exist:`, life: 3000 });
                 router.push('/live/match')
             })
         wsClient = MatchStateService.getMatchStateSocket(query.id as string)
@@ -51,7 +51,7 @@ const LiveMatchPage = () => {
 
     function getCanvasSize() : number {
         if (lazyCanvasHolder === null) {
-            lazyCanvasHolder = window.screen.height - 200
+            lazyCanvasHolder = window.screen.height - 350
         }
         return lazyCanvasHolder;
     }

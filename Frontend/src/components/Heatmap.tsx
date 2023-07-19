@@ -23,7 +23,7 @@ export default function Heatmap({heatmap, map} : HeatmapProps) {
 
     function getCanvasSize() : number {
         if (lazyCanvasHolder === null) {
-            lazyCanvasHolder = window.screen.height - 200
+            lazyCanvasHolder = window.screen.height - 350
         }
         return lazyCanvasHolder;
     }

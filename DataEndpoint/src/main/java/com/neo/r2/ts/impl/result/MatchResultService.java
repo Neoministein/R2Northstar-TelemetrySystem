@@ -1,5 +1,6 @@
 package com.neo.r2.ts.impl.result;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.MethodNameCacheKeyGenerator;
 import com.neo.r2.ts.persistence.searchable.MatchResultSearchable;
 import com.neo.util.framework.api.cache.spi.CacheInvalidateAll;
@@ -42,6 +43,14 @@ public class MatchResultService {
     @CacheInvalidateAll(cacheName = MATCH_STATS_CACHE)
     public void invalidateStatsCache() {
         LOGGER.info("Invalidating stats cache");
+    }
+
+    @CacheResult(cacheName = MATCH_STATS_CACHE, keyGenerator = MethodNameCacheKeyGenerator.class)
+    public List<JsonNode> getResultForMatch(String matchId) {
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setFields(List.of("gamemode", "uId", "hasWon", "PGS_ELIMINATED", "PGS_KILLS", "PGS_DEATHS", "PGS_PILOT_KILLS", "PGS_TITAN_KILLS", "PGS_NPC_KILLS", "PGS_ASSISTS", "PGS_SCORE", "PGS_ASSAULT_SCORE", "PGS_DEFENSE_SCORE", "PGS_DISTANCE_SCORE", "PGS_DETONATION_SCORE"));
+        searchQuery.addFilters(new ExplicitSearchCriteria("matchId", matchId));
+        return searchProvider.fetch(resultIndexName, searchQuery).getHits();
     }
 
     @CacheResult(cacheName = MATCH_STATS_CACHE, keyGenerator = MethodNameCacheKeyGenerator.class)

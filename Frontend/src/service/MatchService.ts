@@ -1,6 +1,6 @@
 import {AppConfig} from "../AppConfig";
 import MapService, {GameMap, HeatmapEntity} from "./MapService";
-import BackendErrorUtils from "../utils/BackendErrorUtils";
+import ErrorUtils from "../utils/ErrorUtils";
 
 export interface MatchEntity {
     id: string
@@ -17,7 +17,7 @@ const MatchService = {
 
     getMatch(matchId : string) : Promise<MatchEntity>{
         return fetch(AppConfig.apiUrl + "/match/" + matchId )
-            .then(resp => { return BackendErrorUtils.parseResponse(resp);})
+            .then(resp => { return ErrorUtils.parseResponse(resp);})
             .then(async match => {
                 match.mapDetails = await MapService.getMapDetails(match.map)
                 return match;
@@ -26,7 +26,7 @@ const MatchService = {
 
     getRunningMatches() : Promise<MatchEntity[]> {
         return fetch(AppConfig.apiUrl + "/match/playing")
-            .then(resp => { return BackendErrorUtils.parseResponse(resp);})
+            .then(resp => { return ErrorUtils.parseResponse(resp);})
             .then(d => {
                 return d.hits;
             }).then(async hits => {
@@ -39,7 +39,7 @@ const MatchService = {
 
     getFinishedMatches() : Promise<MatchEntity[]> {
         return fetch(AppConfig.apiUrl + "/match/stopped")
-            .then(resp => { return BackendErrorUtils.parseResponse(resp);})
+            .then(resp => { return ErrorUtils.parseResponse(resp);})
             .then(d => {
                 return d.hits;
             }).then(async hits => {
@@ -52,7 +52,7 @@ const MatchService = {
 
     getHeatmap(matchId : string) : Promise<HeatmapEntity>{
         return fetch(AppConfig.apiUrl + "/match/" + matchId + "/heatmap")
-            .then(resp => { return BackendErrorUtils.parseResponse(resp);});
+            .then(resp => { return ErrorUtils.parseResponse(resp);});
     }
 }
 
