@@ -1,35 +1,34 @@
 import p5 from "p5";
-import dynamic from "next/dynamic";
 import {P5CanvasInstance} from "@p5-wrapper/react";
 import {GameMap, HeatmapEntity} from "../service/MapService";
 import {AppConfig} from "../AppConfig";
+import {MutableRefObject, useEffect, useState} from "react";
+import ClientSideReactP5 from "./ClientSideReactP5";
 
 export interface HeatmapProps {
     heatmap: HeatmapEntity
     map: GameMap
+    parentObject: MutableRefObject<any>
 }
 
-export default function Heatmap({heatmap, map} : HeatmapProps) {
+export default function Heatmap({heatmap, map, parentObject} : HeatmapProps) {
 
-    const ReactP5Wrapper = dynamic<typeof import("@p5-wrapper/react").ReactP5Wrapper>(
-        // @ts-ignore
-        () => import("@p5-wrapper/react").then(m => {
-            return m.ReactP5Wrapper;
-        }),
-        { ssr: false }
-    );
+    const [canvasSize, setCanvasSize] = useState(parentObject.current.clientWidth);
 
-    let lazyCanvasHolder = null;
+    useEffect(() => {
+        const handleWindowResize = () => {
+            setCanvasSize(parentObject.current.clientWidth);
+        };
 
-    function getCanvasSize() : number {
-        if (lazyCanvasHolder === null) {
-            lazyCanvasHolder = window.screen.height - 350
-        }
-        return lazyCanvasHolder;
-    }
+        window.addEventListener('resize', handleWindowResize);
+
+        return () => {
+            window.removeEventListener('resize', handleWindowResize);
+        };
+    });
 
     function scalePosition(position : number) : number {
-        return position / 1024 * getCanvasSize();
+        return position / 1024 * canvasSize;
     }
 
     function sketch(p5Instance : P5CanvasInstance) {
@@ -38,7 +37,7 @@ export default function Heatmap({heatmap, map} : HeatmapProps) {
         p5Instance.preload = () => {
             bg = p5Instance.loadImage(AppConfig.minimapImgPath + "/map/" + map.name + '.png');
         }
-        p5Instance.setup = () => p5Instance.createCanvas(getCanvasSize(), getCanvasSize(), p5Instance.P2D);
+        p5Instance.setup = () => p5Instance.createCanvas(canvasSize, canvasSize, p5Instance.P2D);
 
         p5Instance.draw = () => {
             p5Instance.background(bg, 255 as number);
@@ -59,9 +58,5 @@ export default function Heatmap({heatmap, map} : HeatmapProps) {
         };
     }
 
-    return (
-        <div>
-            <ReactP5Wrapper sketch={sketch} />
-        </div>
-    );
+    return <ClientSideReactP5 sketchFunc={sketch}/>
 }

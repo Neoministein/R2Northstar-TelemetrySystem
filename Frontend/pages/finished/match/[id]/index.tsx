@@ -1,6 +1,6 @@
 import {useRouter} from 'next/router';
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import useQuery from "../../../../src/utils/useQuery";
 import MatchService, {MatchEntity} from "../../../../src/service/MatchService";
 import Heatmap from "../../../../src/components/Heatmap";
@@ -19,6 +19,7 @@ const FinishedMatchPage = () => {
     const [match, setMatch] = useState<MatchEntity>();
     const [heatmap, setHeatmap] = useState<HeatmapEntity>();
     const [heatmapFailed, setHeatmapFailed] = useState<boolean>(false)
+    const heatmapParent = useRef();
 
     useEffect(() => {
         if (!query) {
@@ -52,33 +53,40 @@ const FinishedMatchPage = () => {
     return (
         <div>
             <Card title={match?.nsServerName}>
-                <div>
-                    {
-                        match?.id != null ? <MatchResultTable matchId={match.id}/> : null
-                    }
-                </div>
-                { heatmapFailed ?
-                    <div>
-                        Cannot load heatmap
-                    </div>
-                    :
-                    <div>
+                <div className="grid">
+                    <div className="md:col-7 sm:col-12" ref={heatmapParent}>
                         {
-                            heatmap != null && match != null ? (
-                                    <Heatmap heatmap={heatmap} map={match.mapDetails}/>
-                                ) :
-                                <div>
-                                    <div>
-                                        Waiting for the heatmap to be generated...
-                                    </div>
-                                    <ProgressSpinner/>
-                                </div>
+                            heatmapFailed
+                                ?
+                            <div>
+                                Cannot load heatmap
+                            </div>
+                            :
+                            <div>
+                                {
+                                    heatmap != null && match != null ? (
+                                            <Heatmap heatmap={heatmap} map={match.mapDetails} parentObject={heatmapParent}/>
+                                        ) :
+                                        <div>
+                                            <div>
+                                                Waiting for the heatmap to be generated...
+                                            </div>
+                                            <ProgressSpinner/>
+                                        </div>
 
+                                }
+                            </div>
                         }
                     </div>
-                }
-            </Card>
 
+                    <div className="md:col-5 sm:col-12">
+                        <h2 style={{paddingLeft: '10px'}}>Scoreboard</h2>
+                        {
+                            match?.id != null ? <MatchResultTable matchId={match.id}/> : null
+                        }
+                    </div>
+                </div>
+            </Card>
         </div>
     );
 };

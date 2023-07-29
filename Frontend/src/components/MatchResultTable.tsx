@@ -3,6 +3,7 @@ import {useEffect, useState} from "react";
 import PlayerLookUpService from "../service/PlayerLookUpService";
 import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
+import I18nService from "../service/I18nService";
 
 interface MatchResultTableProps {
     matchId: string
@@ -11,6 +12,7 @@ interface MatchResultTableProps {
 export default function MatchResultTable({matchId} : MatchResultTableProps) {
     const [matchResult, setMatchResult] = useState<MatchResult[]>(undefined);
     const [columnsToRender, setColumnsToRender] = useState({
+        playerName: true,
         PGS_ELIMINATED: false,
         PGS_KILLS: false,
         PGS_DEATHS: false,
@@ -59,8 +61,6 @@ export default function MatchResultTable({matchId} : MatchResultTableProps) {
 
     }, []);
 
-
-
     return (
         <DataTable
             value={matchResult}
@@ -72,7 +72,7 @@ export default function MatchResultTable({matchId} : MatchResultTableProps) {
             {
                 Object.keys(columnsToRender).map((key) => {
                     if (columnsToRender[key]) {
-                        return (<Column key={key} field={key} header={key}/>)
+                        return (<Column key={key} field={key} header={ I18nService.translate(key) }/>)
                     } else {
                         return null
                     }
