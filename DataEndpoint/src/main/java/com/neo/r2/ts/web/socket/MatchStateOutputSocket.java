@@ -1,15 +1,10 @@
 package com.neo.r2.ts.web.socket;
 
-import com.neo.r2.ts.api.socket.AbstractMonitorableWebsocket;
+import com.neo.util.framework.websocket.api.WebserverHttpHeaderForwarding;
+import com.neo.util.framework.websocket.impl.monitoring.AbstractMonitorableWebsocket;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
-import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,17 +12,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ApplicationScoped
-@ServerEndpoint(value = MatchStateOutputSocket.WS_LOCATION)
+@ServerEndpoint(value = MatchStateOutputSocket.WS_LOCATION, configurator = WebserverHttpHeaderForwarding.class)
 public class MatchStateOutputSocket extends AbstractMonitorableWebsocket {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchStateOutputSocket.class);
 
     public static final String WS_LOCATION = "/ws/state/output/{id}";
 
     protected Map<String, List<Session>> sessionMap = new ConcurrentHashMap<>();
 
-    @OnOpen
-    public void onOpen(Session session, @PathParam("id") String id) {
+    @Override
+    protected void onOpen(Session session) {
+        String id = getPathParameter(session, "id");
         List<Session> sessions = sessionMap.get(id);
         if (sessions == null) {
             sessions = new ArrayList<>();
@@ -38,8 +32,9 @@ public class MatchStateOutputSocket extends AbstractMonitorableWebsocket {
         }
     }
 
-    @OnClose
-    public void onClose(Session session, @PathParam("id") String id) {
+    @Override
+    protected void onClose(Session session) {
+        String id = getPathParameter(session, "id");
         List<Session> sessions = sessionMap.computeIfPresent(id, (key, val) -> {
             val.remove(session);
             return val;
@@ -47,11 +42,6 @@ public class MatchStateOutputSocket extends AbstractMonitorableWebsocket {
         if (sessions != null && sessions.isEmpty()) {
             sessionMap.remove(id);
         }
-    }
-
-    @OnError
-    public void onError(Session session, Throwable throwable) {
-        LOGGER.warn("There has been an error with session [{}] [{}]", session.getId(), throwable.getMessage());
     }
 
     public void broadcast(String id ,String message) {

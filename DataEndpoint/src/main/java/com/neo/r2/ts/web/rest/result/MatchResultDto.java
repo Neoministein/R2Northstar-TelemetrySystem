@@ -1,6 +1,7 @@
 package com.neo.r2.ts.web.rest.result;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.neo.r2.ts.persistence.searchable.MatchResultSearchable;
 import com.neo.util.framework.elastic.api.ElasticMappingConstants;
 import com.neo.util.framework.rest.api.parser.InboundDto;
 import jakarta.validation.constraints.Max;
@@ -48,63 +49,63 @@ public record MatchResultDto(
             @JsonProperty(required = true)
             boolean hasWon,
 
-            @JsonProperty(value = "PGS_ELIMINATED")
+            @JsonProperty(value = MatchResultSearchable.PGS_ELIMINATED)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsEliminated,
 
-            @JsonProperty(value = "PGS_KILLS")
+            @JsonProperty(value = MatchResultSearchable.PGS_KILLS)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsKills,
 
-            @JsonProperty(value = "PGS_DEATHS")
+            @JsonProperty(value = MatchResultSearchable.PGS_DEATHS)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsDeaths,
 
-            @JsonProperty(value = "PGS_PILOT_KILLS")
+            @JsonProperty(value = MatchResultSearchable.PGS_PILOT_KILLS)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsPilotKills,
 
-            @JsonProperty(value = "PGS_TITAN_KILLS")
+            @JsonProperty(value = MatchResultSearchable.PGS_TITAN_KILLS)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsTitanKills,
 
-            @JsonProperty(value = "PGS_NPC_KILLS")
+            @JsonProperty(value = MatchResultSearchable.PGS_NPC_KILLS)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsNpcKills,
 
-            @JsonProperty(value = "PGS_ASSISTS")
+            @JsonProperty(value = MatchResultSearchable.PGS_ASSISTS)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsAssists,
 
-            @JsonProperty(value = "PGS_SCORE")
+            @JsonProperty(value = MatchResultSearchable.PGS_SCORE)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsScore,
 
-            @JsonProperty(value = "PGS_ASSAULT_SCORE")
+            @JsonProperty(value = MatchResultSearchable.PGS_ASSAULT_SCORE)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsAssaultScore,
 
-            @JsonProperty(value = "PGS_DEFENSE_SCORE")
+            @JsonProperty(value = MatchResultSearchable.PGS_DEFENSE_SCORE)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsDefenseScore,
 
-            @JsonProperty(value = "PGS_DISTANCE_SCORE")
+            @JsonProperty(value = MatchResultSearchable.PGS_DISTANCE_SCORE)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsDistanceScore,
 
 
-            @JsonProperty(value = "PGS_DETONATION_SCORE")
+            @JsonProperty(value = MatchResultSearchable.PGS_DETONATION_SCORE)
             @Min(value = ElasticMappingConstants.INT_MIN)
             @Max(value = ElasticMappingConstants.INT_MAX)
             Optional<Integer> pgsDetonationScore

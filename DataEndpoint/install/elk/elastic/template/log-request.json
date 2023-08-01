@@ -1,0 +1,49 @@
+{
+  "index_patterns": [
+    "request-log-*"
+  ],
+  "settings": {
+    "number_of_shards": "1",
+    "auto_expand_replicas": "0-1",
+    "index.default_pipeline": "log-request-geoip"
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "segment": {
+        "properties": {
+          "initiator": {
+            "type": "keyword"
+          },
+          "context": {
+            "type": "keyword"
+          },
+          "failed": {
+            "type": "boolean"
+          },
+          "processTime": {
+            "type": "integer"
+          },
+          "remoteAddress": {
+            "type": "ip"
+          },
+          "status": {
+            "type": "keyword"
+          },
+          "agent": {
+            "type": "keyword"
+          },
+          "error": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  },
+  "aliases": {
+      "log-request": {}
+  },
+  "version": 3
+}

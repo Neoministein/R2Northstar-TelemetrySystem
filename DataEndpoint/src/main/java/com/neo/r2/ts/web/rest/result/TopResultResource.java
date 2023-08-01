@@ -1,8 +1,8 @@
 package com.neo.r2.ts.web.rest.result;
 
-import com.neo.r2.ts.impl.player.PlayerLookUpService;
+import com.neo.r2.ts.impl.repository.searchable.MatchResultRepository;
+import com.neo.r2.ts.impl.repository.searchable.PlayerLookUpRepository;
 import com.neo.r2.ts.impl.result.MatchResultRequestParam;
-import com.neo.r2.ts.impl.result.MatchResultService;
 import com.neo.r2.ts.persistence.searchable.MatchResultSearchable;
 import com.neo.util.common.impl.MathUtils;
 import com.neo.util.common.impl.StringUtils;
@@ -26,10 +26,10 @@ public class TopResultResource {
     public static final String RESOURCE_LOCATION = "api/v1/result/top";
 
     @Inject
-    protected PlayerLookUpService playerLookUpService;
+    protected PlayerLookUpRepository playerLookUpService;
 
     @Inject
-    protected MatchResultService matchResultService;
+    protected MatchResultRepository matchResultRepository;
 
     @Inject
     protected SearchProvider searchProvider;
@@ -45,12 +45,11 @@ public class TopResultResource {
                 saveResult(matchResultDto, searchable -> searchable.addMatchId(matchId));
             }
         }
-        matchResultService.invalidateStatsCache();
     }
 
     protected void saveResult(MatchResultDto matchResultDto, UnaryOperator<MatchResultSearchable> matchId) {
         for (MatchResultDto.Player player : matchResultDto.players()) {
-            searchProvider.index(matchId.apply(new MatchResultSearchable(matchResultDto, player)));
+            matchResultRepository.saveResult(matchId.apply(new MatchResultSearchable(matchResultDto, player)));
             playerLookUpService.updatePlayerLookUp(player.uId(), player.playerName());
         }
     }
@@ -59,35 +58,35 @@ public class TopResultResource {
     @Path("npc-kills")
     public AggregationResult getNpcKills(@QueryParam("max") String maxResult, @QueryParam("page") String page,
                                          @QueryParam("tags") String tags) {
-        return matchResultService.getNpcKills(parseMatchResultParm(tags, maxResult, page));
+        return matchResultRepository.getNpcKills(parseMatchResultParm(tags, maxResult, page));
     }
 
     @GET
     @Path("player-kills")
     public AggregationResult getPlayerKills(@QueryParam("max") String maxResult, @QueryParam("page") String page,
                                             @QueryParam("tags") String tags) {
-        return matchResultService.getPlayerKills(parseMatchResultParm(tags, maxResult, page));
+        return matchResultRepository.getPlayerKills(parseMatchResultParm(tags, maxResult, page));
     }
 
     @GET
     @Path("player-kd")
     public AggregationResult getPlayerKd(@QueryParam("max") String maxResult, @QueryParam("page") String page,
                                          @QueryParam("tags") String tags) {
-        return matchResultService.getPlayerKd(parseMatchResultParm(tags, maxResult, page));
+        return matchResultRepository.getPlayerKd(parseMatchResultParm(tags, maxResult, page));
     }
 
     @GET
     @Path("win")
     public AggregationResult getWin(@QueryParam("max") String maxResult, @QueryParam("page") String page,
                                     @QueryParam("tags") String tags) {
-        return matchResultService.getWin(parseMatchResultParm(tags, maxResult, page));
+        return matchResultRepository.getWin(parseMatchResultParm(tags, maxResult, page));
     }
 
     @GET
     @Path("win-ratio")
     public AggregationResult getWinRatio(@QueryParam("max") String maxResult, @QueryParam("page") String page,
                                          @QueryParam("tags") String tags) {
-        return matchResultService.getWinRatio(parseMatchResultParm(tags, maxResult, page));
+        return matchResultRepository.getWinRatio(parseMatchResultParm(tags, maxResult, page));
     }
 
     private MatchResultRequestParam parseMatchResultParm(String tags, String maxResult, String page) {

@@ -17,6 +17,7 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
     public static final String C_DATA = "data";
     public static final String C_HIGHEST_COUNT = "highestCount";
     public static final String C_MAP = "map";
+    public static final String C_STATUS = "status";
     public static final String C_TYPE = "type";
     public static final String C_DESCRIPTION = "description";
 
@@ -46,6 +47,10 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
     @Column(name = "STATUS", nullable = false)
     @JsonView(Views.Public.class)
     private String status;
+
+    @Column(name = "PIXEL_DENSITY", nullable = false)
+        @JsonView(Views.Public.class)
+    private Integer pixelDensity;
 
     @Column(name = "DESCRIPTION")
         @JsonView(Views.Public.class)
@@ -118,6 +123,14 @@ public class Heatmap extends AuditableDataBaseEntity implements PersistenceEntit
 
     public void setMatch(Match match) {
         this.match = match;
+    }
+
+    public Integer getPixelDensity() {
+        return pixelDensity;
+    }
+
+    public void setPixelDensity(Integer resolution) {
+        this.pixelDensity = resolution;
     }
 
     @Override

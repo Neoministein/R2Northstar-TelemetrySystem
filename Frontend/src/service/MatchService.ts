@@ -10,7 +10,7 @@ export interface MatchEntity {
     startDate: number
     maxPlayers: number
     numberOfPlayers: number
-    mapDetails: GameMap
+    mapDetails?: GameMap
 }
 
 const MatchService = {
@@ -27,14 +27,7 @@ const MatchService = {
     getRunningMatches() : Promise<MatchEntity[]> {
         return fetch(AppConfig.apiUrl + "/match/playing")
             .then(resp => { return ErrorUtils.parseResponse(resp);})
-            .then(d => {
-                return d.hits;
-            }).then(async hits => {
-                for (const hit of hits) {
-                    hit.mapDetails = await MapService.getMapDetails(hit.map);
-                }
-                return hits;
-            });
+            .then(d => {return d.hits;});
     },
 
     getFinishedMatches() : Promise<MatchEntity[]> {
@@ -42,11 +35,6 @@ const MatchService = {
             .then(resp => { return ErrorUtils.parseResponse(resp);})
             .then(d => {
                 return d.hits;
-            }).then(async hits => {
-                for (const hit of hits) {
-                    hit.mapDetails = await MapService.getMapDetails(hit.map);
-                }
-                return hits;
             });
     },
 

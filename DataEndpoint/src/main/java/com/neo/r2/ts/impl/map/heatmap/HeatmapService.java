@@ -8,7 +8,8 @@ import com.neo.r2.ts.impl.map.scaling.MapScale;
 import com.neo.r2.ts.impl.map.scaling.MapService;
 import com.neo.r2.ts.impl.match.event.processor.player.movement.PlayerPositionEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
-import com.neo.r2.ts.impl.repository.HeatmapRepository;
+import com.neo.r2.ts.impl.repository.entity.HeatmapRepository;
+import com.neo.r2.ts.impl.repository.searchable.MatchEventRepository;
 import com.neo.r2.ts.persistence.HeatmapEnums;
 import com.neo.r2.ts.persistence.entity.Heatmap;
 import com.neo.util.common.impl.exception.ConfigurationException;
@@ -42,8 +43,6 @@ public class HeatmapService {
     protected static final String PLAYER_POS_X = "entity.position.x";
     protected static final String PLAYER_POS_Y = "entity.position.y";
 
-    protected static final int PIXELS_PER_CALL = 4;
-
     protected static final SimpleFieldAggregation COUNT_AGGREGATION = new SimpleFieldAggregation(COUNT, MatchStateWrapper.MATCH_ID, SimpleFieldAggregation.Type.COUNT);
 
 
@@ -53,6 +52,8 @@ public class HeatmapService {
     @Inject
     protected MapService mapService;
 
+    @Inject
+    protected MatchEventRepository matchEventRepository;
     @Inject
     protected HeatmapRepository heatmapRepository;
 
@@ -72,7 +73,7 @@ public class HeatmapService {
         }
 
         try {
-            generateHeatmap(heatmap,searchCriteriaList, PIXELS_PER_CALL);
+            generateHeatmap(heatmap,searchCriteriaList);
         } catch (Exception ex) {
             LOGGER.warn("Failed to calculate Heatmap: [{}] ErrorMessage: [{}]", heatmap.getId(), ex.getMessage());
             heatmap.setStatus(HeatmapEnums.ProcessState.FAILED.toString());
@@ -82,7 +83,7 @@ public class HeatmapService {
         return heatmap;
     }
 
-    protected void generateHeatmap(Heatmap heatmap, List<SearchCriteria> basicCriteria, int resolution) {
+    protected void generateHeatmap(Heatmap heatmap, List<SearchCriteria> basicCriteria) {
         if (!searchProvider.enabled()) {
             throw new ConfigurationException(CustomConstants.EX_SERVICE_UNAVAILABLE);
         }
@@ -94,17 +95,17 @@ public class HeatmapService {
         result.set("entries", resultArray);
 
         Bounds bounds = getMapBounds(basicCriteria, mapScale);
-        for (long x = bounds.xMin; x < bounds.xMax; x = x + resolution) {
+        for (long x = bounds.xMin; x < bounds.xMax; x = x + heatmap.getPixelDensity()) {
             Map<String, SearchCriteria> criteriaMap = new HashMap<>();
-            for (long y = bounds.yMin; y < bounds.yMax; y = y + resolution) {
-                criteriaMap.put(Long.toString(y), new LongRangeSearchCriteria(PLAYER_POS_Y,mapScale.toGameScaleY(y),mapScale.toGameScaleY(y + PIXELS_PER_CALL) -1, false));
+            for (long y = bounds.yMin; y < bounds.yMax; y = y + heatmap.getPixelDensity()) {
+                criteriaMap.put(Long.toString(y), new LongRangeSearchCriteria(PLAYER_POS_Y,mapScale.toGameScaleY(y),mapScale.toGameScaleY(y + heatmap.getPixelDensity()) -1, false));
             }
             SearchQuery searchQuery = new SearchQuery(0);
             List<SearchCriteria> searchCriteriaList = new ArrayList<>(basicCriteria);
-            searchCriteriaList.add(new LongRangeSearchCriteria(PLAYER_POS_X, mapScale.toGameScaleX(x),mapScale.toGameScaleX(x + PIXELS_PER_CALL) -1, false));
+            searchCriteriaList.add(new LongRangeSearchCriteria(PLAYER_POS_X, mapScale.toGameScaleX(x),mapScale.toGameScaleX(x + heatmap.getPixelDensity()) -1, false));
             searchQuery.setFilters(searchCriteriaList);
             searchQuery.setAggregations(List.of(new CriteriaAggregation("values", criteriaMap, COUNT_AGGREGATION)));
-            SearchResult<JsonNode> searchResult = searchProvider.fetch("r2ts-match-event",searchQuery);
+            SearchResult<JsonNode> searchResult = searchProvider.fetch(matchEventRepository.getIndexName(),searchQuery);
             for (Map.Entry<String, Object> entry: ((CriteriaAggregationResult) searchResult.getAggregations().get("values")).getCriteriaResult().entrySet()) {
                 long count = parseLongFromDouble(entry.getValue());
                 if (count != 0) {

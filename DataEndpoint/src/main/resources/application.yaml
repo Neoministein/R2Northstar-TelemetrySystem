@@ -1,10 +1,12 @@
 r2ts:
   shouldSaveNpcPosition: false
+  heatmap.pixelDensity: 4
+
 elastic:
     nodes:
         - ${org.elastic.node.0}
-    prefix: r2ts
     enabled: ${org.elastic.enabled}
+    postfix: r2ts
 server:
     port: 8090
 javax:
@@ -16,7 +18,7 @@ javax:
                     url: ${javax.persistence.jdbc.url}
                     user: ${javax.persistence.jdbc.user}
                     password: ${javax.persistence.jdbc.password}
-scheduler.CloseOpenMatchScheduler: false
+scheduler.CloseOpenMatchScheduler.enabled: false
 #mp:
 #  messaging:
 #    connector.helidon-jms:

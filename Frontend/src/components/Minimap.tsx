@@ -24,7 +24,6 @@ export default function Minimap({match, parentObject} : MinimapProps) {
         }
     );
     let wsClient = null;
-    let lazyCanvasHolder = null;
     let imageContainer : ImageContainer;
 
     useEffect(() => {
@@ -63,11 +62,10 @@ export default function Minimap({match, parentObject} : MinimapProps) {
 
     function getCanvasSize() : number {
         if (canvasSize.width < canvasSize.height) {
-            return canvasSize.width - 100;
+            return canvasSize.width - 15;
         } else {
             return canvasSize.height - 100;
         }
-
     }
 
     function sketch(p5Instance : P5CanvasInstance) {

@@ -1,0 +1,27 @@
+{
+  "index_patterns": [
+    "player-uid-*"
+  ],
+  "settings": {
+    "number_of_shards": "1",
+    "auto_expand_replicas": "0-1"
+  },
+  "mappings": {
+    "properties": {
+      "playerName": {
+        "type": "keyword"
+      },
+      "uId": {
+        "type": "keyword"
+      },
+      "lastUpdate": {
+        "type": "date",
+        "format": "epoch_millis"
+      }
+    }
+  },
+  "aliases": {
+    "player-uid": {}
+  },
+  "version": 3
+}

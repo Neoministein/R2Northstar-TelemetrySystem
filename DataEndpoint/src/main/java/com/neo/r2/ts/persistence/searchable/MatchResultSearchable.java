@@ -18,6 +18,22 @@ public class MatchResultSearchable extends AbstractSearchable implements Searcha
 
     public static final String INDEX_NAME = "match-result";
 
+    public static final String MATCH_ID = "matchId";
+    public static final String MAP = "map";
+
+    public static final String PGS_ELIMINATED = "PGS_ELIMINATED";
+    public static final String PGS_KILLS = "PGS_KILLS";
+    public static final String PGS_DEATHS = "PGS_DEATHS";
+    public static final String PGS_PILOT_KILLS = "PGS_PILOT_KILLS";
+    public static final String PGS_TITAN_KILLS = "PGS_TITAN_KILLS";
+    public static final String PGS_NPC_KILLS = "PGS_NPC_KILLS";
+    public static final String PGS_ASSISTS = "PGS_ASSISTS";
+    public static final String PGS_SCORE = "PGS_SCORE";
+    public static final String PGS_ASSAULT_SCORE = "PGS_ASSAULT_SCORE";
+    public static final String PGS_DEFENSE_SCORE = "PGS_DEFENSE_SCORE";
+    public static final String PGS_DISTANCE_SCORE = "PGS_DISTANCE_SCORE";
+    public static final String PGS_DETONATION_SCORE = "PGS_DETONATION_SCORE";
+
     protected String matchId;
     protected String map;
     protected String gamemode;
@@ -26,29 +42,29 @@ public class MatchResultSearchable extends AbstractSearchable implements Searcha
 
     protected String uId;
     protected Boolean hasWon;
-    @JsonProperty(value = "PGS_ELIMINATED")
+    @JsonProperty(value = PGS_ELIMINATED)
     protected Integer pgsEliminated;
-    @JsonProperty(value = "PGS_KILLS")
+    @JsonProperty(value = PGS_KILLS)
     protected Integer pgsKills;
-    @JsonProperty(value = "PGS_DEATHS")
+    @JsonProperty(value = PGS_DEATHS)
     protected Integer pgsDeaths;
-    @JsonProperty(value = "PGS_PILOT_KILLS")
+    @JsonProperty(value = PGS_PILOT_KILLS)
     protected Integer pgsPilotKills;
-    @JsonProperty(value = "PGS_TITAN_KILLS")
+    @JsonProperty(value = PGS_TITAN_KILLS)
     protected Integer pgsTitanKills;
-    @JsonProperty(value = "PGS_NPC_KILLS")
+    @JsonProperty(value = PGS_NPC_KILLS)
     protected Integer pgsNpcKills;
-    @JsonProperty(value = "PGS_ASSISTS")
+    @JsonProperty(value = PGS_ASSISTS)
     protected Integer pgsAssists;
-    @JsonProperty(value = "PGS_SCORE")
+    @JsonProperty(value = PGS_SCORE)
     protected Integer pgsScore;
-    @JsonProperty(value = "PGS_ASSAULT_SCORE")
+    @JsonProperty(value = PGS_ASSAULT_SCORE)
     protected Integer pgsAssaultScore;
-    @JsonProperty(value = "PGS_DEFENSE_SCORE")
+    @JsonProperty(value = PGS_DEFENSE_SCORE)
     protected Integer pgsDefenseScore;
-    @JsonProperty(value = "PGS_DISTANCE_SCORE")
+    @JsonProperty(value = PGS_DISTANCE_SCORE)
     protected Integer pgsDistanceScore;
-    @JsonProperty(value = "PGS_DETONATION_SCORE")
+    @JsonProperty(value = PGS_DETONATION_SCORE)
     protected Integer pgsDetonationScore;
 
     public MatchResultSearchable(MatchResultDto matchResultDto, MatchResultDto.Player player) {
@@ -83,20 +99,20 @@ public class MatchResultSearchable extends AbstractSearchable implements Searcha
         this.uId = event.get("entityId").asText();
         JsonUtil.ifPresent(event.get("hasWon") , v -> hasWon = v.asBoolean());
 
-        JsonUtil.ifPresent(event.get("PGS_ELIMINATED") ,        v -> pgsEliminated = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_KILLS") ,             v -> pgsKills = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_DEATHS") ,            v -> pgsDeaths = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_PILOT_KILLS") ,       v -> pgsPilotKills = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_ELIMINATED) ,        v -> pgsEliminated = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_KILLS) ,             v -> pgsKills = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_DEATHS) ,            v -> pgsDeaths = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_PILOT_KILLS) ,       v -> pgsPilotKills = v.asInt());
 
 
-        JsonUtil.ifPresent(event.get("PGS_TITAN_KILLS") ,       v -> pgsTitanKills = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_NPC_KILLS") ,         v -> pgsNpcKills = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_ASSISTS") ,           v -> pgsAssists = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_SCORE") ,             v -> pgsScore = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_ASSAULT_SCORE") ,     v -> pgsAssaultScore = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_DEFENSE_SCORE") ,     v -> pgsDefenseScore = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_DISTANCE_SCORE") ,    v -> pgsDistanceScore = v.asInt());
-        JsonUtil.ifPresent(event.get("PGS_DETONATION_SCORE") ,  v -> pgsDetonationScore = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_TITAN_KILLS) ,       v -> pgsTitanKills = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_NPC_KILLS) ,         v -> pgsNpcKills = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_ASSISTS) ,           v -> pgsAssists = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_SCORE) ,             v -> pgsScore = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_ASSAULT_SCORE) ,     v -> pgsAssaultScore = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_DEFENSE_SCORE) ,     v -> pgsDefenseScore = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_DISTANCE_SCORE) ,    v -> pgsDistanceScore = v.asInt());
+        JsonUtil.ifPresent(event.get(PGS_DETONATION_SCORE) ,  v -> pgsDetonationScore = v.asInt());
     }
 
     protected MatchResultSearchable() {

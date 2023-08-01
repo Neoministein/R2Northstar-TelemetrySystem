@@ -3,7 +3,6 @@ import ErrorUtils from "../utils/ErrorUtils";
 
 export interface GameMap {
     name: string
-    displayName: string
     type: string
     scale: MapScale
 }
@@ -20,37 +19,38 @@ export interface HeatmapEntity {
     map: string
     type: string
     status: string
+    pixelDensity: number
     description: string
 }
 
-type CachedGameMap = GameMap | Promise<GameMap>;
+export interface MapDistribution {
+    map: string
+    count: number
+    percent: number
+}
 
 const MapService = {
 
-    cachedMapDetails: new Map<string, CachedGameMap>(),
+    getAllMapDetails() : Promise<GameMap[]> {
+        return fetch(AppConfig.apiUrl + "/map" )
+            .then(resp => { return ErrorUtils.parseResponse(resp);})
+            .then(resp => { return resp.hits;});
+    },
 
-    async getMapDetails(mapId : string) : Promise<GameMap> {
-        const cachedPlayer = this.cachedMapDetails.get(mapId);
-        if(cachedPlayer === undefined) {
-            const promise = fetch(AppConfig.apiUrl + "/map/" + mapId )
-                .then(resp => { return ErrorUtils.parseResponse(resp);})
-                .then(playerLookUp => {
-                    this.cachedMapDetails.set(mapId, playerLookUp);
-                    return playerLookUp;
-                });
-
-            this.cachedMapDetails.set(mapId, promise);
-
-            return promise;
-        } else if (cachedPlayer instanceof Promise) {
-            return cachedPlayer;
-        }
-
-        return Promise.resolve(cachedPlayer);
+    getMapDetails(mapId : string) : Promise<GameMap> {
+        return fetch(AppConfig.apiUrl + "/map/" + mapId )
+            .then(resp => { return ErrorUtils.parseResponse(resp);});
     },
 
     getMapHeatmap(map : string) : Promise<HeatmapEntity> {
-        return fetch(AppConfig.apiUrl + "/map/" + map + "/heatmap").then(response => response.json());
+        return fetch(AppConfig.apiUrl + "/map/" + map + "/heatmap")
+            .then(resp => { return ErrorUtils.parseResponse(resp);});
+    },
+
+    getMapDistribution() : Promise<MapDistribution[]> {
+        return fetch(AppConfig.apiUrl + "/map/distribution" )
+            .then(resp => { return ErrorUtils.parseResponse(resp);})
+            .then(resp => { return resp.hits;});
     }
 }
 

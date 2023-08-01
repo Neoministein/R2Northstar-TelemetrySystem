@@ -1,0 +1,19 @@
+{
+  "description" : "Add geoip info to log request",
+  "processors" : [
+    {
+      "geoip" : {
+        "field" : "remoteAddress",
+        "target_field" : "geolocation",
+        "ignore_missing": true,
+        "properties": [
+          "continent_name",
+          "country_iso_code",
+          "region_iso_code",
+          "location",
+          "city_name"
+        ]
+      }
+    }
+  ]
+}

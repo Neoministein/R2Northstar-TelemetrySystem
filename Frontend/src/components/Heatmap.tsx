@@ -13,11 +13,23 @@ export interface HeatmapProps {
 
 export default function Heatmap({heatmap, map, parentObject} : HeatmapProps) {
 
-    const [canvasSize, setCanvasSize] = useState(parentObject.current.clientWidth);
+    const [canvasSize, setCanvasSize] = useState(
+        {
+            width: parentObject.current.clientWidth,
+            height: parentObject.current.clientHeight
+        }
+    );
 
     useEffect(() => {
         const handleWindowResize = () => {
-            setCanvasSize(parentObject.current.clientWidth);
+            if (parentObject != undefined) {
+                // @ts-ignore
+                setCanvasSize({
+                    width: parentObject.current.clientWidth,
+                    height: parentObject.current.clientHeight
+                });
+            }
+
         };
 
         window.addEventListener('resize', handleWindowResize);
@@ -27,8 +39,17 @@ export default function Heatmap({heatmap, map, parentObject} : HeatmapProps) {
         };
     });
 
+    function getCanvasSize() : number {
+        if (canvasSize.width < canvasSize.height) {
+            return canvasSize.height;
+
+        } else {
+            return canvasSize.width ;
+        }
+    }
+
     function scalePosition(position : number) : number {
-        return position / 1024 * canvasSize;
+        return position / 1024 * getCanvasSize();
     }
 
     function sketch(p5Instance : P5CanvasInstance) {
@@ -37,7 +58,7 @@ export default function Heatmap({heatmap, map, parentObject} : HeatmapProps) {
         p5Instance.preload = () => {
             bg = p5Instance.loadImage(AppConfig.minimapImgPath + "/map/" + map.name + '.png');
         }
-        p5Instance.setup = () => p5Instance.createCanvas(canvasSize, canvasSize, p5Instance.P2D);
+        p5Instance.setup = () => p5Instance.createCanvas(getCanvasSize(), getCanvasSize(), p5Instance.P2D);
 
         p5Instance.draw = () => {
             p5Instance.background(bg, 255 as number);
@@ -51,12 +72,12 @@ export default function Heatmap({heatmap, map, parentObject} : HeatmapProps) {
                     p5Instance.rect(
                         scalePosition(element.x),
                         scalePosition(element.y),
-                        scalePosition(4),
-                        scalePosition(4));
+                        scalePosition(heatmap.pixelDensity),
+                        scalePosition(heatmap.pixelDensity));
                 }
             }
         };
     }
 
-    return <ClientSideReactP5 sketchFunc={sketch}/>
+    return (heatmap != null && map != null ? <ClientSideReactP5 sketchFunc={sketch}/> : null);
 }

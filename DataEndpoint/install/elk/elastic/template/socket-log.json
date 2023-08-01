@@ -1,0 +1,26 @@
+{
+  "index_patterns": [
+    "log-socket-*"
+  ],
+  "settings": {
+    "number_of_shards": "1",
+    "auto_expand_replicas": "0-1"
+  },
+  "mappings": {
+    "properties": {
+      "incoming": {
+        "type": "long"
+      },
+      "outgoing": {
+        "type": "long"
+      },
+      "context": {
+        "type": "keyword"
+      }
+    }
+  },
+  "aliases": {
+      "log-socket": {}
+  },
+  "version": 3
+}

@@ -3,8 +3,6 @@ package com.neo.r2.ts.impl.match.event.processor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
-import com.neo.r2.ts.impl.match.event.MatchEventBuffer;
-import com.neo.r2.ts.impl.match.state.GlobalMatchState;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
 import com.neo.util.common.impl.json.JsonUtil;
@@ -15,12 +13,6 @@ import jakarta.inject.Inject;
 import java.util.List;
 
 public abstract class AbstractBasicEventProcessor implements MatchEventProcessor {
-
-    @Inject
-    protected MatchEventBuffer matchEventBuffer;
-
-    @Inject
-    protected GlobalMatchState globalMatchState;
 
     protected JsonSchema jsonSchema;
 

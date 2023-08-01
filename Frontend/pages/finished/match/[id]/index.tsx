@@ -52,7 +52,7 @@ const FinishedMatchPage = () => {
 
     return (
         <div>
-            <Card title={match?.nsServerName}>
+            <Card title={match?.nsServerName} style={{minHeight: 'calc(100vh - 9.5rem)', display: 'flex', flexDirection: 'column'}}>
                 <div className="grid">
                     <div className="md:col-7 sm:col-12" ref={heatmapParent}>
                         {

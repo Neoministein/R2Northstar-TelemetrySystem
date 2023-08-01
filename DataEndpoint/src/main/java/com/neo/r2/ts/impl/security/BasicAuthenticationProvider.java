@@ -1,8 +1,9 @@
 package com.neo.r2.ts.impl.security;
 
-import com.neo.r2.ts.impl.repository.UserTokenRepository;
+import com.neo.r2.ts.impl.repository.entity.UserTokenRepository;
 import com.neo.r2.ts.persistence.entity.ApplicationUser;
 import com.neo.util.framework.api.PriorityConstants;
+import com.neo.util.framework.api.request.UserRequestDetails;
 import com.neo.util.framework.api.security.AuthenticationProvider;
 import com.neo.util.framework.api.security.AuthenticationScheme;
 import com.neo.util.framework.api.security.RolePrincipal;
@@ -55,6 +56,11 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
             return authenticate((bearerCredentials).getToken());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public void authenticate(UserRequestDetails userRequestDetails, Credential credential) {
+        authenticate(credential).ifPresent(userRequestDetails::setUserIfPossible);
     }
 
     @Override

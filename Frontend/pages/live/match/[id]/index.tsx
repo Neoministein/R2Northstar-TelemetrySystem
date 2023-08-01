@@ -29,10 +29,14 @@ const LiveMatchPage = () => {
 
     return (
         <div>
-            <Card ref={parentObject} title={match?.nsServerName} style={{height: 'calc(100vh - 9.5rem)', display: 'flex', flexDirection: 'column'}}>
-                {
-                    match != null ? <Minimap match={match} parentObject={parentObject}/> : null
-                }
+            <Card ref={parentObject} title={"Server Name: " + match?.nsServerName} style={{minHeight: 'calc(100vh - 9.5rem)', display: 'flex', flexDirection: 'column'}}>
+                <div className="grid">
+                    <div className="md:col-offset-2 md:col-6 sm:col-12" ref={parentObject}>
+                        {
+                            match != null ? <Minimap match={match} parentObject={parentObject}/> : null
+                        }
+                    </div>
+                </div>
             </Card>
         </div>
 

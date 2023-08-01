@@ -8,9 +8,9 @@ services:
       POSTGRES_PASSWORD: DBACC # The PostgreSQL password (useful to connect to the database)
       POSTGRES_DB: R2-TS # The PostgreSQL default database (automatically created at first launch)
     ports: 
-    - 5432:5432
+    - "5432:5432"
   r2-ts-es01:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
     environment:
       - node.name=es01
       - discovery.type=single-node
@@ -29,15 +29,15 @@ services:
     volumes:
       - ../services/esdata:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
+      - "9200:9200"
     networks:
       - esnet
   r2-ts-kibana:
-    image: docker.elastic.co/kibana/kibana:8.6.2
+    image: docker.elastic.co/kibana/kibana:8.9.0
     volumes:
       - ../services/kibanadata:/usr/share/kibana/data
     ports:
-      - 5601:5601
+      - "5601:5601"
     environment:
       - SERVERNAME=kibana
       - ELASTICSEARCH_HOSTS=http://r2-ts-es01:9200

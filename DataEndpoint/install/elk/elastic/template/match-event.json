@@ -1,0 +1,244 @@
+{
+  "index_patterns": [
+    "match-event-*"
+  ],
+  "settings": {
+    "number_of_shards": "1",
+    "auto_expand_replicas": "0-1"
+  },
+  "mappings": {
+    "properties": {
+      "businessId": {
+        "type": "keyword"
+      },
+      "data": {
+        "properties": {
+          "damageType": {
+            "type": "keyword"
+          },
+          "victim": {
+            "properties": {
+              "entityId": {
+                "type": "keyword"
+              },
+              "entityType": {
+                "type": "keyword"
+              },
+              "equipment": {
+                "properties": {
+                  "primary": {
+                    "type": "keyword"
+                  },
+                  "secondary": {
+                    "type": "keyword"
+                  },
+                  "weapon3": {
+                    "type": "keyword"
+                  },
+                  "special": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "health": {
+                "type": "long"
+              },
+              "isAlive": {
+                "type": "boolean"
+              },
+              "isCrouching": {
+                "type": "boolean"
+              },
+              "isGrounded": {
+                "type": "boolean"
+              },
+              "isHanging": {
+                "type": "boolean"
+              },
+              "isRodeoing": {
+                "type": "boolean"
+              },
+              "isShooting": {
+                "type": "boolean"
+              },
+              "isTitan": {
+                "type": "boolean"
+              },
+              "isWallRunning": {
+                "type": "boolean"
+              },
+              "team": {
+                "type": "long"
+              },
+              "titanClass": {
+                "type": "keyword"
+              },
+              "position": {
+                "properties": {
+                  "x": {
+                    "type": "long"
+                  },
+                  "y": {
+                    "type": "long"
+                  },
+                  "z": {
+                    "type": "long"
+                  }
+                }
+              },
+              "distance": {
+                "type": "long"
+              },
+              "rotation": {
+                "properties": {
+                  "x": {
+                    "type": "long"
+                  },
+                  "y": {
+                    "type": "long"
+                  },
+                  "z": {
+                    "type": "long"
+                  }
+                }
+              },
+              "velocity": {
+                "properties": {
+                  "x": {
+                    "type": "long"
+                  },
+                  "y": {
+                    "type": "long"
+                  },
+                  "z": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "entity": {
+        "properties": {
+          "entityId": {
+            "type": "keyword"
+          },
+          "entityType": {
+            "type": "keyword"
+          },
+          "equipment": {
+            "properties": {
+              "primary": {
+                "type": "keyword"
+              },
+              "secondary": {
+                "type": "keyword"
+              },
+              "weapon3": {
+                "type": "keyword"
+              },
+              "special": {
+                "type": "keyword"
+              }
+            }
+          },
+          "health": {
+            "type": "long"
+          },
+          "isAlive": {
+            "type": "boolean"
+          },
+          "isCrouching": {
+            "type": "boolean"
+          },
+          "isGrounded": {
+            "type": "boolean"
+          },
+          "isHanging": {
+            "type": "boolean"
+          },
+          "isRodeoing": {
+            "type": "boolean"
+          },
+          "isShooting": {
+            "type": "boolean"
+          },
+          "isTitan": {
+            "type": "boolean"
+          },
+          "isWallRunning": {
+            "type": "boolean"
+          },
+          "team": {
+            "type": "long"
+          },
+          "titanClass": {
+            "type": "keyword"
+          },
+          "position": {
+            "properties": {
+              "x": {
+                "type": "long"
+              },
+              "y": {
+                "type": "long"
+              },
+              "z": {
+                "type": "long"
+              }
+            }
+          },
+          "distance": {
+            "type": "long"
+          },
+          "rotation": {
+            "properties": {
+              "x": {
+                "type": "long"
+              },
+              "y": {
+                "type": "long"
+              },
+              "z": {
+                "type": "long"
+              }
+            }
+          },
+          "velocity": {
+            "properties": {
+              "x": {
+                "type": "long"
+              },
+              "y": {
+                "type": "long"
+              },
+              "z": {
+                "type": "long"
+              }
+            }
+          }
+        }
+      },
+      "eventType": {
+        "type": "keyword"
+      },
+      "map": {
+        "type": "keyword"
+      },
+      "matchId": {
+        "type": "keyword"
+      },
+      "searchable": {
+        "type": "keyword"
+      },
+      "timePassed": {
+        "type": "long"
+      }
+    }
+  },
+  "aliases": {
+      "match-event": {}
+  },
+  "version": 3
+}

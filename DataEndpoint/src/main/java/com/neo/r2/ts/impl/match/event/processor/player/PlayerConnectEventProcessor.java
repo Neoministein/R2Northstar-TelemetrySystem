@@ -6,7 +6,7 @@ import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
-import com.neo.r2.ts.impl.player.PlayerLookUpService;
+import com.neo.r2.ts.impl.repository.searchable.PlayerLookUpRepository;
 import com.neo.util.common.impl.json.JsonUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,7 +15,7 @@ import jakarta.inject.Inject;
 public class PlayerConnectEventProcessor extends AbstractBasicEventProcessor implements MatchEventProcessor {
 
     @Inject
-    protected PlayerLookUpService playerLookUpService;
+    protected PlayerLookUpRepository playerLookUpService;
 
     @Override
     public void handleIncomingEvent(String matchId, JsonNode event, MatchStateWrapper matchStateWrapper) {
@@ -42,7 +42,7 @@ public class PlayerConnectEventProcessor extends AbstractBasicEventProcessor imp
         player.put("isAlive", false);
         player.put("isRodeoing", false);
 
-        player.put("/distance", 0);
+        player.put("distance", 0);
 
         ObjectNode position = player.withObject("/position");
         position.put("x", 0);

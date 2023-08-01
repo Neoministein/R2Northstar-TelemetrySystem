@@ -1,0 +1,10 @@
+{
+  "description": "Extract values within square brackets",
+  "processors": [
+    {
+      "script": {
+        "source": "def pattern = /\\[(.+?)\\]/; def matcher = pattern.matcher(ctx.text); def values = [:]; def index = 0; while (matcher.find()) { values[index.toString()] = matcher.group(1); index++; }  ctx.values = values;"
+      }
+    }
+  ]
+}

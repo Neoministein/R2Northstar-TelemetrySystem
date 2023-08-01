@@ -59,6 +59,12 @@
 
         <dependency>
             <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-websocket</artifactId>
+            <version>${neoutil.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.neo.util</groupId>
             <artifactId>neoutil-helidon-rest</artifactId>
             <version>${neoutil.version}</version>
         </dependency>
@@ -72,6 +78,11 @@
         <dependency>
             <groupId>com.neo.util</groupId>
             <artifactId>neoutil-jobrunr-queue</artifactId>
+            <version>${neoutil.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-jobrunr-scheduler</artifactId>
             <version>${neoutil.version}</version>
         </dependency>
 
@@ -109,8 +120,6 @@
             <artifactId>helidon-integrations-cdi-hibernate</artifactId>
             <version>${helidon.version}</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/io.helidon.logging/helidon-logging-slf4j -->
         <dependency>
             <groupId>io.helidon.logging</groupId>
             <artifactId>helidon-logging-slf4j</artifactId>
@@ -120,7 +129,7 @@
         <dependency>
             <groupId>io.helidon.microprofile.websocket</groupId>
             <artifactId>helidon-microprofile-websocket</artifactId>
-            <version>${helidon.version}</version>
+            <version>3.2.2-neoutil</version>
         </dependency>
         <!--
         <dependency>
@@ -142,11 +151,6 @@
         <dependency>
             <groupId>io.helidon.microprofile.bean-validation</groupId>
             <artifactId>helidon-microprofile-bean-validation</artifactId>
-            <version>${helidon.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.helidon.microprofile.scheduling</groupId>
-            <artifactId>helidon-microprofile-scheduling</artifactId>
             <version>${helidon.version}</version>
         </dependency>
 

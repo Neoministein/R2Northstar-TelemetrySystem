@@ -1,0 +1,78 @@
+{
+  "index_patterns": [
+    "match-result-*"
+  ],
+  "settings": {
+    "number_of_shards": "1",
+    "auto_expand_replicas": "0-1"
+  },
+  "mappings": {
+    "properties": {
+      "map": {
+        "type": "keyword"
+      },
+      "matchId": {
+        "type": "keyword"
+      },
+      "gamemode": {
+        "type": "keyword"
+      },
+      "PGS_ELIMINATED": {
+        "type": "integer"
+      },
+      "PGS_KILLS": {
+        "type": "integer"
+      },
+      "PGS_ASSAULT_SCORE": {
+        "type": "integer"
+      },
+      "PGS_DEFENSE_SCORE": {
+        "type": "integer"
+      },
+      "PGS_DISTANCE_SCORE": {
+        "type": "integer"
+      },
+      "PGS_DETONATION_SCORE": {
+        "type": "integer"
+      },
+      "PGS_DEATHS": {
+        "type": "integer"
+      },
+      "PGS_NPC_KILLS": {
+        "type": "integer"
+      },
+      "PGS_ASSISTS": {
+        "type": "integer"
+      },
+      "PGS_PILOT_KILLS": {
+        "type": "integer"
+      },
+      "PGS_TITAN_KILLS": {
+        "type": "integer"
+      },
+      "PGS_SCORE": {
+        "type": "integer"
+      },
+      "uId": {
+        "type": "keyword"
+      },
+      "playerName": {
+        "type": "keyword"
+      },
+      "hasWon": {
+        "type": "boolean"
+      },
+      "searchable": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type": "date",
+        "format": "epoch_millis"
+      }
+    }
+  },
+  "aliases": {
+    "match-result": {}
+  },
+  "version": 3
+}

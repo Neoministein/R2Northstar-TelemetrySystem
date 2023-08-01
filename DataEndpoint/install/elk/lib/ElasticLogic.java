@@ -28,7 +28,7 @@ class Scratch {
 
         for (final File fileEntry : folder.listFiles()) {
             String content = readFile(fileEntry.toPath());
-            sendFileBody(endpoint, httpMethod, content, fileEntry.getName());
+            sendFileBody(endpoint, httpMethod, content, fileEntry.getName().substring(0, fileEntry.getName().lastIndexOf('.')));
         }
     }
 
