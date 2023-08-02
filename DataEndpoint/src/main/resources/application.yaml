@@ -19,6 +19,12 @@ javax:
                     user: ${javax.persistence.jdbc.user}
                     password: ${javax.persistence.jdbc.password}
 scheduler.CloseOpenMatchScheduler.enabled: false
+request.recorder:
+  HttpRequestDetails.enabled: true
+  QueueRequestRecorder.enabled: true
+  SchedulerRequestDetails.enabled: true
+  StartupRequestDetails.enabled: true
+  WebsocketRequestDetails.enabled: false
 #mp:
 #  messaging:
 #    connector.helidon-jms:
