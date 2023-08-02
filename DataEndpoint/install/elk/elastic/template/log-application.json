@@ -2,33 +2,34 @@
   "index_patterns": [
     "log-application-*"
   ],
-  "settings": {
-    "number_of_shards": "1",
-    "auto_expand_replicas": "0-1",
-    "index.default_pipeline": "extract-bracket-values"
-  },
-  "mappings" : {
-    "properties" : {
-      "@timestamp" : {
-        "type" : "date"
-      },
-      "segment" : {
-        "properties" : {
-          "level" : {
-            "type" : "keyword"
-          },
-          "class" : {
-            "type" : "keyword"
-          },
-          "message" : {
-            "type" : "keyword"
-          }
+  "priority": 500,
+  "composed_of": ["log"],
+  "template" : {
+    "settings": {
+      "number_of_shards": "1",
+      "auto_expand_replicas": "0-1",
+      "index.default_pipeline": "extract-bracket-values"
+    },
+    "mappings" : {
+      "properties" : {
+        "@timestamp" : {
+          "type" : "date"
+        },
+        "level" : {
+          "type" : "keyword"
+        },
+        "class" : {
+          "type" : "keyword"
+        },
+        "message" : {
+          "type" : "keyword"
         }
       }
+    },
+    "aliases": {
+      "log-application-r2ts": {},
+      "log-application": {}
     }
-  },
-  "aliases": {
-      "log-application-r2ts": {}
   },
   "version": 3
 }

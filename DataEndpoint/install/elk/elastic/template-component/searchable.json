@@ -1,0 +1,18 @@
+{
+  "template" : {
+    "settings": {
+      "number_of_shards": "1",
+      "auto_expand_replicas": "0-1"
+    },
+    "mappings": {
+      "properties": {
+        "businessId": {
+          "type": "keyword"
+        },
+        "searchable": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

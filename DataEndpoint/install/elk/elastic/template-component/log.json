@@ -1,0 +1,38 @@
+{
+  "template" : {
+    "settings": {
+      "number_of_shards": "1",
+      "auto_expand_replicas": "0-1"
+    },
+    "mappings" : {
+      "properties" : {
+        "@timestamp" : {
+          "type" : "date"
+        },
+        "timestamp" : {
+          "type" : "date",
+          "format": "epoch_millis||yyyy-MM-dd HH:mm:ss"
+        },
+        "instance" : {
+          "type" : "keyword"
+        },
+        "contextType" : {
+          "type" : "keyword"
+        },
+        "requestId" : {
+          "type" : "keyword"
+        },
+        "traceId" : {
+          "type" : "keyword"
+        },
+        "searchable": {
+          "type": "keyword"
+        }
+      }
+    },
+    "aliases": {
+      "log-r2ts": {},
+      "log": {}
+    }
+  }
+}

@@ -1,49 +1,50 @@
 {
   "index_patterns": [
-    "request-log-*"
+    "log-request-*"
   ],
-  "settings": {
-    "number_of_shards": "1",
-    "auto_expand_replicas": "0-1",
-    "index.default_pipeline": "log-request-geoip"
-  },
-  "mappings": {
-    "properties": {
-      "@timestamp": {
-        "type": "date"
-      },
-      "segment": {
-        "properties": {
-          "initiator": {
-            "type": "keyword"
-          },
-          "context": {
-            "type": "keyword"
-          },
-          "failed": {
-            "type": "boolean"
-          },
-          "processTime": {
-            "type": "integer"
-          },
-          "remoteAddress": {
-            "type": "ip"
-          },
-          "status": {
-            "type": "keyword"
-          },
-          "agent": {
-            "type": "keyword"
-          },
-          "error": {
-            "type": "keyword"
-          }
+  "priority": 500,
+  "composed_of": ["searchable","log"],
+  "template": {
+    "settings": {
+      "number_of_shards": "1",
+      "auto_expand_replicas": "0-1",
+      "index.default_pipeline": "log-request-geoip"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "initiator": {
+          "type": "keyword"
+        },
+        "context": {
+          "type": "keyword"
+        },
+        "failed": {
+          "type": "boolean"
+        },
+        "processTime": {
+          "type": "integer"
+        },
+        "remoteAddress": {
+          "type": "ip"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "agent": {
+          "type": "keyword"
+        },
+        "error": {
+          "type": "keyword"
         }
       }
+    },
+    "aliases": {
+      "log-request-r2ts": {},
+      "log-request": {}
     }
-  },
-  "aliases": {
-      "log-request-r2ts": {}
   },
   "version": 3
 }

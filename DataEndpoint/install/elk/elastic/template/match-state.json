@@ -2,380 +2,385 @@
   "index_patterns": [
     "match-state-*"
   ],
-  "settings": {
-    "number_of_shards": "1",
-    "auto_expand_replicas": "0-1"
-  },
-  "mappings": {
-    "properties": {
-      "businessId": {
-        "type": "keyword"
-      },
-      "searchable": {
-        "type": "keyword"
-      },
-      "matchId": {
-        "type": "keyword"
-      },
-      "map": {
-        "type": "keyword"
-      },
-      "gamemode": {
-        "type": "keyword"
-      },
-      "timePassed": {
-        "type": "long"
-      },
-      "players": {
-        "properties": {
-          "entityId": {
-            "type": "keyword"
-          },
-          "entityType": {
-            "type": "keyword"
-          },
-          "team": {
-            "type": "byte"
-          },
-          "health": {
-            "type": "byte"
-          },
-          "titanClass": {
-            "type": "keyword"
-          },
-          "isAlive": {
-            "type": "boolean"
-          },
-          "isCrouching": {
-            "type": "boolean"
-          },
-          "isGrounded": {
-            "type": "boolean"
-          },
-          "isHanging": {
-            "type": "boolean"
-          },
-          "isShooting": {
-            "type": "boolean"
-          },
-          "isTitan": {
-            "type": "boolean"
-          },
-          "isWallRunning": {
-            "type": "boolean"
-          },
-          "equipment": {
-            "properties": {
-              "primary": {
-                "type": "keyword"
-              },
-              "secondary": {
-                "type": "keyword"
-              },
-              "weapon3": {
-                "type": "keyword"
-              },
-              "special": {
-                "type": "keyword"
+  "priority": 500,
+  "composed_of": ["searchable"],
+  "template": {
+    "settings": {
+      "number_of_shards": "1",
+      "auto_expand_replicas": "0-1"
+    },
+    "mappings": {
+      "properties": {
+        "businessId": {
+          "type": "keyword"
+        },
+        "searchable": {
+          "type": "keyword"
+        },
+        "matchId": {
+          "type": "keyword"
+        },
+        "map": {
+          "type": "keyword"
+        },
+        "gamemode": {
+          "type": "keyword"
+        },
+        "timePassed": {
+          "type": "long"
+        },
+        "players": {
+          "properties": {
+            "entityId": {
+              "type": "keyword"
+            },
+            "entityType": {
+              "type": "keyword"
+            },
+            "team": {
+              "type": "byte"
+            },
+            "health": {
+              "type": "byte"
+            },
+            "titanClass": {
+              "type": "keyword"
+            },
+            "isAlive": {
+              "type": "boolean"
+            },
+            "isCrouching": {
+              "type": "boolean"
+            },
+            "isGrounded": {
+              "type": "boolean"
+            },
+            "isHanging": {
+              "type": "boolean"
+            },
+            "isShooting": {
+              "type": "boolean"
+            },
+            "isTitan": {
+              "type": "boolean"
+            },
+            "isWallRunning": {
+              "type": "boolean"
+            },
+            "equipment": {
+              "properties": {
+                "primary": {
+                  "type": "keyword"
+                },
+                "secondary": {
+                  "type": "keyword"
+                },
+                "weapon3": {
+                  "type": "keyword"
+                },
+                "special": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "position": {
-            "properties": {
-              "x": {
-                "type": "long"
-              },
-              "y": {
-                "type": "long"
-              },
-              "z": {
-                "type": "long"
+            },
+            "position": {
+              "properties": {
+                "x": {
+                  "type": "long"
+                },
+                "y": {
+                  "type": "long"
+                },
+                "z": {
+                  "type": "long"
+                }
               }
-            }
-          },
-          "distance": {
-            "type": "long"
-          },
-          "rotation": {
-            "properties": {
-              "x": {
-                "type": "short"
-              },
-              "y": {
-                "type": "short"
-              },
-              "z": {
-                "type": "short"
+            },
+            "distance": {
+              "type": "long"
+            },
+            "rotation": {
+              "properties": {
+                "x": {
+                  "type": "short"
+                },
+                "y": {
+                  "type": "short"
+                },
+                "z": {
+                  "type": "short"
+                }
               }
-            }
-          },
-          "velocity": {
-            "properties": {
-              "x": {
-                "type": "short"
-              },
-              "y": {
-                "type": "short"
-              },
-              "z": {
-                "type": "short"
-              }
-            }
-          }
-        }
-      },
-      "npcs": {
-        "properties": {
-          "entityId": {
-            "type": "keyword"
-          },
-          "entityType": {
-            "type": "keyword"
-          },
-          "team": {
-            "type": "long"
-          },
-          "health": {
-            "type": "long"
-          },
-          "equipment": {
-            "properties": {
-              "primary": {
-                "type": "keyword"
-              },
-              "secondary": {
-                "type": "keyword"
-              }
-            }
-          },
-          "position": {
-            "properties": {
-              "x": {
-                "type": "long"
-              },
-              "y": {
-                "type": "long"
-              },
-              "z": {
-                "type": "long"
-              }
-            }
-          },
-          "distance": {
-            "type": "long"
-          },
-          "rotation": {
-            "properties": {
-              "x": {
-                "type": "long"
-              },
-              "y": {
-                "type": "long"
-              },
-              "z": {
-                "type": "long"
-              }
-            }
-          },
-          "velocity": {
-            "properties": {
-              "x": {
-                "type": "long"
-              },
-              "y": {
-                "type": "long"
-              },
-              "z": {
-                "type": "long"
+            },
+            "velocity": {
+              "properties": {
+                "x": {
+                  "type": "short"
+                },
+                "y": {
+                  "type": "short"
+                },
+                "z": {
+                  "type": "short"
+                }
               }
             }
           }
-        }
-      },
-      "events": {
-        "properties": {
-          "EntityKilled": {
-            "properties": {
-              "attackerId": {
-                "type": "keyword"
-              },
-              "victimId": {
-                "type": "keyword"
-              },
-              "damageType": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+        },
+        "npcs": {
+          "properties": {
+            "entityId": {
+              "type": "keyword"
+            },
+            "entityType": {
+              "type": "keyword"
+            },
+            "team": {
+              "type": "long"
+            },
+            "health": {
+              "type": "long"
+            },
+            "equipment": {
+              "properties": {
+                "primary": {
+                  "type": "keyword"
+                },
+                "secondary": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "position": {
+              "properties": {
+                "x": {
+                  "type": "long"
+                },
+                "y": {
+                  "type": "long"
+                },
+                "z": {
+                  "type": "long"
+                }
+              }
+            },
+            "distance": {
+              "type": "long"
+            },
+            "rotation": {
+              "properties": {
+                "x": {
+                  "type": "long"
+                },
+                "y": {
+                  "type": "long"
+                },
+                "z": {
+                  "type": "long"
+                }
+              }
+            },
+            "velocity": {
+              "properties": {
+                "x": {
+                  "type": "long"
+                },
+                "y": {
+                  "type": "long"
+                },
+                "z": {
+                  "type": "long"
+                }
               }
             }
-          },
-          "NpcDespawn": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+          }
+        },
+        "events": {
+          "properties": {
+            "EntityKilled": {
+              "properties": {
+                "attackerId": {
+                  "type": "keyword"
+                },
+                "victimId": {
+                  "type": "keyword"
+                },
+                "damageType": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "NpcSpawn": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "entityType": {
-                "type": "keyword"
-              },
-              "primary": {
-                "type": "keyword"
-              },
-              "secondary": {
-                "type": "keyword"
-              },
-              "team": {
-                "type": "long"
-              },
-              "eventType": {
-                "type": "keyword"
+            },
+            "NpcDespawn": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "PilotNewLoadout": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "primary": {
-                "type": "keyword"
-              },
-              "secondary": {
-                "type": "keyword"
-              },
-              "weapon3": {
-                "type": "keyword"
-              },
-              "special": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+            },
+            "NpcSpawn": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "entityType": {
+                  "type": "keyword"
+                },
+                "primary": {
+                  "type": "keyword"
+                },
+                "secondary": {
+                  "type": "keyword"
+                },
+                "team": {
+                  "type": "long"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "PilotRespawned": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+            },
+            "PilotNewLoadout": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "primary": {
+                  "type": "keyword"
+                },
+                "secondary": {
+                  "type": "keyword"
+                },
+                "weapon3": {
+                  "type": "keyword"
+                },
+                "special": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "PlayerConnect": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
-              },
-              "playerName": {
-                "type": "keyword"
-              },
-              "team": {
-                "type": "long"
+            },
+            "PilotRespawned": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "PlayerDisconnect": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+            },
+            "PlayerConnect": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                },
+                "playerName": {
+                  "type": "keyword"
+                },
+                "team": {
+                  "type": "long"
+                }
               }
-            }
-          },
-          "PlayerDoubleJump": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+            },
+            "PlayerDisconnect": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "PlayerJump": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+            },
+            "PlayerDoubleJump": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "PlayerMantle": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+            },
+            "PlayerJump": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "PilotBecomesTitan": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "titanClass": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+            },
+            "PlayerMantle": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "PlayerRespawned": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
+            },
+            "PilotBecomesTitan": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "titanClass": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "TitanBecomesPilot": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "eventType": {
-                "type": "keyword"
+            },
+            "PlayerRespawned": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                }
               }
-            }
-          },
-          "EntityChangedTeam": {
-            "properties": {
-              "entityId": {
-                "type": "keyword"
-              },
-              "team": {
-                "type": "long"
+            },
+            "TitanBecomesPilot": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "eventType": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "EntityChangedTeam": {
+              "properties": {
+                "entityId": {
+                  "type": "keyword"
+                },
+                "team": {
+                  "type": "long"
+                }
               }
             }
           }
         }
       }
+    },
+    "aliases": {
+      "match-state-r2ts": {},
+      "match-state": {}
     }
-  },
-  "aliases": {
-    "match-state-r2ts": {}
   },
   "version": 3
 }

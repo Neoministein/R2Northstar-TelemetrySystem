@@ -1,9 +1,9 @@
 {
   "index_patterns": [
-    "player-uid-*"
+    "log-socket-*"
   ],
   "priority": 500,
-  "composed_of": ["searchable"],
+  "composed_of": ["searchable","log"],
   "template": {
     "settings": {
       "number_of_shards": "1",
@@ -11,21 +11,22 @@
     },
     "mappings": {
       "properties": {
-        "playerName": {
+        "incoming": {
+          "type": "long"
+        },
+        "outgoing": {
+          "type": "long"
+        },
+        "initiator": {
           "type": "keyword"
         },
-        "uId": {
+        "context": {
           "type": "keyword"
-        },
-        "lastUpdate": {
-          "type": "date",
-          "format": "epoch_millis"
         }
       }
     },
     "aliases": {
-      "player-uid": {},
-      "player-uid-r2ts": {}
+      "log-socket": {}
     }
   },
   "version": 3

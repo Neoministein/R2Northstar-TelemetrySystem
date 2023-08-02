@@ -19,8 +19,12 @@ class Scratch {
         uploadConfig("/elastic/pipeline", "/_ingest/pipeline", "PUT");
         System.out.println();
         System.out.println("------------------------------------------------");
-        System.out.println("Uploading Templates");
-        uploadConfig("/elastic/template", "/_template", "POST");
+        System.out.println("Uploading Index Templates Component");
+        uploadConfig("/elastic/template-component", "/_component_template", "PUT");
+        System.out.println();
+        System.out.println("------------------------------------------------");
+        System.out.println("Uploading Index Templates");
+        uploadConfig("/elastic/template", "/_index_template", "POST");
     }
 
     static void uploadConfig(String fileLocation, String endpoint, String httpMethod) throws IOException {
