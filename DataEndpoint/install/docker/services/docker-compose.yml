@@ -9,6 +9,8 @@ services:
       POSTGRES_DB: R2-TS # The PostgreSQL default database (automatically created at first launch)
     ports: 
     - "5432:5432"
+    networks:
+    - r2-ts
   r2-ts-es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
     environment:
@@ -31,7 +33,7 @@ services:
     ports:
       - "9200:9200"
     networks:
-      - esnet
+      - r2-ts
   r2-ts-kibana:
     image: docker.elastic.co/kibana/kibana:8.9.0
     volumes:
@@ -47,6 +49,7 @@ services:
       - xpack.security.http.ssl.enabled=false
       - xpack.security.transport.ssl.enabled=false
     networks:
-      - esnet
+      - r2-ts
 networks:
-  esnet:
+  r2-ts:
+    external: true

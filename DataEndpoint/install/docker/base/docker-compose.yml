@@ -9,3 +9,8 @@ services:
     - "8090:8090"
     env_file:
     - container.env
+    networks:
+      - r2-t2
+networks:
+  r2-t2:
+    external: true

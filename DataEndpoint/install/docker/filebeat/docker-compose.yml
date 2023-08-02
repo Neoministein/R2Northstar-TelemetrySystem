@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  r2-gs-filebeat:
+    image: docker.elastic.co/beats/filebeat:8.9.0
+    user: root
+    volumes:
+      - "../../elk/filebeat/docker.application-log.yml:/usr/share/filebeat/filebeat.yml:ro"
+      - /var/lib/docker/containers/:/var/lib/docker/containers/:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - r2-gs-endpoint-log:/usr/share/filebeat/r2-gs-endpoint
+    environment:
+      - ELASTICSEARCH_HOST=r2-gs-es01
+      - KIBANA_HOST=r2-gs-kibana
+    # Disable strict permission checks to override filebeat.yml
+    command: filebeat -strict.perms=false
+    networks:
+      - r2-t2
+networks:
+  r2-t2:
+    external: true
+volumes:
+  r2-t2-endpoint-log:
+    external: true
