@@ -48,7 +48,7 @@ public class MatchEventInputSocket extends AbstractMonitorableWebsocket {
             JsonSchemaUtil.isValidOrThrow(event, eventSchema);
             matchEventService.delegateToEventProcessor(getPathParameter(session, "id"), event);
         } catch (ValidationException ex) {
-            LOGGER.warn("A validation exception occurred [{}]", ex.getMessage());
+            LOGGER.warn("A validation exception occurred [{}], body [{}]", ex.getMessage(), message);
         } catch (Exception ex) {
             LOGGER.warn("Unable to process match state input [{}]",ex.getMessage(), ex);
             session.close();
