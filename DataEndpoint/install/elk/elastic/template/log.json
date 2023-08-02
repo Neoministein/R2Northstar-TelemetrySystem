@@ -37,7 +37,7 @@
     }
   },
   "aliases": {
-      "log": {}
+      "log-r2ts": {}
   },
   "version": 3
 }

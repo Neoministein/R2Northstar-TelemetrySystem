@@ -238,7 +238,7 @@
     }
   },
   "aliases": {
-      "match-event": {}
+      "match-event-r2ts": {}
   },
   "version": 3
 }

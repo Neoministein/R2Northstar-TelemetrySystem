@@ -28,7 +28,7 @@
     }
   },
   "aliases": {
-      "log-application": {}
+      "log-application-r2ts": {}
   },
   "version": 3
 }

@@ -43,7 +43,7 @@
     }
   },
   "aliases": {
-      "log-request": {}
+      "log-request-r2ts": {}
   },
   "version": 3
 }

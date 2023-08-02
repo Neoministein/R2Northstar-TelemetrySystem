@@ -20,7 +20,7 @@
     }
   },
   "aliases": {
-      "log-socket": {}
+      "log-socket-r2ts": {}
   },
   "version": 3
 }
