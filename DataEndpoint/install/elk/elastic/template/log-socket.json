@@ -3,11 +3,12 @@
     "log-socket-*"
   ],
   "priority": 500,
-  "composed_of": ["searchable","log"],
+  "composed_of": ["searchable","log", "geolocation"],
   "template": {
     "settings": {
       "number_of_shards": "1",
-      "auto_expand_replicas": "0-1"
+      "auto_expand_replicas": "0-1",
+      "index.default_pipeline": "log-request-geoip"
     },
     "mappings": {
       "properties": {
@@ -22,6 +23,9 @@
         },
         "context": {
           "type": "keyword"
+        },
+        "remoteAddress": {
+          "type": "ip"
         }
       }
     },

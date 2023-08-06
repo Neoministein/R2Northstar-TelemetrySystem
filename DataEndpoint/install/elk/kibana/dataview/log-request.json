@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "log-request",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "timestamp",
+    "title": "log-request",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-06T21:15:38.094Z",
+  "id": "c6754549-5e2e-4627-be64-c82f520ab351",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-08-06T21:15:38.094Z",
+  "version": "WzIyOCwyXQ=="
+}

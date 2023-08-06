@@ -1,0 +1,41 @@
+{
+  "attributes": {
+    "columns": [
+      "contextType",
+      "context",
+      "traceId",
+      "processTime"
+    ],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "isTextBasedQuery": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "timestamp",
+        "desc"
+      ]
+    ],
+    "timeRestore": false,
+    "title": "Log Request Discovery",
+    "usesAdHocDataView": false
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-06T21:29:15.362Z",
+  "id": "3813cc10-349f-11ee-9d8c-9db76534c89a",
+  "managed": false,
+  "references": [
+    {
+      "id": "c6754549-5e2e-4627-be64-c82f520ab351",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-08-06T21:35:59.823Z",
+  "version": "WzI2MiwyXQ=="
+}

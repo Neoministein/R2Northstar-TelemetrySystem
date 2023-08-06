@@ -1,0 +1,1 @@
+java lib/KibanaLogic.java lib/Lib.java -DKIBANA_URL=http://localhost:9200

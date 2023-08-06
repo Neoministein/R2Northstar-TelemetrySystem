@@ -3,7 +3,7 @@
     "log-request-*"
   ],
   "priority": 500,
-  "composed_of": ["searchable","log"],
+  "composed_of": ["searchable","log", "geolocation"],
   "template": {
     "settings": {
       "number_of_shards": "1",
