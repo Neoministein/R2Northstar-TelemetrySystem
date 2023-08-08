@@ -21,7 +21,7 @@ javax:
 scheduler.CloseOpenMatchScheduler.enabled: false
 request.recorder:
   HttpRequestDetails.enabled: true
-  QueueRequestRecorder.enabled: true
+  QueueRequestDetails.enabled: true
   SchedulerRequestDetails.enabled: true
   StartupRequestDetails.enabled: true
   WebsocketRequestDetails.enabled: false
