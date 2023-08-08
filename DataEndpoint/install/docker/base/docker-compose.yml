@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  r2-ts-dataendpoint-base:
+  r2-ts-endpoint:
     build:
       context: ../../..
       dockerfile: install/docker/Dockerfile
@@ -9,8 +9,13 @@ services:
     - "8090:8090"
     env_file:
     - container.env
+    volumes:
+      - r2-ts-endpoint-log:/usr/share/r2ts/endpoint/log
     networks:
-      - r2-t2
+      - r2-ts
 networks:
-  r2-t2:
+  r2-ts:
+    external: true
+volumes:
+  r2-ts-endpoint-log:
     external: true

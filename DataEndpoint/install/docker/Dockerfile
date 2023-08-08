@@ -1,6 +1,6 @@
 
 # 1st stage, build the app
-FROM maven:3.8.5-eclipse-temurin-17-alpine as build
+FROM maven:3.9.0-eclipse-temurin-17-alpine as build
 
 #Install git
 RUN apk add git
@@ -29,8 +29,8 @@ RUN mvn package -DskipTests
 RUN echo "done!"
 
 # 2nd stage, build the runtime image
-FROM openjdk:17-alpine
-WORKDIR /dataEndpoint
+FROM eclipse-temurin:17.0.6_10-jre-alpine
+WORKDIR /usr/share/r2ts/endpoint
 
 # Copy the binary built in the 1st stage
 COPY --from=build /dataEndpoint/target/r2-telemetry-system-endpoint.jar ./

@@ -2,10 +2,16 @@
 
 filebeat.inputs:
   - type: filestream
-    id: request
+    id: r2-ts-endpoint
     enabled: true
     paths:
       - './r2-ts-endpoint/application.log'
+    index: "log-application-r2ts-%{+yyyy.MM.ww.DDD}-v1"
+    processors:
+      #2023-07-29 17:33:21|DEBUG|JobRunnerSchedulerService:64|abbb9c0a-0cb4-4ae8-a9d2-5fdb30aa49be|Startup|3|fc31aa73-2258-44f9-add6-62b45212c9c8|ApplicationPostReadyEvent processed
+      - dissect:
+          tokenizer: "%{timestamp|string}|%{level|string}|%{class|string}|%{instance|string}|%{contextType|string}|%{requestId|string}|%{traceId|string}|%{text|string}"
+          target_prefix: ""
 
 # ============================== Filebeat modules ==============================
 
@@ -22,18 +28,12 @@ setup.dashboards.enabled: false
 
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
-  hosts: ["localhost:9200"]
+  hosts: ["host.docker.internal:9200"]
   allow_older_versions: true
-  index: "log-application-%{+yyyy.MM.ww.DDD}-v1"
-
 # ------------------------------ Logstash Output -------------------------------
 
 # ================================= Processors =================================
-#2023-07-29 17:33:21|DEBUG|JobRunnerSchedulerService:64|abbb9c0a-0cb4-4ae8-a9d2-5fdb30aa49be|Startup|3|fc31aa73-2258-44f9-add6-62b45212c9c8|ApplicationPostReadyEvent processed
 processors:
-  - dissect:
-      tokenizer: "%{timestamp|string}|%{level|string}|%{class|string}|%{instance|string}|%{contextType|string}|%{requestId|string}|%{traceId|string}|%{message|string}"
-      target_prefix: "segment"
   - drop_fields:
       fields: ["agent", "log", "input", "host", "ecs", "message" ]
 
