@@ -290,7 +290,11 @@
                 <artifactId>jandex-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>make-index</id>
+                        <id>make-index-test</id>
+                        <goals>
+                            <goal>jandex</goal>
+                        </goals>
+                        <phase>process-test-classes</phase>
                     </execution>
                 </executions>
             </plugin>
