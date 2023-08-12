@@ -25,8 +25,12 @@ class Scratch {
         uploadConfig("/kibana/search", "/api/saved_objects/_import?overwrite=true", "POST", false, true);
         System.out.println();
         System.out.println("------------------------------------------------");
-        System.out.println("Uploading Search");
+        System.out.println("Uploading Map");
         uploadConfig("/kibana/map", "/api/saved_objects/_import?overwrite=true", "POST", false, true);
+        System.out.println();
+        System.out.println("------------------------------------------------");
+        System.out.println("Uploading Dashboard");
+        uploadConfig("/kibana/dashboard", "/api/saved_objects/_import?overwrite=true", "POST", false, true);
     }
 
     static void uploadConfig(String fileLocation, String endpoint, String httpMethod, boolean fileNameInUrl, boolean mutlipart) throws IOException {
