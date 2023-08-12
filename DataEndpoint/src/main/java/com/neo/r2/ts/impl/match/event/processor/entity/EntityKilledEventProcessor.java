@@ -34,6 +34,10 @@ public class EntityKilledEventProcessor extends AbstractBasicEventProcessor impl
 
     @Override
     public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
+        if (!saveSearchable()) {
+            return List.of();
+        }
+
         ObjectNode data = JsonUtil.emptyObjectNode();
         String victimId = event.get("victimId").asText();
         String attackerId = event.get("attackerId").asText();

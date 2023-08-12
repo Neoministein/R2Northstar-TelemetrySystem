@@ -26,6 +26,10 @@ public class EntityLeachedEventProcessor extends AbstractBasicEventProcessor imp
 
     @Override
     public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
+        if (!saveSearchable()) {
+            return List.of();
+        }
+
         Optional<ObjectNode> player = endMatchState.getPlayer(event.get("entityId").asText());
         MatchEventSearchable searchable = new MatchEventSearchable(endMatchState, getEventName(), player.orElse(null));
         endMatchState.getNpc(event.get("specterId").asText()).ifPresent(searchable::setData);

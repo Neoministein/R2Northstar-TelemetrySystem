@@ -6,6 +6,8 @@ import com.neo.r2.ts.api.match.event.MatchEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
 import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.api.config.Config;
+import com.neo.util.framework.api.config.ConfigService;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import com.networknt.schema.JsonSchema;
 import jakarta.inject.Inject;
@@ -15,12 +17,23 @@ import java.util.List;
 public abstract class AbstractBasicEventProcessor implements MatchEventProcessor {
 
     protected JsonSchema jsonSchema;
+    protected boolean enabled;
+    protected int modulo;
+
+    protected int moduloCount = 0;
 
     protected abstract String getSchemaName();
 
     @Inject
-    public void init(JsonSchemaLoader jsonSchemaLoader) {
+    public void init(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
         this.jsonSchema = jsonSchemaLoader.getJsonSchema(getSchemaName()).orElseThrow();
+        Config config = configService.get("r2ts").get("match").get("event").get(getEventName());
+        enabled = config.get("enabled").asBoolean().orElse(true);
+        modulo = config.get("modulo").asInt().orElse(1);
+    }
+
+    protected boolean saveSearchable() {
+        return enabled && moduloCount++ % modulo == 0;
     }
 
     @Override
@@ -33,9 +46,13 @@ public abstract class AbstractBasicEventProcessor implements MatchEventProcessor
 
     @Override
     public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
+        if (!saveSearchable()) {
+            return List.of();
+        }
+
         String entityId = event.get("entityId").asText();
         return List.of(new MatchEventSearchable(endMatchState, getEventName(),
-                endMatchState.getPlayer(entityId).orElse(parseBackupEntity(entityId))));
+                endMatchState.getEntity(entityId).orElse(parseBackupEntity(entityId))));
     }
 
     @Override

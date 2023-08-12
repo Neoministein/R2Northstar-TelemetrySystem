@@ -1,6 +1,11 @@
 r2ts:
   shouldSaveNpcPosition: false
   heatmap.pixelDensity: 4
+  match:
+    event:
+      NpcPosition:
+        modulo: 1000
+
 
 elastic:
     nodes:

@@ -25,6 +25,10 @@ public class EntityRodeoEventProcessor extends AbstractStateEventProcessor imple
 
     @Override
     public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
+        if (!saveSearchable()) {
+            return List.of();
+        }
+
         String entityId = event.get("entityId").asText();
         String rodeoEntityId = event.get("rodeoEntityId").asText();
 

@@ -50,7 +50,9 @@ public abstract class AbstractPositionEventProcessor extends AbstractBasicEventP
     public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
         List<MatchEventSearchable> matchEventSearchableList = new ArrayList<>(endMatchState.getNumberOfPlayers() + 1);
         for (JsonNode player: getAllEntities(endMatchState)) {
-            matchEventSearchableList.add(new MatchEventSearchable(endMatchState, getEventName(), player));
+            if (saveSearchable()) {
+                matchEventSearchableList.add(new MatchEventSearchable(endMatchState, getEventName(), player));
+            }
         }
         return matchEventSearchableList;
     }
