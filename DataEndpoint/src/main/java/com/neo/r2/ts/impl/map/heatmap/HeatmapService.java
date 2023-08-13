@@ -64,6 +64,8 @@ public class HeatmapService {
     public Heatmap calculateHeatmap(Heatmap heatmap) {
         List<SearchCriteria> searchCriteriaList = new ArrayList<>();
 
+        searchCriteriaList.add(new ExplicitSearchCriteria(MatchStateWrapper.MAP, heatmap.getMap()));
+
         if (heatmap.getMatch() != null) {
             searchCriteriaList.add(new ExplicitSearchCriteria(MatchStateWrapper.MATCH_ID, heatmap.getMatch().getId().toString()));
         }
@@ -73,7 +75,7 @@ public class HeatmapService {
         }
 
         try {
-            generateHeatmap(heatmap,searchCriteriaList);
+            generateHeatmap(heatmap, searchCriteriaList);
         } catch (Exception ex) {
             LOGGER.warn("Failed to calculate Heatmap: [{}] ErrorMessage: [{}]", heatmap.getId(), ex.getMessage());
             heatmap.setStatus(HeatmapEnums.ProcessState.FAILED.toString());
