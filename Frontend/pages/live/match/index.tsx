@@ -25,11 +25,6 @@ const MatchListPage = () => {
         return rowData.numberOfPlayers + "/" + rowData.maxPlayers;
     }
 
-
-    const translateMap = (rowData : MatchEntity) => {
-        return I18nService.translate(rowData.map);
-    }
-
     const handleClick = (value : any) => {
         router.push('/live/match/[id]', '/live/match/' + value.id );
     };
@@ -41,8 +36,8 @@ const MatchListPage = () => {
                     <DataTable value={matches} loading={loading} scrollable={true} selectionMode="single" onSelectionChange={e => {handleClick(e.value);}}>
                         <Column header="Ns Server Name" sortable field="nsServerName"/>
                         <Column header="Players"        sortable field="numberOfPlayers" body={numberOfPlayers}/>
-                        <Column header="Map"            sortable field="map" body={translateMap}/>
-                        <Column header="Gamemode"       sortable field="gamemode"/>
+                        <Column header="Map"            sortable field="map" body={row => I18nService.translate(row.map)}/>
+                        <Column header="Gamemode"       sortable field="gamemode" body={row => I18nService.translate(row.gamemode)}/>
                         <Column header="Start date"     sortable field="startDate" body={toDateString}/>
                     </DataTable>
                 </div>

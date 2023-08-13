@@ -21,10 +21,6 @@ const MatchListPage = () => {
         return new Date(rowData.startDate).toISOString().replace("T", " ").split(".")[0];
     }
 
-    const translateMap = (rowData : MatchEntity) => {
-        return I18nService.translate(rowData.map);
-    }
-
     const handleClick = (value : any) => {
         router.push('/finished/match/[id]', '/finished/match/' + value.id );
     };
@@ -35,8 +31,8 @@ const MatchListPage = () => {
                 <div className="card">
                     <DataTable value={matches} loading={loading} scrollable={true} selectionMode="single" onSelectionChange={e => {handleClick(e.value);}}>
                         <Column header="Ns Server Name" sortable field="nsServerName"/>
-                        <Column header="Map"            sortable field="map" body={translateMap}/>
-                        <Column header="Gamemode"       sortable field="gamemode"/>
+                        <Column header="Map"            sortable field="map" body={row => I18nService.translate(row.map)}/>
+                        <Column header="Gamemode"       sortable field="gamemode" body={row => I18nService.translate(row.gamemode)}/>
                         <Column header="Start date"     sortable field="startDate" body={toDateString}/>
                     </DataTable>
                 </div>
