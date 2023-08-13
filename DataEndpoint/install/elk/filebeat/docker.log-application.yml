@@ -28,7 +28,7 @@ setup.dashboards.enabled: false
 
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
-  hosts: ["host.docker.internal:9200"]
+  hosts: ["r2-ts-es01:9200"]
   allow_older_versions: true
 # ------------------------------ Logstash Output -------------------------------
 
