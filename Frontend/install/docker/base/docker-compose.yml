@@ -8,7 +8,7 @@ services:
     ports:
     - "3000:3000"
     networks:
-      - r2-gs
+      - r2-ts
 networks:
-  r2-gs:
+  r2-ts:
     external: true
