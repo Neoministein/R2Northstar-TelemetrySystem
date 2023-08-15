@@ -25,7 +25,7 @@ public class MatchEventInputSocket extends AbstractMonitorableWebsocket {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchEventInputSocket.class);
 
-    public static final String WS_LOCATION = "/ws/state/input/{id}";
+    public static final String WS_LOCATION = "/ws/v1/state/input/{id}";
 
     protected JsonSchema eventSchema;
 

@@ -149,7 +149,7 @@ void function ITS_RegisterNewMatch_Success(HttpRequestResponse response )
 {
     file.matchId = expect string (DecodeJSON(response.body)["id"])
 
-    string url = file.config.tls ? "wss://" : "ws://" + file.config.hostname + "/ws/state/input/" + file.matchId
+    string url = file.config.tls ? "wss://" : "ws://" + file.config.hostname + "/ws/v1/state/input/" + file.matchId
     table<string , string > headers
     headers["Authorization"] <- "BEARER " + file.config.apiKey
 

@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint(value = MatchStateOutputSocket.WS_LOCATION, configurator = WebserverHttpHeaderForwarding.class)
 public class MatchStateOutputSocket extends AbstractMonitorableWebsocket {
 
-    public static final String WS_LOCATION = "/ws/state/output/{id}";
+    public static final String WS_LOCATION = "/ws/v1/state/output/{id}";
 
     protected Map<String, List<Session>> sessionMap = new ConcurrentHashMap<>();
 
