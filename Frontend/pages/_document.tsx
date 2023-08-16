@@ -14,6 +14,7 @@ class MyDocument extends Document {
             <Html lang="en">
                 <Head>
                     <link id="theme-css" href={`${contextPath}/themes/md-dark-indigo/theme.css`} rel="stylesheet"></link>
+                    <link id="tf2-css" href={`${contextPath}/themes/titanfall/theme.css`} rel="stylesheet"></link>
                 </Head>
                 <body>
                     <Main />

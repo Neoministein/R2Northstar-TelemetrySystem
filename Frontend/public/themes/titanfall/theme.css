@@ -1,0 +1,20 @@
+@font-face {
+    font-family: 'Titanfall';
+    margin: 0;
+    font-size: 16px;
+    letter-spacing: 0.1px;
+    line-height: 16px;
+    padding: 24px 32px;
+    white-space: nowrap;
+    display: inline-block;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    user-select: none !important;
+    src: local("Titanfall"), url("./fonts/titanfall_new.ttf") format("truetype");
+}
+
+
+.tf2-font-link {
+    font-family: 'Titanfall', serif;
+}

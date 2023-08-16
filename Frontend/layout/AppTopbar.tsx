@@ -29,7 +29,7 @@ const AppTopbar = forwardRef((props, ref) => {
             <Link href="/">
                 <a className="layout-topbar-logo">
                     <>
-                        <span>Global R2Northstar Telemetry</span>
+                        <span className="tf2-font-link">R2-Northstar Telemetry</span>
                     </>
                 </a>
             </Link>
