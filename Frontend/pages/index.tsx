@@ -1,3 +1,6 @@
+import {Chart} from "primereact/chart";
+import {useEffect, useState} from "react";
+
 const Dashboard = () => {
 
     let totalUniquePlayers = 152;
@@ -9,8 +12,45 @@ const Dashboard = () => {
     let playerKills = 753;
     let npcKills = 1235;
 
-    let distanceTravled = 45;
-    let distanceTravledLast24Hours = 10;
+    let distanceTraveled = 45;
+    let distanceTraveledLast24Hours = 10;
+
+    const [chartData, setChartData] = useState({});
+    const [chartOptions, setChartOptions] = useState({});
+
+    useEffect(() => {
+        const documentStyle = getComputedStyle(document.documentElement);
+        const data = {
+            labels: ['A', 'B', 'C'],
+            datasets: [
+                {
+                    data: [540, 325, 702],
+                    backgroundColor: [
+                        documentStyle.getPropertyValue('--blue-500'),
+                        documentStyle.getPropertyValue('--yellow-500'),
+                        documentStyle.getPropertyValue('--green-500')
+                    ],
+                    hoverBackgroundColor: [
+                        documentStyle.getPropertyValue('--blue-400'),
+                        documentStyle.getPropertyValue('--yellow-400'),
+                        documentStyle.getPropertyValue('--green-400')
+                    ]
+                }
+            ]
+        }
+        const options = {
+            plugins: {
+                legend: {
+                    labels: {
+                        usePointStyle: true
+                    }
+                }
+            }
+        };
+
+        setChartData(data);
+        setChartOptions(options);
+    }, []);
 
     return (
         <div className="grid">
@@ -77,7 +117,7 @@ const Dashboard = () => {
                     <div className="flex justify-content-between mb-3">
                         <div>
                             <span className="block text-500 font-medium mb-3">Distance Traveled</span>
-                            <div className="text-900 font-medium text-xl">{distanceTravled}km</div>
+                            <div className="text-900 font-medium text-xl">{distanceTraveled}km</div>
                         </div>
                         <div
                             className="flex align-items-center justify-content-center bg-blue-100 border-round"
@@ -85,8 +125,20 @@ const Dashboard = () => {
                             <i className="pi pi-shopping-cart text-blue-500 text-xl" />
                         </div>
                     </div>
-                    <span className="text-green-500 font-medium">{distanceTravledLast24Hours}km</span>
+                    <span className="text-green-500 font-medium">{distanceTraveledLast24Hours}km</span>
                     <span className="text-500"> | In the last 24 hours </span>
+                </div>
+            </div>
+            <div className="col-12 lg:col-6 xl:col-6">
+                <div className="card">
+                    <h5>Live Kill feed</h5>
+
+                </div>
+            </div>
+            <div className="col-12 lg:col-6 xl:col-6">
+                <div className="card flex flex-column align-items-center">
+                    <h5>Gamemode Distribution</h5>
+                    <Chart type="pie" data={chartData} options={chartOptions} className="w-full md:w-30rem" style={{}} />
                 </div>
             </div>
         </div>
