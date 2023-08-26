@@ -1,5 +1,8 @@
 import {Chart} from "primereact/chart";
 import {useEffect, useState} from "react";
+import LiveFeed from "../src/components/LiveFeed";
+import I18nService from "../src/service/I18nService";
+import DashboardService, {GameModeDistribution} from "../src/service/DashboardService";
 
 const Dashboard = () => {
 
@@ -15,42 +18,51 @@ const Dashboard = () => {
     let distanceTraveled = 45;
     let distanceTraveledLast24Hours = 10;
 
-    const [chartData, setChartData] = useState({});
-    const [chartOptions, setChartOptions] = useState({});
+    const [distribution, setDistribution] = useState<GameModeDistribution[]>([])
 
     useEffect(() => {
-        const documentStyle = getComputedStyle(document.documentElement);
-        const data = {
-            labels: ['A', 'B', 'C'],
+        DashboardService.getModeDistribution().then(response => {setDistribution(response)})
+    }, []);
+
+    function getChartData() {
+        if (distribution.length == 0) {
+            return {}
+        }
+        return {
+            labels: distribution.map(v => I18nService.translate(v.mode)),
             datasets: [
                 {
-                    data: [540, 325, 702],
+                    data: distribution.map(v => v.percent),
                     backgroundColor: [
-                        documentStyle.getPropertyValue('--blue-500'),
-                        documentStyle.getPropertyValue('--yellow-500'),
-                        documentStyle.getPropertyValue('--green-500')
-                    ],
-                    hoverBackgroundColor: [
-                        documentStyle.getPropertyValue('--blue-400'),
-                        documentStyle.getPropertyValue('--yellow-400'),
-                        documentStyle.getPropertyValue('--green-400')
+                        '#42a5f5',
+                        '#5c6bc0',
+                        '#7e57c2',
+                        '#ab47bc',
+                        '#ec407a',
+                        '#ef5350',
+                        '#d4e157',
+                        '#9ccc65',
+                        '#66bb6a',
+                        '#26a69a',
+                        '#26c6da',
+                        '#42a5f5',
+                        '#8d6e63',
+                        '#ff7043',
+                        '#ffa726',
+                        '#ffca28',
+                        '#ffee58',
+                        '#d4e157',
                     ]
                 }
             ]
-        }
-        const options = {
-            plugins: {
-                legend: {
-                    labels: {
-                        usePointStyle: true
-                    }
-                }
-            }
         };
+    }
 
-        setChartData(data);
-        setChartOptions(options);
-    }, []);
+    function getChartOptions() {
+        return {
+            options: '60%',
+        }
+    }
 
     return (
         <div className="grid">
@@ -131,14 +143,17 @@ const Dashboard = () => {
             </div>
             <div className="col-12 lg:col-6 xl:col-6">
                 <div className="card">
-                    <h5>Live Kill feed</h5>
-
+                    <LiveFeed maxSize={10} feedName="player-kills" renderItem={(item) =>
+                        <div>
+                            {item.title} with [{I18nService.translate(item.contentText)}]
+                        </div>
+                    }/>
                 </div>
             </div>
             <div className="col-12 lg:col-6 xl:col-6">
                 <div className="card flex flex-column align-items-center">
                     <h5>Gamemode Distribution</h5>
-                    <Chart type="pie" data={chartData} options={chartOptions} className="w-full md:w-30rem" style={{}} />
+                    <Chart type="pie" data={getChartData()} options={getChartOptions()} className="w-full md:w-30rem" />
                 </div>
             </div>
         </div>

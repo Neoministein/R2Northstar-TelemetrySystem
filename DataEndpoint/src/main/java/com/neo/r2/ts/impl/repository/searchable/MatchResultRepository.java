@@ -115,6 +115,15 @@ public class MatchResultRepository implements SearchableRepository {
         return ((SimpleAggregationResult) result.getAggregations().get("distinctCount")).getValue().intValue();
     }
 
+    @CacheResult(cacheName = MATCH_STATS_CACHE, keyGenerator = MethodNameCacheKeyGenerator.class)
+    public int fetchUnqiueGameMode() { //TODO TEST
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.addAggregations(new SimpleFieldAggregation("uniqueModes", MatchResultSearchable.GAMEMODE, SimpleFieldAggregation.Type.CARDINALITY));
+        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
+
+        return ((SimpleAggregationResult) result.getAggregations().get("uniqueModes")).getValue().intValue();
+    }
+
     @Override
     public String getIndexName() {
         return indexName;

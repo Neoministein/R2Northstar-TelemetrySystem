@@ -5,6 +5,9 @@ import com.neo.r2.ts.persistence.searchable.PlayerUidSearchable;
 import com.neo.util.framework.api.cache.spi.CacheInvalidate;
 import com.neo.util.framework.api.cache.spi.CacheKeyParameterPositions;
 import com.neo.util.framework.api.cache.spi.CacheResult;
+import com.neo.util.framework.api.persistence.aggregation.SimpleAggregationResult;
+import com.neo.util.framework.api.persistence.aggregation.SimpleFieldAggregation;
+import com.neo.util.framework.api.persistence.criteria.DateSearchCriteria;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.api.persistence.search.SearchQuery;
@@ -15,6 +18,8 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,6 +67,16 @@ public class PlayerLookUpRepository {
     @CacheResult(cacheName = PLAYER_LOOK_UP_CACHE)
     public long countUniquePlayers() {
         return searchProvider.count(PlayerUidSearchable.class);
+    }
+
+    @CacheResult(cacheName = PLAYER_LOOK_UP_CACHE)
+    public long countUniquePlayers(Duration duration) {
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setMaxResults(0);
+        searchQuery.addFilters(new DateSearchCriteria(PlayerUidSearchable.LAST_UPDATE, Instant.now().minus(duration), Instant.now()));
+        searchQuery.addAggregations(new SimpleFieldAggregation("count", PlayerUidSearchable.U_ID, SimpleFieldAggregation.Type.COUNT));
+
+        return ((SimpleAggregationResult) searchProvider.fetch(playerUid, searchQuery).getAggregations().get("count")).getValue().longValue();
     }
 
     @CacheResult(cacheName = PLAYER_LOOK_UP_CACHE)

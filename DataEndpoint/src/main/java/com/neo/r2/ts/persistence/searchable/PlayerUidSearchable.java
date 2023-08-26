@@ -13,6 +13,7 @@ public class PlayerUidSearchable extends AbstractSearchable implements Searchabl
     public static final String INDEX_NAME = "player-uid";
     public static final String U_ID = "uId";
     public static final String PLAYER_NAME = "playerName";
+    public static final String LAST_UPDATE = "lastUpdate";
 
     protected Instant lastUpdate = Instant.now();
 

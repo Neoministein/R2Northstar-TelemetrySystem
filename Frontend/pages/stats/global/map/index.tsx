@@ -13,7 +13,6 @@ const MapStatsListPage = () => {
     const router = useRouter();
 
     const [chartClicked, setChartClicked] = useState<number>(-1);
-    const [chartOptions, setChartOptions] = useState({});
 
     useEffect(() => {
         MapService.getAllMapDetails()
