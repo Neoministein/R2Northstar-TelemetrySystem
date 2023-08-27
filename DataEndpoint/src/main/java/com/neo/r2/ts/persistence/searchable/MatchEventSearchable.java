@@ -7,8 +7,12 @@ import com.neo.util.framework.api.persistence.search.IndexPeriod;
 import com.neo.util.framework.api.persistence.search.Searchable;
 import com.neo.util.framework.api.persistence.search.SearchableIndex;
 
+import java.time.Instant;
+
 @SearchableIndex(indexName = "match-event", indexPeriod = IndexPeriod.WEEKLY)
 public class MatchEventSearchable extends AbstractSearchable implements Searchable {
+
+    public static final String EVENT_TYPE = "eventType";
 
     private String matchId;
     private String map;
@@ -17,6 +21,7 @@ public class MatchEventSearchable extends AbstractSearchable implements Searchab
 
     private String eventType;
     private JsonNode data;
+    private Instant timestamp = Instant.now();
 
     public MatchEventSearchable(MatchStateWrapper matchState, String eventType, JsonNode entity) {
         this.matchId = matchState.getMatchId();
@@ -76,5 +81,9 @@ public class MatchEventSearchable extends AbstractSearchable implements Searchab
 
     public void setData(JsonNode data) {
         this.data = data;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
     }
 }
