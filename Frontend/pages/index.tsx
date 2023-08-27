@@ -2,26 +2,34 @@ import {Chart} from "primereact/chart";
 import {useEffect, useState} from "react";
 import LiveFeed from "../src/components/LiveFeed";
 import I18nService from "../src/service/I18nService";
-import DashboardService, {GameModeDistribution} from "../src/service/DashboardService";
+import DashboardService from "../src/service/DashboardService";
+import {Distribution} from "../src/service/MapService";
 
 const Dashboard = () => {
 
-    let totalUniquePlayers = 152;
-    let playersLast24Hours = 10;
+    const [distanceTraveled, setDistanceTraveled] = useState<string>("0")
+    const [distanceTraveled24h, setDistanceTraveled24h] = useState<string>("0")
+    const [totalMatches, setTotalMatches] = useState<number>(0)
+    const [totalMatches24h, setTotalMatches24h] = useState<number>(0)
 
-    let totalMatches = 22;
-    let matchesLast24Hours = 3;
+    const [playerKills, setPlayerKills] = useState<number>(0)
+    const [npcKills, setNpcKills] = useState<number>(0)
 
-    let playerKills = 753;
-    let npcKills = 1235;
+    const [uniquePlayers, setUniquePlayers] = useState<number>(0)
+    const [uniquePlayers24h, setUniquePlayers24h] = useState<number>(0)
 
-    let distanceTraveled = 45;
-    let distanceTraveledLast24Hours = 10;
-
-    const [distribution, setDistribution] = useState<GameModeDistribution[]>([])
+    const [distribution, setDistribution] = useState<Distribution[]>([])
 
     useEffect(() => {
         DashboardService.getModeDistribution().then(response => {setDistribution(response)})
+        DashboardService.getTotalUniquePlayers().then(response => setUniquePlayers(response))
+        DashboardService.getTotalUniquePlayers24h().then(response => setUniquePlayers24h(response))
+        DashboardService.getTotalPlayerKills24h().then(response => setPlayerKills(response))
+        DashboardService.getTotalNpcKills24h().then(response => setNpcKills(response))
+        DashboardService.getTotalMatches().then(response => setTotalMatches(response))
+        DashboardService.getTotalMatches24h().then(response => setTotalMatches24h(response))
+        DashboardService.getTotalDistance().then(response => setDistanceTraveled((response / 52000).toFixed(2)))
+        DashboardService.getTotalDistance24h().then(response => setDistanceTraveled24h((response / 52000).toFixed(2)))
     }, []);
 
     function getChartData() {
@@ -29,7 +37,7 @@ const Dashboard = () => {
             return {}
         }
         return {
-            labels: distribution.map(v => I18nService.translate(v.mode)),
+            labels: distribution.map(v => I18nService.translate(v.name)),
             datasets: [
                 {
                     data: distribution.map(v => v.percent),
@@ -74,7 +82,7 @@ const Dashboard = () => {
                     <div className="flex justify-content-between mb-3">
                         <div>
                             <span className="block text-500 font-medium mb-3">Total Unique Players</span>
-                            <div className="text-900 font-medium text-xl">{totalUniquePlayers}</div>
+                            <div className="text-900 font-medium text-xl">{uniquePlayers}</div>
                         </div>
                         <div
                             className="flex align-items-center justify-content-center bg-blue-100 border-round"
@@ -83,7 +91,7 @@ const Dashboard = () => {
                             <i className="pi pi-shopping-cart text-blue-500 text-xl" />
                         </div>
                     </div>
-                    <span className="text-green-500 font-medium">{playersLast24Hours}</span>
+                    <span className="text-green-500 font-medium">{uniquePlayers24h}</span>
                     <span className="text-500"> | In the last 24 hours </span>
                 </div>
 
@@ -120,7 +128,7 @@ const Dashboard = () => {
                             <i className="pi pi-shopping-cart text-blue-500 text-xl" />
                         </div>
                     </div>
-                    <span className="text-green-500 font-medium">{matchesLast24Hours}</span>
+                    <span className="text-green-500 font-medium">{totalMatches24h}</span>
                     <span className="text-500"> | In the last 24 hours </span>
                 </div>
             </div>
@@ -137,15 +145,15 @@ const Dashboard = () => {
                             <i className="pi pi-shopping-cart text-blue-500 text-xl" />
                         </div>
                     </div>
-                    <span className="text-green-500 font-medium">{distanceTraveledLast24Hours}km</span>
+                    <span className="text-green-500 font-medium">{distanceTraveled24h}km</span>
                     <span className="text-500"> | In the last 24 hours </span>
                 </div>
             </div>
             <div className="col-12 lg:col-6 xl:col-6">
                 <div className="card">
-                    <LiveFeed maxSize={10} feedName="player-kills" renderItem={(item) =>
+                    <LiveFeed maxSize={14} feedName="player-kills" renderItem={(item) =>
                         <div>
-                            {item.title} with [{I18nService.translate(item.contentText)}]
+                            {item.title} with [{I18nService.translate(item.content_text)}]
                         </div>
                     }/>
                 </div>

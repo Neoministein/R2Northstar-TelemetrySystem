@@ -6,11 +6,8 @@ import com.neo.r2.ts.impl.player.PlayerLookUpObject;
 import com.neo.r2.ts.impl.repository.searchable.PlayerLookUpRepository;
 import com.neo.r2.ts.impl.rss.RssHeader;
 import com.neo.r2.ts.impl.rss.RssItem;
-import com.neo.r2.ts.impl.rss.RssResponse;
-import com.neo.r2.ts.web.rest.AuthorizationEndpoint;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
@@ -19,11 +16,11 @@ import java.text.MessageFormat;
 import java.time.Instant;
 
 @ApplicationScoped
-@Path(AuthorizationEndpoint.RESOURCE_LOCATION)
+@Path(PlayerKillsRssFeed.RESOURCE_LOCATION)
 @Produces(MediaType.APPLICATION_JSON + "; charset=UTF-8")
 public class PlayerKillsRssFeed extends AbstractRssFeed {
 
-    public static final String RESOURCE_LOCATION = "/api/v1/rss/player/kills";
+    public static final String RESOURCE_LOCATION = "/api/v1/rss/player-kills";
 
     protected long id = 0;
 
@@ -43,11 +40,6 @@ public class PlayerKillsRssFeed extends AbstractRssFeed {
     @Override
     protected int getMaxRssItems() {
         return 20;
-    }
-
-    @GET
-    public RssResponse getRssResponse() {
-        return new RssResponse(rssHeader, rssItems);
     }
 
     public void addPlayerKill(String attackerId, String victimId, String dmgType) {

@@ -23,8 +23,8 @@ export interface HeatmapEntity {
     description: string
 }
 
-export interface MapDistribution {
-    map: string
+export interface Distribution {
+    name: string
     count: number
     percent: number
 }
@@ -47,7 +47,7 @@ const MapService = {
             .then(resp => { return ErrorUtils.parseResponse(resp);});
     },
 
-    getMapDistribution() : Promise<MapDistribution[]> {
+    getMapDistribution() : Promise<Distribution[]> {
         return fetch(AppConfig.apiUrl + "/map/distribution" )
             .then(resp => { return ErrorUtils.parseResponse(resp);})
             .then(resp => { return resp.hits;});

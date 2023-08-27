@@ -1,12 +1,13 @@
 package com.neo.r2.ts.web.socket;
 
-import com.neo.r2.ts.impl.rss.RssItem;
 import com.neo.r2.ts.api.rss.RssFeed;
+import com.neo.r2.ts.impl.rss.RssItem;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.websocket.api.WebserverHttpHeaderForwarding;
 import com.neo.util.framework.websocket.impl.monitoring.AbstractMonitorableWebsocket;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class RssFeedSocket extends AbstractMonitorableWebsocket {
 
     protected Map<String, List<Session>> sessionMap = new ConcurrentHashMap<>();
 
+    @Inject
     public void init(Instance<RssFeed> rssFeeds) {
         for (RssFeed rssFeed: rssFeeds) {
             sessionMap.put(rssFeed.getId(), new ArrayList<>());

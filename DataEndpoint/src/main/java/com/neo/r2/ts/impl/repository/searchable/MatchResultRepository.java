@@ -3,12 +3,13 @@ package com.neo.r2.ts.impl.repository.searchable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.api.SearchableRepository;
 import com.neo.r2.ts.impl.MethodNameCacheKeyGenerator;
-import com.neo.r2.ts.impl.result.MatchResultRequestParam;
+import com.neo.r2.ts.impl.match.result.MatchResultRequestParam;
 import com.neo.r2.ts.persistence.searchable.MatchResultSearchable;
 import com.neo.util.framework.api.cache.spi.CacheInvalidateAll;
 import com.neo.util.framework.api.cache.spi.CacheResult;
 import com.neo.util.framework.api.persistence.aggregation.*;
 import com.neo.util.framework.api.persistence.criteria.ContainsSearchCriteria;
+import com.neo.util.framework.api.persistence.criteria.DateSearchCriteria;
 import com.neo.util.framework.api.persistence.criteria.ExplicitSearchCriteria;
 import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.api.persistence.search.SearchQuery;
@@ -18,6 +19,8 @@ import com.neo.util.framework.elastic.api.aggregation.BucketScriptAggregation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -100,8 +103,8 @@ public class MatchResultRepository implements SearchableRepository {
     public int countMatches() {
         SearchQuery searchQuery = new SearchQuery();
         searchQuery.addAggregations(new SimpleFieldAggregation("distinctCount", MatchResultSearchable.MATCH_ID, SimpleFieldAggregation.Type.CARDINALITY));
-        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
 
+        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
         return ((SimpleAggregationResult) result.getAggregations().get("distinctCount")).getValue().intValue();
     }
 
@@ -110,18 +113,70 @@ public class MatchResultRepository implements SearchableRepository {
         SearchQuery searchQuery = new SearchQuery();
         searchQuery.addFilters(new ExplicitSearchCriteria(MatchResultSearchable.MAP, map));
         searchQuery.addAggregations(new SimpleFieldAggregation("distinctCount", MatchResultSearchable.MATCH_ID, SimpleFieldAggregation.Type.CARDINALITY));
-        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
 
+        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
         return ((SimpleAggregationResult) result.getAggregations().get("distinctCount")).getValue().intValue();
     }
 
     @CacheResult(cacheName = MATCH_STATS_CACHE, keyGenerator = MethodNameCacheKeyGenerator.class)
-    public int fetchUnqiueGameMode() { //TODO TEST
+    public List<String> fetchAllGamemodeTypes() {
         SearchQuery searchQuery = new SearchQuery();
-        searchQuery.addAggregations(new SimpleFieldAggregation("uniqueModes", MatchResultSearchable.GAMEMODE, SimpleFieldAggregation.Type.CARDINALITY));
-        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
+        searchQuery.addAggregations(new TermAggregation("uniqueModes", MatchResultSearchable.GAMEMODE, List.of(new SimpleFieldAggregation("count", MatchResultSearchable.GAMEMODE, SimpleFieldAggregation.Type.COUNT))));
 
-        return ((SimpleAggregationResult) result.getAggregations().get("uniqueModes")).getValue().intValue();
+        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
+        return ((TermAggregationResult) result.getAggregations().get("uniqueModes")).getBuckets().stream().map(TermAggregationResult.Bucket::key).toList();
+    }
+
+    @CacheResult(cacheName = MATCH_STATS_CACHE, keyGenerator = MethodNameCacheKeyGenerator.class)
+    public int countMatchesByGamemode(String gamemode) {
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.addFilters(new ExplicitSearchCriteria(MatchResultSearchable.GAMEMODE, gamemode));
+        searchQuery.addAggregations(new SimpleFieldAggregation("distinctCount", MatchResultSearchable.MATCH_ID, SimpleFieldAggregation.Type.CARDINALITY));
+
+        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
+        return ((SimpleAggregationResult) result.getAggregations().get("distinctCount")).getValue().intValue();
+    }
+
+    @CacheResult(cacheName = MATCH_STATS_CACHE, keyGenerator = MethodNameCacheKeyGenerator.class)
+    public int fetchTotal(String field) {
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setMaxResults(0);
+        searchQuery.addAggregations(new SimpleFieldAggregation("count", field, SimpleFieldAggregation.Type.SUM));
+
+        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
+        return ((SimpleAggregationResult) result.getAggregations().get("count")).getValue().intValue();
+    }
+
+    @CacheResult(cacheName = MATCH_STATS_CACHE, keyGenerator = MethodNameCacheKeyGenerator.class)
+    public int fetchTotal(String field, Duration duration) {
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setMaxResults(0);
+        searchQuery.addFilters(new DateSearchCriteria(MatchResultSearchable.TIME_STAMP, Instant.now().minus(duration), Instant.now()));
+        searchQuery.addAggregations(new SimpleFieldAggregation("count", field, SimpleFieldAggregation.Type.SUM));
+
+        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
+        return ((SimpleAggregationResult) result.getAggregations().get("count")).getValue().intValue();
+    }
+
+    @CacheResult(cacheName = MATCH_STATS_CACHE, keyGenerator = MethodNameCacheKeyGenerator.class)
+    public int countTotalMatches() {
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setMaxResults(0);
+        searchQuery.addAggregations(new SimpleFieldAggregation("count", MatchResultSearchable.MATCH_ID, SimpleFieldAggregation.Type.CARDINALITY));
+
+        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
+        return ((SimpleAggregationResult) result.getAggregations().get("count")).getValue().intValue();
+    }
+
+    @CacheResult(cacheName = MATCH_STATS_CACHE, keyGenerator = MethodNameCacheKeyGenerator.class)
+    public int countTotalMatches(Duration duration) {
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setMaxResults(0);
+        searchQuery.addFilters(new DateSearchCriteria(MatchResultSearchable.TIME_STAMP, Instant.now().minus(duration), Instant.now()));
+        searchQuery.addAggregations(new SimpleFieldAggregation("count", MatchResultSearchable.MATCH_ID, SimpleFieldAggregation.Type.CARDINALITY));
+
+        SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
+        return ((SimpleAggregationResult) result.getAggregations().get("count")).getValue().intValue();
     }
 
     @Override

@@ -12,7 +12,7 @@ export interface RssResponse {
 export interface RssItem {
     id: string
     title: string
-    contentText: string
+    content_text: string
     datePublished: number
     icon: string
 }

@@ -21,7 +21,7 @@ export default function LiveFeed({title, feedName, maxSize, renderItem} : Props)
         );
 
         RssService.getRssFeedSocket(feedName).onmessage = (message) => {
-            addItem(message.data)
+            addItem(JSON.parse(message.data))
         }
     },[])
 
@@ -45,7 +45,7 @@ export default function LiveFeed({title, feedName, maxSize, renderItem} : Props)
 
     return (
         <div>
-            <h5>{getTitle()}</h5>
+            <h5>Live Feed: {getTitle()}</h5>
             <ul className="p-0 mx-0 mt-0 mb-4 list-none">
                 {items.map(item => (
                     <div>

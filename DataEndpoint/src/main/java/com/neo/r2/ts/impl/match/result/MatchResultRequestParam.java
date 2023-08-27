@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.result;
+package com.neo.r2.ts.impl.match.result;
 
 import java.util.Arrays;
 import java.util.Objects;

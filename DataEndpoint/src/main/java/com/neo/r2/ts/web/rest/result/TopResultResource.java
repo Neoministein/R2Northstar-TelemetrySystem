@@ -1,8 +1,8 @@
 package com.neo.r2.ts.web.rest.result;
 
+import com.neo.r2.ts.impl.match.result.MatchResultRequestParam;
 import com.neo.r2.ts.impl.repository.searchable.MatchResultRepository;
 import com.neo.r2.ts.impl.repository.searchable.PlayerLookUpRepository;
-import com.neo.r2.ts.impl.result.MatchResultRequestParam;
 import com.neo.r2.ts.persistence.searchable.MatchResultSearchable;
 import com.neo.util.common.impl.MathUtils;
 import com.neo.util.common.impl.StringUtils;

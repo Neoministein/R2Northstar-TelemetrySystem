@@ -21,6 +21,7 @@ public class MatchResultSearchable extends AbstractSearchable implements Searcha
     public static final String MATCH_ID = "matchId";
     public static final String MAP = "map";
     public static final String GAMEMODE = "gamemode";
+    public static final String TIME_STAMP = "timestamp";
 
     public static final String PGS_ELIMINATED = "PGS_ELIMINATED";
     public static final String PGS_KILLS = "PGS_KILLS";

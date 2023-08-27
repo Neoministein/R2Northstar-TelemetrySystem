@@ -54,4 +54,9 @@ public class MatchEventInputSocket extends AbstractMonitorableWebsocket {
             session.close();
         }
     }
+
+    @Override
+    protected boolean secured() {
+        return true;
+    }
 }

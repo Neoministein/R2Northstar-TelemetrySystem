@@ -3,12 +3,12 @@ import {useRouter} from "next/router";
 import I18nService from "../../../../src/service/I18nService";
 import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
-import MapService, {GameMap, MapDistribution} from "../../../../src/service/MapService";
+import MapService, {Distribution, GameMap} from "../../../../src/service/MapService";
 import {Chart} from "primereact/chart";
 
 const MapStatsListPage = () => {
     const [gameMap, setGameMap] = useState<GameMap[]>([]);
-    const [distribution, setDistribution] = useState<MapDistribution[]>([])
+    const [distribution, setDistribution] = useState<Distribution[]>([])
     const [loading, setLoading] = useState<boolean>(true);
     const router = useRouter();
 
@@ -30,7 +30,7 @@ const MapStatsListPage = () => {
 
     useEffect(() => {
         if (chartClicked !== -1) {
-            handleClick(distribution[chartClicked].map)
+            handleClick(distribution[chartClicked].name)
         }
     }, [chartClicked])
 
@@ -39,7 +39,7 @@ const MapStatsListPage = () => {
             return {}
         }
         return {
-            labels: distribution.map(v => I18nService.translate(v.map)),
+            labels: distribution.map(v => I18nService.translate(v.name)),
             datasets: [
                 {
                     data: distribution.map(v => v.percent),
