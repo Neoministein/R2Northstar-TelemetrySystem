@@ -2,6 +2,7 @@ package com.neo.r2.ts.impl.match.event.processor.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
@@ -48,7 +49,18 @@ public class EntityKilledEventProcessor extends AbstractBasicEventProcessor impl
     public void updateMatchState(JsonNode event, MatchStateWrapper matchStateToUpdate) {
         super.updateMatchState(event, matchStateToUpdate);
         Optional<ObjectNode> victimPlayer = matchStateToUpdate.getPlayer(event.get("victimId").asText());
-        victimPlayer.ifPresent(jsonNodes -> jsonNodes.put("isAlive", false));
+        if (victimPlayer.isPresent()) {
+            ObjectNode player = victimPlayer.get();
+            player.put("isTitan", false);
+            player.put("isWallRunning", false);
+            player.put("isShooting", false);
+            player.put("isGrounded", false);
+            player.put("isHanging", false);
+            player.put("isCrouching", false);
+            player.put("isAlive", false);
+            player.put("isRodeoing", false);
+            player.put("isTitan", CustomConstants.UNKNOWN);
+        }
     }
 
     @Override
