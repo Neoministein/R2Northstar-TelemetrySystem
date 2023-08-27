@@ -55,6 +55,9 @@ const map = new Map([
     ["solo",                    "Campaign"],
     ["tdm",                     "Skirmish"],
     ["ttdm",                    "Titan Brawl"],
+    //Gamemodes - Custom
+    ["fastball", "Fastball"],
+    ["hs", "Hs"],
     //Site
     ["playerName",              "Player Name"],
     ["ratio",                   "Ratio"],
