@@ -376,7 +376,7 @@ void function ITS_EntityKilled( entity victim, entity attacker, var damageInfo )
 {
     table entitykillEvent
     entitykillEvent["eventType"] <- "EntityKilled"
-    entitykillEvent["damageType"] <- DamageInfo_GetDamageWeaponName( damageInfo )
+    entitykillEvent["damageType"] <- DamageSourceIDToString( DamageInfo_GetDamageSourceIdentifier( damageInfo ) )
 
     if (attacker.IsPlayer()) {
         entitykillEvent["attackerId"] <- attacker.GetUID()
