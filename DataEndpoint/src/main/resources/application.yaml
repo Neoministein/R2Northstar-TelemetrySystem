@@ -23,7 +23,6 @@ javax:
                     url: ${javax.persistence.jdbc.url}
                     user: ${javax.persistence.jdbc.user}
                     password: ${javax.persistence.jdbc.password}
-scheduler.CloseOpenMatchScheduler.enabled: false
 request.recorder:
   HttpRequestDetails.enabled: true
   QueueRequestDetails.enabled: true
