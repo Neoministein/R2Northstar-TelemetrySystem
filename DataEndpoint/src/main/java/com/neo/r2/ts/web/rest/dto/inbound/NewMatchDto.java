@@ -35,4 +35,5 @@ public record NewMatchDto(
         boolean recordNpc,
 
         @JsonProperty(required = true)
+        @Size(max = DatabaseMappingConstants.VARCHAR)
         String tags) {}
