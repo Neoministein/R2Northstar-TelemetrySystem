@@ -6,7 +6,7 @@
 	"ConVars": [
 		{
 			"Name": "ts-hostname",
-			"DefaultValue": "127.0.0.1:8090"
+			"DefaultValue": "r2ts.neoministein.com"
 		},
 		{
 			"Name": "ts-apiKey",
@@ -18,7 +18,7 @@
 		},
 		{
 			"Name": "ts-tls",
-			"DefaultValue": "false"
+			"DefaultValue": "1"
 		},
 		{
 			"Name": "ts-milliSecBetweenState",
