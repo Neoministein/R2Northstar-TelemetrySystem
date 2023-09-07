@@ -38,7 +38,7 @@ void function ITS_SendRequestToBackend(string path, int method, string body, voi
 {
     HttpRequest request = { ... }
     request.method = method
-    request.url =  file.config.tls ? "https://" : "http://" + file.config.hostname + path
+    request.url =  (file.config.tls ? "https://" : "http://") + file.config.hostname + path
 
     if(body != ITS_NO_BODY) {
         request.body = body
