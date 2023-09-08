@@ -153,7 +153,7 @@ void function ITS_RegisterNewMatch_Success(HttpRequestResponse response )
     table<string , string > headers
     headers["Authorization"] <- "BEARER " + file.config.apiKey
 
-    file.isWebsocketRunning = NS_ConnectToWebsocket(ITS_WS_NAME, url, ITS_WebsocketPooling, 60, headers)
+    file.isWebsocketRunning = NS_ConnectToWebsocket(ITS_WS_NAME, url, ITS_WebsocketPooling, 60, false ,headers)
 }
 
 void function ITS_MatchStart()
