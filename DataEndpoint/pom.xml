@@ -25,6 +25,16 @@
         <mockito.core.version>4.8.0</mockito.core.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.helidon.webserver</groupId>
+                <artifactId>helidon-webserver-websocket</artifactId>
+                <version>3.2.2-neoutil</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- NeoUtil -->
         <dependency>
