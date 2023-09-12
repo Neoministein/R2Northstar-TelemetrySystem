@@ -43,6 +43,11 @@ global struct ITS_ConfigStruct {
     bool recordNpc,
 }
 
+global struct ITS_Position {
+    vector origin,
+    vector angles,
+}
+
 struct {
     ITS_ConfigStruct& config,
 
@@ -53,6 +58,7 @@ struct {
     string matchId = ITS_NO_MATCH,
 
     table < entity , table < int , int > > scoreData,
+    table < string , ITS_Position > lastReportedPosition,
 } file
 
 void function ITS_init()
@@ -168,23 +174,29 @@ void function ITS_MainTelemetryLoop()
 	while ( file.matchId != ITS_NO_MATCH )
 	{
         {
-            table playerPostionEvent
-            playerPostionEvent["eventType"] <- "PlayerPosition"
+            table playerPositionEvent
+            playerPositionEvent["eventType"] <- "PlayerPosition"
 
-            array postions
+            array positions
             foreach(entity player in GetPlayerArray())
             {
-                table postion
-                postion["entityId"] <- player.GetUID()
-                postion["health"] <- (100.0 * player.GetHealth() / player.GetMaxHealth()).tointeger()
-                postion["position"] <- ITS_VectorIntoTable(player.GetOrigin())
-                postion["rotation"] <- ITS_VectorIntoTable(player.GetAngles())
-                postion["velocity"] <- ITS_VectorIntoTable(player.GetVelocity())
-                postions.append(postion)
-            }
-            playerPostionEvent["positions"] <- postions
+                table position
+                position["entityId"] <- player.GetUID()
+                position["health"] <- (100.0 * player.GetHealth() / player.GetMaxHealth()).tointeger()
+                position["position"] <- ITS_VectorIntoTable(player.GetOrigin())
+                position["rotation"] <- ITS_VectorIntoTable(player.GetAngles())
+                position["velocity"] <- ITS_VectorIntoTable(player.GetVelocity())
 
-            ITS_SendToWebsocket(EncodeJSON(playerPostionEvent))
+                if (ITS_ComparePositions(player)) {
+                    positions.append(position)
+                }
+            }
+            playerPositionEvent["positions"] <- positions
+
+            if(positions.len() > 0)
+            {
+                ITS_SendToWebsocket(EncodeJSON(playerPositionEvent))
+            }
         }
 
         {
@@ -205,24 +217,27 @@ void function ITS_MainTelemetryLoop()
             table npcPositionEvent
             npcPositionEvent["eventType"] <- "NpcPosition"
 
-            array postions
+            array positions
             foreach(string npcType in npcTypes)
             {
                 foreach(entity npc in GetNPCArrayByClass( npcType ))
                 {
-                    table postion
-                    postion["entityId"] <- npc.GetEncodedEHandle() + ""
-                    postion["health"] <- (100.0 * npc.GetHealth() / npc.GetMaxHealth()).tointeger()
-                    postion["position"] <- ITS_VectorIntoTable(npc.GetOrigin())
-                    postion["rotation"] <- ITS_VectorIntoTable(npc.GetAngles())
-                    postion["velocity"] <- ITS_VectorIntoTable(npc.GetVelocity())
-                    postions.append(postion)
+                    table position
+                    position["entityId"] <- npc.GetEncodedEHandle() + ""
+                    position["health"] <- (100.0 * npc.GetHealth() / npc.GetMaxHealth()).tointeger()
+                    position["position"] <- ITS_VectorIntoTable(npc.GetOrigin())
+                    position["rotation"] <- ITS_VectorIntoTable(npc.GetAngles())
+                    position["velocity"] <- ITS_VectorIntoTable(npc.GetVelocity())
+
+                    if (ITS_ComparePositions(npc)) {
+                        positions.append(position)
+                    }
                 }
             }
 
-            npcPositionEvent["positions"] <- postions
+            npcPositionEvent["positions"] <- positions
 
-            if(postions.len() > 0)
+            if(positions.len() > 0)
             {
                 ITS_SendToWebsocket(EncodeJSON(npcPositionEvent))
             }
@@ -277,6 +292,8 @@ void function ITS_PlayerConnect( entity player )
     playerConnectEvent["playerName"] <-  player.GetPlayerName()
     playerConnectEvent["team"] <- player.GetTeam()
     ITS_SendToWebsocket(EncodeJSON(playerConnectEvent))
+
+    ITS_UpdateITSPosition(player)
 }
 
 void function ITS_PlayerDisconnect( entity player )
@@ -316,6 +333,8 @@ void function ITS_NpcSpawn(entity npc)
 
     ITS_SendToWebsocket(EncodeJSON(npcSpawnEvent))
     thread ITS_WaitForNpcDespawn(npc)
+
+    ITS_UpdateITSPosition(npc)
 }
 
 void function ITS_NpcWithWeaponSpawn( entity npc )
@@ -374,34 +393,34 @@ void function ITS_SpectreLeeched( entity spectre, entity player )
 
 void function ITS_EntityKilled( entity victim, entity attacker, var damageInfo )
 {
-    table entitykillEvent
-    entitykillEvent["eventType"] <- "EntityKilled"
-    entitykillEvent["damageType"] <- DamageSourceIDToString( DamageInfo_GetDamageSourceIdentifier( damageInfo ) )
+    table entityKillEvent
+    entityKillEvent["eventType"] <- "EntityKilled"
+    entityKillEvent["damageType"] <- DamageSourceIDToString( DamageInfo_GetDamageSourceIdentifier( damageInfo ) )
 
     if (attacker.IsPlayer()) {
-        entitykillEvent["attackerId"] <- attacker.GetUID()
+        entityKillEvent["attackerId"] <- attacker.GetUID()
     } else {
         try
         {
-            entitykillEvent["attackerId"] <- attacker.GetEncodedEHandle() + ""
+            entityKillEvent["attackerId"] <- attacker.GetEncodedEHandle() + ""
         } catch (exception) {
-            entitykillEvent["attackerId"] <- ITS_UNKNOWN
+            entityKillEvent["attackerId"] <- ITS_UNKNOWN
         }
     }
 
     if (victim.IsPlayer()) {
-        entitykillEvent["victimId"] <- victim.GetUID()
+        entityKillEvent["victimId"] <- victim.GetUID()
     }
     else
     {
         try
         {
-            entitykillEvent["victimId"] <- attacker.GetEncodedEHandle() + ""
+            entityKillEvent["victimId"] <- attacker.GetEncodedEHandle() + ""
         } catch (exception) {
-            entitykillEvent["victimId"] <- ITS_UNKNOWN
+            entityKillEvent["victimId"] <- ITS_UNKNOWN
         }
     }
-    ITS_SendToWebsocket(EncodeJSON(entitykillEvent))
+    ITS_SendToWebsocket(EncodeJSON(entityKillEvent))
 }
 
 void function ITS_PlayerRespawned( entity player )
@@ -625,6 +644,39 @@ void function ITS_SendToWebsocket(string body)
     }
 }
 
+ITS_Position function ITS_UpdateITSPosition(entity ent)
+{
+    ITS_Position position
+    position.origin = ent.GetOrigin()
+    position.angles = ent.GetAngles()
+
+
+    file.lastReportedPosition[ITS_GetEntityId(ent)] <- position
+    return position
+}
+
+bool function ITS_ComparePositions(entity ent)
+{
+    ITS_Position originalPosition = file.lastReportedPosition[ITS_GetEntityId(ent)]
+    ITS_Position newPosition = ITS_UpdateITSPosition(ent)
+
+    if (!ITS_InRange(originalPosition.origin.x, newPosition.origin.x, 5)) {
+        return true
+    }
+    if (!ITS_InRange(originalPosition.origin.y, newPosition.origin.y, 5)) {
+        return true
+    }
+    if (!ITS_InRange(originalPosition.origin.z, newPosition.origin.z, 5)) {
+        return true
+    }
+
+    //Ignoring X and Z due to it not being used by the player.angles
+    if (!ITS_InRange(originalPosition.angles.y, newPosition.angles.y, 1)) {
+        return true
+    }
+    return false
+}
+
 void function ITS_GenericHttpFailure(HttpRequestFailure faluire )
 {
     file.isClientCompatible = false
@@ -649,4 +701,9 @@ function ITS_TableValuesToArray( tab )
 	}
 
 	return resultArray
+}
+
+bool function ITS_InRange(float num1, float num2, float range_threshold)
+{
+    return num1 - num2 <= range_threshold && num2 - num1 <= range_threshold
 }
