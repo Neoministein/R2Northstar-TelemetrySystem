@@ -29,6 +29,18 @@ request.recorder:
   SchedulerRequestDetails.enabled: true
   StartupRequestDetails.enabled: true
   WebsocketRequestDetails.enabled: false
+caffeine:
+  default:
+    expireAfterSeconds: 86400 # 1 day
+  instances:
+    matchEventBuffer:
+      expireAfterSeconds: 120 # 2 min
+    playerLookUp:
+      expireAfterSeconds: 43200 # 6 hours
+    currentMatchState:
+      expireAfterSeconds: 120 # 2 min
+    matchStatsCache:
+      expireAfterSeconds: 120 # 2 min
 #mp:
 #  messaging:
 #    connector.helidon-jms:
