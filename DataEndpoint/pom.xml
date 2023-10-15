@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.helidon.applications</groupId>
         <artifactId>helidon-mp</artifactId>
-        <version>3.2.2</version>
+        <version>4.0.0-RC1</version>
     </parent>
     
     <groupId>com.neo.r2</groupId>
@@ -18,22 +18,12 @@
     <properties>
         <mainClass>io.helidon.microprofile.cdi.Main</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <helidon.version>3.2.2</helidon.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <helidon.version>4.0.0-RC1</helidon.version>
         <neoutil.version>1.0.0</neoutil.version>
         <mockito.core.version>4.8.0</mockito.core.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.helidon.webserver</groupId>
-                <artifactId>helidon-webserver-websocket</artifactId>
-                <version>3.2.2-neoutil</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- NeoUtil -->
@@ -95,6 +85,11 @@
             <artifactId>neoutil-jobrunr-scheduler</artifactId>
             <version>${neoutil.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.neo.util</groupId>
+            <artifactId>neoutil-request-recording-searchable</artifactId>
+            <version>${neoutil.version}</version>
+        </dependency>
 
         <!--
         <dependency>
@@ -139,7 +134,7 @@
         <dependency>
             <groupId>io.helidon.microprofile.websocket</groupId>
             <artifactId>helidon-microprofile-websocket</artifactId>
-            <version>3.2.2-neoutil</version>
+            <version>${helidon.version}</version>
         </dependency>
         <!--
         <dependency>
@@ -168,30 +163,30 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.4.1</version>
+            <version>42.6.0</version>
         </dependency>
 
         <!-- Logging -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.19.0</version>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>2.20.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.19.0</version>
+            <version>2.20.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.19.0</version>
+            <version>2.20.0</version>
         </dependency>
 
         <!-- Testing -->
         <dependency>
-            <groupId>io.helidon.microprofile.tests</groupId>
-            <artifactId>helidon-microprofile-tests-junit5</artifactId>
+            <groupId>io.helidon.microprofile.testing</groupId>
+            <artifactId>helidon-microprofile-testing-junit5</artifactId>
             <version>${helidon.version}</version>
             <scope>test</scope>
         </dependency>
@@ -222,8 +217,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <source>21</source>
+                    <target>21</target>
                     <!-- Enable preview features for compilation -->
                     <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
@@ -296,8 +291,9 @@
             </plugin>
             <!-- Generate Jandex index file -->
             <plugin>
-                <groupId>org.jboss.jandex</groupId>
+                <groupId>io.smallrye</groupId>
                 <artifactId>jandex-maven-plugin</artifactId>
+                <version>3.1.5</version>
                 <executions>
                     <execution>
                         <id>make-index-test</id>
@@ -305,6 +301,28 @@
                             <goal>jandex</goal>
                         </goals>
                         <phase>process-test-classes</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.neo.util</groupId>
+                <artifactId>rendex-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>make-index-test</id>
+                        <goals>
+                            <goal>rendex</goal>
+                        </goals>
+                        <phase>process-test-classes</phase>
+                        <configuration>
+                            <indexDir>${project.build.directory}/test-classes/META-INF</indexDir>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${project.build.directory}/test-classes/</directory>
+                                </fileSet>
+                            </fileSets>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
