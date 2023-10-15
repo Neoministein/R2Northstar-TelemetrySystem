@@ -10,6 +10,7 @@ WORKDIR /dependency/neoutil
 
 ## Download NeoUtil dependencies
 RUN git clone https://github.com/Neoministein/NeoUtil.git /dependency/neoutil
+RUN git checkout project/r2-telemetry
 RUN mvn clean install -Dmaven.test.skip
 
 
