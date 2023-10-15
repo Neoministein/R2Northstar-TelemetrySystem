@@ -3,6 +3,7 @@
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,7 +15,7 @@ class Scratch {
     private static final String LINE = "\r\n";
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         System.out.println();
         System.out.println("------------------------------------------------");
         System.out.println("Uploading Data View");
@@ -33,7 +34,7 @@ class Scratch {
         uploadConfig("/kibana/dashboard", "/api/saved_objects/_import?overwrite=true", "POST", false, true);
     }
 
-    static void uploadConfig(String fileLocation, String endpoint, String httpMethod, boolean fileNameInUrl, boolean mutlipart) throws IOException {
+    static void uploadConfig(String fileLocation, String endpoint, String httpMethod, boolean fileNameInUrl, boolean mutlipart) throws Exception {
         File folder = new File(System.getProperty("user.dir") + fileLocation);
 
         for (final File fileEntry : folder.listFiles()) {
@@ -49,12 +50,12 @@ class Scratch {
         return new String(encoded, StandardCharsets.UTF_8);
     }
 
-    static void sendFileBody(String endpoint, String httpMethod, String body, String templateName, boolean fileNameInUrl, boolean mutlipart) throws IOException {
+    static void sendFileBody(String endpoint, String httpMethod, String body, String templateName, boolean fileNameInUrl, boolean mutlipart) throws Exception {
         URL url;
         if (fileNameInUrl) {
-            url = new URL ( ENDPOINT_URL + endpoint + "/" +  templateName);
+            url = new URI( ENDPOINT_URL + endpoint + "/" +  templateName).toURL();
         } else {
-            url = new URL ( ENDPOINT_URL + endpoint);
+            url = new URI( ENDPOINT_URL + endpoint).toURL();
         }
 
         HttpURLConnection con = (HttpURLConnection)url.openConnection();

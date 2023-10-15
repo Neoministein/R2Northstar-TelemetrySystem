@@ -3,6 +3,7 @@
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,7 +13,7 @@ class Scratch {
     public static final String ELASTIC_URL = System.getProperty("ELASTIC_URL", "http://127.0.0.1:9200");
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         System.out.println();
         System.out.println("------------------------------------------------");
         System.out.println("Uploading Pipelines");
@@ -27,7 +28,7 @@ class Scratch {
         uploadConfig("/elastic/template", "/_index_template", "POST");
     }
 
-    static void uploadConfig(String fileLocation, String endpoint, String httpMethod) throws IOException {
+    static void uploadConfig(String fileLocation, String endpoint, String httpMethod) throws Exception {
         File folder = new File(System.getProperty("user.dir") + fileLocation);
 
         for (final File fileEntry : folder.listFiles()) {
@@ -41,8 +42,8 @@ class Scratch {
         return new String(encoded, StandardCharsets.UTF_8);
     }
 
-    static void sendFileBody(String endpoint, String httpMethod, String body, String templateName) throws IOException {
-        URL url = new URL ( ELASTIC_URL + endpoint + "/" +  templateName);
+    static void sendFileBody(String endpoint, String httpMethod, String body, String templateName) throws Exception {
+        URL url = new URI( ELASTIC_URL + endpoint + "/" +  templateName).toURL();
         HttpURLConnection con = (HttpURLConnection)url.openConnection();
         con.setRequestMethod(httpMethod);
         con.setRequestProperty("Content-Type", "application/json");
