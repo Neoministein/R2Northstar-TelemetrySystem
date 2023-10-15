@@ -22,7 +22,46 @@
           "type" : "keyword"
         },
         "text" : {
-          "type" : "keyword"
+          "type" : "keyword",
+          "fields": {
+            "fulltext": {
+              "type": "text"
+            }
+          }
+        },
+        "values": {
+          "properties": {
+            "0": {
+              "type": "keyword"
+            },
+            "1": {
+              "type": "keyword"
+            },
+            "2": {
+              "type": "keyword"
+            },
+            "3": {
+              "type": "keyword"
+            },
+            "4": {
+              "type": "keyword"
+            },
+            "5": {
+              "type": "keyword"
+            },
+            "6": {
+              "type": "keyword"
+            },
+            "7": {
+              "type": "keyword"
+            },
+            "8": {
+              "type": "keyword"
+            },
+            "9": {
+              "type": "keyword"
+            }
+          }
         }
       }
     },

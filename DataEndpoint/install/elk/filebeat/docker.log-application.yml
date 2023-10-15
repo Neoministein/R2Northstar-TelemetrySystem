@@ -7,10 +7,16 @@ filebeat.inputs:
     paths:
       - './r2-ts-endpoint/application.log'
     index: "log-application-r2ts-%{+yyyy.MM.ww.DDD}-v1"
+    parsers:
+      - multiline:
+          type: pattern
+          pattern: '^###'
+          negate: true
+          match: after
     processors:
       #2023-07-29 17:33:21|DEBUG|JobRunnerSchedulerService:64|abbb9c0a-0cb4-4ae8-a9d2-5fdb30aa49be|Startup|3|fc31aa73-2258-44f9-add6-62b45212c9c8|ApplicationPostReadyEvent processed
       - dissect:
-          tokenizer: "%{timestamp|string}|%{level|string}|%{class|string}|%{instance|string}|%{contextType|string}|%{requestId|string}|%{traceId|string}|%{text|string}"
+          tokenizer: "###%{timestamp|string}|%{level|string}|%{class|string}|%{instance|string}|%{contextType|string}|%{requestId|string}|%{traceId|string}|%{text|string}"
           target_prefix: ""
 
 # ============================== Filebeat modules ==============================
