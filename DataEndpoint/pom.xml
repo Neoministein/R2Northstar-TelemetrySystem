@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.helidon.applications</groupId>
         <artifactId>helidon-mp</artifactId>
-        <version>4.0.0-RC1</version>
+        <version>4.0.0</version>
     </parent>
     
     <groupId>com.neo.r2</groupId>
@@ -20,7 +20,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <helidon.version>4.0.0-RC1</helidon.version>
+        <helidon.version>4.0.0</helidon.version>
         <neoutil.version>1.0.0</neoutil.version>
         <mockito.core.version>4.8.0</mockito.core.version>
     </properties>
