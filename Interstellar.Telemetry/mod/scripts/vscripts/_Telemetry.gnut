@@ -657,7 +657,14 @@ ITS_Position function ITS_UpdateITSPosition(entity ent)
 
 bool function ITS_ComparePositions(entity ent)
 {
-    ITS_Position originalPosition = file.lastReportedPosition[ITS_GetEntityId(ent)]
+    ITS_Position originalPosition
+
+    try {
+        originalPosition = file.lastReportedPosition[ITS_GetEntityId(ent)]
+    } catch(e) { //This can happen when the entity doesn't get added fast enough to the map
+        ITS_UpdateITSPosition(ent)
+        return true
+    }
     ITS_Position newPosition = ITS_UpdateITSPosition(ent)
 
     if (!ITS_InRange(originalPosition.origin.x, newPosition.origin.x, 5)) {
