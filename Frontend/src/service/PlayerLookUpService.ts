@@ -1,4 +1,5 @@
 import {AppConfig} from "../AppConfig";
+import ErrorUtils from "../utils/ErrorUtils";
 
 export interface PlayerLookUp {
     uId: string
@@ -69,6 +70,17 @@ const PlayerLookUpService = {
 
         return responseObject;
     },
+
+    searchPlayerLookupFromName(name: string) : Promise<PlayerLookUp[]> {
+        return fetch(AppConfig.apiUrl + "/player/search/name/" + name )
+            .then(resp => { return ErrorUtils.parseResponse(resp);})
+            .then(resp => resp.hits);
+    },
+
+    getPlayerLookupFromName(name: string) : Promise<PlayerLookUp> {
+        return fetch(AppConfig.apiUrl + "/player/name/" + name )
+            .then(resp => { return ErrorUtils.parseResponse(resp);});
+    }
 }
 
 export default PlayerLookUpService;

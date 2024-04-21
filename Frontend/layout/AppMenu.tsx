@@ -24,11 +24,17 @@ const AppMenu = () => {
         {
             label: 'Global Player Stats',
             items: [
-                { label: 'Player Kills', icon: 'pi pi-fw pi-user', to: '/stats/global/player/player-kills' },
+                { label: 'Player Kills', icon: 'pi pi-fw pi-users', to: '/stats/global/player/player-kills' },
                 { label: 'Npc Kills', icon: 'pi pi-fw pi-android', to: '/stats/global/player/npc-kills' },
                 { label: 'K/D', icon: 'pi pi-fw pi-users', to: '/stats/global/player/player-kd' },
                 { label: 'Wins', icon: 'pi pi-fw pi-exclamation-circle', to: '/stats/global/player/wins' },
                 { label: 'Win Ratio', icon: 'pi pi-fw pi-percentage', to: '/stats/global/player/win-ratio' },
+            ]
+        },
+        {
+            label: 'Player Stats',
+            items: [
+                { label: 'Player', icon: 'pi pi-fw pi-user', to: '/stats/player' }
             ]
         },
         {
