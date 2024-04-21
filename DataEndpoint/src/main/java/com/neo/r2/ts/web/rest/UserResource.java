@@ -1,16 +1,16 @@
 package com.neo.r2.ts.web.rest;
 
-import com.neo.r2.ts.impl.repository.entity.UserTokenRepository;
+import com.neo.r2.ts.impl.repository.entity.ApplicationRepository;
 import com.neo.r2.ts.persistence.entity.ApplicationUser;
 import com.neo.r2.ts.web.rest.dto.GenericUserDto;
-import com.neo.util.common.impl.exception.CommonRuntimeException;
+import com.neo.util.common.impl.exception.ExternalRuntimeException;
 import com.neo.util.common.impl.exception.ValidationException;
 import com.neo.util.framework.api.FrameworkConstants;
-import com.neo.util.framework.api.FrameworkMapping;
-import com.neo.util.framework.rest.api.security.Secured;
+import com.neo.util.framework.rest.api.security.SecuredResource;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -27,12 +27,17 @@ public class UserResource {
 
     public static final String P_INIT = "/init";
 
+
+    protected final ApplicationRepository applicationUserRepository;
+
     @Inject
-    protected UserTokenRepository applicationUserRepository;
+    public UserResource(ApplicationRepository applicationUserRepository) {
+        this.applicationUserRepository = applicationUserRepository;
+    }
 
     @POST
     @Path("{displayName}")
-    @Secured
+    @SecuredResource
     @RolesAllowed(PERM_INTERNAL)
     public GenericUserDto create(@PathParam("displayName") String displayName) {
         ApplicationUser applicationUser = new ApplicationUser();
@@ -42,27 +47,24 @@ public class UserResource {
     }
 
     @PUT
-    @Secured
+    @SecuredResource
     @RolesAllowed(PERM_INTERNAL)
+    @Transactional
     public GenericUserDto edit(GenericUserDto genericUserDto) {
         ApplicationUser user = applicationUserRepository.fetchByUid(genericUserDto.uId())
                 .orElseThrow(() -> new ValidationException(EX_ENTITY_NOT_FOUND, genericUserDto.uId()));
         user.setDisplayName(genericUserDto.displayName());
         user.setDescription(genericUserDto.description());
         user.setDisabled(genericUserDto.disabled());
-        applicationUserRepository.edit(user);
         return new GenericUserDto(user);
     }
 
     @PUT
     @Path("{uId}")
-    @Secured
+    @SecuredResource
     @RolesAllowed(PERM_INTERNAL)
     public Response remove(@PathParam("uId") String uId) {
-        ApplicationUser user = FrameworkMapping.optionalUUID(uId)
-                .flatMap(id -> applicationUserRepository.fetchByUid(uId))
-                .orElseThrow(() -> new ValidationException(EX_ENTITY_NOT_FOUND, uId));
-
+        ApplicationUser user = applicationUserRepository.requestByUid(uId);
         applicationUserRepository.remove(user);
         return Response.ok().build();
     }
@@ -78,6 +80,6 @@ public class UserResource {
             applicationUserRepository.create(userToken);
             return new GenericUserDto(userToken);
         }
-        throw new CommonRuntimeException(FrameworkConstants.EX_FORBIDDEN);
+        throw new ExternalRuntimeException(FrameworkConstants.EX_FORBIDDEN);
     }
 }

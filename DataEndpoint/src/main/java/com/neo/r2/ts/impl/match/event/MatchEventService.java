@@ -1,27 +1,26 @@
 package com.neo.r2.ts.impl.match.event;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
 import com.neo.r2.ts.impl.match.state.GlobalMatchState;
-import com.neo.r2.ts.impl.match.state.MatchStateService;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
+import com.neo.r2.ts.persistence.searchable.MatchStateSearchable;
+import com.neo.r2.ts.web.socket.MatchStateOutputSocket;
+import com.neo.util.common.impl.exception.ValidationException;
 import com.neo.util.common.impl.json.JsonSchemaUtil;
+import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.search.SearchProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
 public class MatchEventService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchEventService.class);
 
     @Inject
     protected GlobalMatchState globalMatchState;
@@ -33,54 +32,62 @@ public class MatchEventService {
     protected SearchProvider searchProvider;
 
     @Inject
-    protected MatchStateService matchStateService;
+    protected MatchStateOutputSocket matchStateOutputSocket;
 
     protected Map<String, MatchEventProcessor> eventProcessorMap = new HashMap<>();
 
     @Inject
-    protected void init(Instance<MatchEventProcessor> matchEventProcessors) {
+    public MatchEventService(Instance<MatchEventProcessor> matchEventProcessors) {
         for (MatchEventProcessor processor: matchEventProcessors) {
             eventProcessorMap.put(processor.getEventName(), processor);
         }
     }
 
-    public void delegateToEventProcessor(String matchId, JsonNode event) {
-        String eventType = event.get("eventType").asText();
-
-        MatchEventProcessor processor = eventProcessorMap.get(eventType);
+    public void delegateToEventProcessor(MatchEvent event) {
+        MatchEventProcessor processor = eventProcessorMap.get(event.getEventType());
         if (processor == null) {
-            throw new IllegalStateException("Event type [" + eventType + "] does not exist");
+            throw new ValidationException(CustomConstants.EX_UNSUPPORTED_EVENT_TYPE, event);
         }
 
-        JsonSchemaUtil.isValidOrThrow(event, processor.getSchema());
+        JsonSchemaUtil.isValidOrThrow(event.getRawData(), processor.getSchema());
 
-        MatchStateWrapper matchStateWrapper = globalMatchState.getCurrentMatchState(matchId).orElseThrow();
+        MatchStateWrapper matchStateWrapper = globalMatchState.getCurrentMatchState(event.getMatchId()).orElseThrow();
 
-        processor.handleIncomingEvent(matchId, event, matchStateWrapper);
+        processor.handleIncomingEvent(event.getMatchId(), event, matchStateWrapper);
 
-        matchEventBuffer.addToBuffer(matchId, event);
+        matchEventBuffer.addToBuffer(event.getMatchId(), event);
         processor.updateMatchState(event, matchStateWrapper);
     }
 
     public void endMatchState(String matchId) {
-        List<JsonNode> events = matchEventBuffer.getBuffer(matchId);
+        List<MatchEvent> events = matchEventBuffer.getBuffer(matchId);
 
         MatchStateWrapper matchStateWrapper = globalMatchState.getCurrentMatchState(matchId).orElseThrow();
-        for (JsonNode event: events) {
-            String eventType = event.get("eventType").asText();
-            searchProvider.index(eventProcessorMap.get(eventType).parseToSearchable(event, matchStateWrapper));
+        for (MatchEvent event: events) {
+            searchProvider.index(eventProcessorMap.get(event.getEventType()).parseToSearchable(event, matchStateWrapper));
         }
 
-        matchStateService.newMatchState(matchId);
+        newMatchState(matchId);
+        matchStateWrapper.clearEvents();
 
         matchStateWrapper.updateTimeStamp();
-        for (JsonNode event: events) {
-            String eventType = event.get("eventType").asText();
-            eventProcessorMap.get(eventType).cleanUpState(event, matchStateWrapper);
+        for (MatchEvent event: events) {
+            eventProcessorMap.get(event.getEventType()).cleanUpState(event, matchStateWrapper);
         }
     }
 
-    public Collection<MatchEventProcessor> getAllProcessors() {
-        return eventProcessorMap.values();
+    public void newMatchState(String matchId) {
+        Optional<MatchStateWrapper> matchState = globalMatchState.getCurrentMatchState(matchId);
+        if (matchState.isPresent()) {
+            matchStateOutputSocket.broadcast(matchId, JsonUtil.toJson(matchState.get().getState()));
+            if (searchProvider.enabled()) {
+                searchProvider.index(new MatchStateSearchable(matchState.get().getState().deepCopy()));
+            }
+        }
+
+    }
+
+    public int getNumberOfPlayerInMatch(String matchId) {
+        return globalMatchState.getCurrentMatchState(matchId).map(MatchStateWrapper::getNumberOfPlayers).orElse(0);
     }
 }

@@ -1,8 +1,13 @@
 package com.neo.r2.ts.impl.match.state;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
+import com.neo.r2.ts.persistence.entity.Match;
+import com.neo.util.common.impl.json.JsonUtil;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
@@ -18,15 +23,28 @@ public class MatchStateWrapper {
 
     public static final String TAGS = "tags";
 
-    private Map<String, ObjectNode> players = new HashMap<>();
-    private Map<String, ObjectNode> npcs = new HashMap<>();
+    private final Map<String, ObjectNode> players = new HashMap<>();
+    private final Map<String, ObjectNode> npcs = new HashMap<>();
 
     private final ObjectNode matchState;
-    private Instant timeStamp;
+    private final Instant startTime;
+    private Instant lastUpdated;
 
-    public MatchStateWrapper(ObjectNode matchState) {
-        this.matchState = matchState;
-        this.timeStamp = Instant.now();
+    public MatchStateWrapper(Match match) {
+        this.startTime = Instant.now();
+        this.lastUpdated = Instant.now();
+
+        this.matchState = JsonUtil.emptyObjectNode();
+        matchState.put(MAP, match.getMap());
+        matchState.put(MATCH_ID, match.getStringId());
+        matchState.put(GAME_MODE, match.getGamemode());
+
+        ArrayNode tags = matchState.putArray(TAGS);
+        match.getTags().forEach(tags::add);
+        matchState.put(TIME_PASSED, 0);
+
+        matchState.putArray(PLAYERS);
+        matchState.putArray(NPCS);
     }
 
     public String getMatchId() {
@@ -100,20 +118,20 @@ public class MatchStateWrapper {
         return Optional.empty();
     }
 
-    public void addEvent(String eventName, JsonNode event) {
-        matchState.withObject("/" + EVENTS).withArray(eventName).add(event);
+    public void addEvent(String eventName, MatchEvent event) {
+        matchState.withObject("/" + EVENTS).withArray(eventName).add(event.getRawData());
     }
 
-    public void clearEvents(String eventName) {
-        matchState.withObject("/" + EVENTS).withArray(eventName).removeAll();
+    public void clearEvents() {
+        matchState.remove("/" + EVENTS);
     }
 
     public ObjectNode getState() {
         return matchState;
     }
 
-    public Instant getTimeStamp() {
-        return timeStamp;
+    public Instant getLastUpdated() {
+        return lastUpdated;
     }
 
     public List<String> getTags() {
@@ -125,6 +143,7 @@ public class MatchStateWrapper {
     }
 
     public void updateTimeStamp() {
-        timeStamp = Instant.now();
+        lastUpdated = Instant.now();
+        matchState.put(TIME_PASSED, Duration.between(startTime, lastUpdated).toMillis());
     }
 }

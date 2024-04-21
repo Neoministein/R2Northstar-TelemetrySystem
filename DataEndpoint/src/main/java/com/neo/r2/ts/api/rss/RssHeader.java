@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.rss;
+package com.neo.r2.ts.api.rss;
 
 public record RssHeader(
         String version,

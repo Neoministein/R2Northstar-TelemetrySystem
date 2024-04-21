@@ -21,14 +21,13 @@ import java.time.Instant;
 @ApplicationScoped
 public class MatchEventRepository implements SearchableRepository {
 
-    protected String indexName;
+    protected final String indexName;
+    protected final SearchProvider searchProvider;
 
     @Inject
-    protected SearchProvider searchProvider;
-
-    @Inject
-    public void init(IndexNamingService indexNamingService) {
-        indexName = indexNamingService.getIndexNamePrefixFromClass(MatchEventSearchable.class, true);
+    public MatchEventRepository(SearchProvider searchProvider, IndexNamingService indexNamingService) {
+        this.indexName = indexNamingService.getIndexNamePrefixFromClass(MatchEventSearchable.class, true);
+        this.searchProvider = searchProvider;
     }
 
     @Override

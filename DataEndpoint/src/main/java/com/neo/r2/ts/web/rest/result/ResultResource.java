@@ -1,5 +1,6 @@
 package com.neo.r2.ts.web.rest.result;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.repository.searchable.MatchResultRepository;
 import com.neo.r2.ts.web.rest.dto.outbound.HitsDto;
 import com.neo.util.framework.rest.api.cache.ClientCacheControl;
@@ -26,7 +27,7 @@ public class ResultResource {
     @GET
     @Path("/match/{id}")
     @ClientCacheControl(maxAge = 2, timeUnit = TimeUnit.HOURS)
-    public HitsDto request(@PathParam("id") String matchId) {
-        return new HitsDto(matchResultRepository.getResultForMatch(matchId));
+    public HitsDto<JsonNode> request(@PathParam("id") String matchId) {
+        return new HitsDto<>(matchResultRepository.getResultForMatch(matchId));
     }
 }

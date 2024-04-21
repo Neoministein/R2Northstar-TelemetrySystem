@@ -17,7 +17,7 @@ import com.neo.util.common.api.json.Views;
 import com.neo.util.common.impl.exception.NoContentFoundException;
 import com.neo.util.framework.rest.api.cache.ClientCacheControl;
 import com.neo.util.framework.rest.api.parser.OutboundJsonView;
-import com.neo.util.framework.rest.api.security.Secured;
+import com.neo.util.framework.rest.api.security.SecuredResource;
 import com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
@@ -53,8 +53,8 @@ public class MapResource {
     protected HeatmapService heatmapService;
 
     @GET
-    public HitsDto getAllMaps() {
-        return new HitsDto(mapService.fetchAll());
+    public HitsDto<GameMap> getAllMaps() {
+        return new HitsDto<>(mapService.fetchAll());
     }
 
     @GET
@@ -74,15 +74,15 @@ public class MapResource {
     @GET
     @Path("{map}/count/match")
     @ClientCacheControl(maxAge = 5)
-    public ValueDto getUniqueMatches(@PathParam("map") String map) {
-        return new ValueDto(matchResultRepository.countMatchesByMap(map));
+    public ValueDto<Integer> getUniqueMatches(@PathParam("map") String map) {
+        return new ValueDto<>(matchResultRepository.countMatchesByMap(map));
     }
 
     @GET
     @Path("distribution")
     @ClientCacheControl(maxAge = 30)
-    public HitsDto getMapDistribution() {
-        return new HitsDto(matchResultService.getMapDistribution());
+    public HitsDto<MatchResultService.Distribution> getMapDistribution() {
+        return new HitsDto<>(matchResultService.getMapDistribution());
     }
 
     @GET
@@ -96,7 +96,7 @@ public class MapResource {
 
     @POST
     @Path("{map}/heatmap")
-    @Secured
+    @SecuredResource
     @RolesAllowed(AbstractEntityRestEndpoint.PERM_INTERNAL)
     public Heatmap createHeatmapData(@PathParam("map") String map) {
         Heatmap heatmap = heatmapFactory.createForMap(getMapByName(map).name(), HeatmapEnums.Type.PLAYER_POSITION);

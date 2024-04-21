@@ -3,15 +3,24 @@ package com.neo.r2.ts.impl.match.event.processor.entity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.event.processor.AbstractStateEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
+import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.util.List;
 
 @ApplicationScoped
 public class EntityRodeoEventProcessor extends AbstractStateEventProcessor implements MatchEventProcessor {
+
+    @Inject
+    public EntityRodeoEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        super(jsonSchemaLoader, configService);
+    }
 
     @Override
     protected String getSchemaName() {
@@ -24,7 +33,7 @@ public class EntityRodeoEventProcessor extends AbstractStateEventProcessor imple
     }
 
     @Override
-    public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
+    public List<MatchEventSearchable> parseToSearchable(MatchEvent event, MatchStateWrapper endMatchState) {
         if (!saveSearchable()) {
             return List.of();
         }
@@ -41,10 +50,5 @@ public class EntityRodeoEventProcessor extends AbstractStateEventProcessor imple
     @Override
     protected void setStateOnPlayer(JsonNode state, ObjectNode player) {
         player.set("isRodeoing", state);
-    }
-
-    @Override
-    public boolean shouldBeAddedToMatchState() {
-        return true;
     }
 }

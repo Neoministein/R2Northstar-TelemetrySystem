@@ -1,6 +1,5 @@
 package com.neo.r2.ts.impl.match.event;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.util.framework.api.cache.Cache;
 import com.neo.util.framework.api.cache.spi.CacheName;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,19 +16,19 @@ public class MatchEventBuffer {
     @CacheName("matchEventBuffer")
     protected Cache matchEventBuffer;
 
-    public void addToBuffer(String matchId, JsonNode event) {
-        Optional<List<JsonNode>> events = matchEventBuffer.get(matchId);
+    public void addToBuffer(String matchId, MatchEvent event) {
+        Optional<List<MatchEvent>> events = matchEventBuffer.get(matchId);
         if (events.isPresent()) {
             events.get().add(event);
         } else {
-            List<JsonNode> newEventList = new LinkedList<>();
+            List<MatchEvent> newEventList = new LinkedList<>();
             newEventList.add(event);
             matchEventBuffer.put(matchId, newEventList);
         }
     }
 
-    public List<JsonNode> getBuffer(String matchId) {
-        Optional<List<JsonNode>> events = matchEventBuffer.get(matchId);
+    public List<MatchEvent> getBuffer(String matchId) {
+        Optional<List<MatchEvent>> events = matchEventBuffer.get(matchId);
         matchEventBuffer.invalidate(matchId);
         return events.orElse(List.of());
     }

@@ -1,9 +1,9 @@
 package com.neo.r2.ts.impl.match.event.processor.player;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,7 +24,7 @@ public class TitanBecomesPlayerEventProcessor extends AbstractBasicEventProcesso
     }
 
     @Override
-    public void updateMatchState(JsonNode event, MatchStateWrapper matchStateToUpdate) {
+    public void updateMatchState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {
         super.updateMatchState(event, matchStateToUpdate);
         Optional<ObjectNode> player = matchStateToUpdate.getPlayer(event.get("entityId").asText());
         if (player.isPresent()) {

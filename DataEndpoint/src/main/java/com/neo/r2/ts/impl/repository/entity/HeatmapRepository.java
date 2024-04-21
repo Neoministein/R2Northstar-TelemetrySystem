@@ -23,7 +23,7 @@ public class HeatmapRepository extends AbstractDatabaseRepository<Heatmap> {
                 AND m.status = :status
                 AND m.type = :type
                 ORDER BY m.id desc""";
-        return pcs.getEm().createQuery(query, Heatmap.class)
+        return pcp.getEm().createQuery(query, Heatmap.class)
                 .setParameter(Heatmap.C_MAP, map)
                 .setParameter(Heatmap.C_STATUS, HeatmapEnums.ProcessState.FINISHED.toString())
                 .setParameter(Heatmap.C_TYPE, HeatmapEnums.Type.PLAYER_POSITION.toString())

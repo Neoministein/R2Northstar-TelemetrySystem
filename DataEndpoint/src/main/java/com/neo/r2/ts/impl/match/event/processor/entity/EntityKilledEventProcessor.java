@@ -1,14 +1,16 @@
 package com.neo.r2.ts.impl.match.event.processor.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
 import com.neo.r2.ts.web.rss.PlayerKillsRssFeed;
 import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -20,8 +22,13 @@ public class EntityKilledEventProcessor extends AbstractBasicEventProcessor impl
 
     public static final String DAMAGE_TYPE = "damageType";
 
+    protected final PlayerKillsRssFeed playerKillsRssFeed;
+
     @Inject
-    protected PlayerKillsRssFeed playerKillsRssFeed;
+    protected EntityKilledEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService, PlayerKillsRssFeed playerKillsRssFeed) {
+        super(jsonSchemaLoader, configService);
+        this.playerKillsRssFeed = playerKillsRssFeed;
+    }
 
     @Override
     protected String getSchemaName() {
@@ -34,7 +41,7 @@ public class EntityKilledEventProcessor extends AbstractBasicEventProcessor impl
     }
 
     @Override
-    public void handleIncomingEvent(String matchId, JsonNode event, MatchStateWrapper matchStateWrapper) {
+    public void handleIncomingEvent(String matchId, MatchEvent event, MatchStateWrapper matchStateWrapper) {
         String attackerId = event.get("attackerId").asText();
         String victimId = event.get("victimId").asText();
 
@@ -46,7 +53,7 @@ public class EntityKilledEventProcessor extends AbstractBasicEventProcessor impl
     }
 
     @Override
-    public void updateMatchState(JsonNode event, MatchStateWrapper matchStateToUpdate) {
+    public void updateMatchState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {
         super.updateMatchState(event, matchStateToUpdate);
         Optional<ObjectNode> victimPlayer = matchStateToUpdate.getPlayer(event.get("victimId").asText());
         if (victimPlayer.isPresent()) {
@@ -64,7 +71,7 @@ public class EntityKilledEventProcessor extends AbstractBasicEventProcessor impl
     }
 
     @Override
-    public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
+    public List<MatchEventSearchable> parseToSearchable(MatchEvent event, MatchStateWrapper endMatchState) {
         if (!saveSearchable()) {
             return List.of();
         }

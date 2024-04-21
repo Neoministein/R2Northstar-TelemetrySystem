@@ -1,6 +1,6 @@
 package com.neo.r2.ts.web.rest;
 
-import com.neo.util.framework.rest.api.security.Secured;
+import com.neo.util.framework.rest.api.security.SecuredResource;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -16,7 +16,7 @@ public class AuthorizationEndpoint {
     public static final String RESOURCE_LOCATION = "api/v1/authorize";
 
     @POST
-    @Secured
+    @SecuredResource
     public Response authenticated() {
         return Response.ok().build();
     }

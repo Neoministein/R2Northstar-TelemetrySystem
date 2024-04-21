@@ -3,8 +3,11 @@ package com.neo.r2.ts.impl.match.event.processor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
+import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.impl.json.JsonSchemaLoader;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,6 +15,10 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class AbstractPositionEventProcessor extends AbstractBasicEventProcessor implements MatchEventProcessor {
+
+    protected AbstractPositionEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        super(jsonSchemaLoader, configService);
+    }
 
     protected abstract Optional<ObjectNode> getEntity(MatchStateWrapper matchStateToUpdate, String entityId);
 
@@ -23,12 +30,7 @@ public abstract class AbstractPositionEventProcessor extends AbstractBasicEventP
     }
 
     @Override
-    public boolean shouldBeAddedToMatchState() {
-        return false;
-    }
-
-    @Override
-    public void updateMatchState(JsonNode event, MatchStateWrapper matchStateToUpdate) {
+    public void updateMatchState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {
         JsonNode entities = event.get("positions");
         for (int i = 0; i < entities.size(); i++) {
             JsonNode newEntityData = entities.get(i);
@@ -47,7 +49,7 @@ public abstract class AbstractPositionEventProcessor extends AbstractBasicEventP
     }
 
     @Override
-    public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
+    public List<MatchEventSearchable> parseToSearchable(MatchEvent event, MatchStateWrapper endMatchState) {
         List<MatchEventSearchable> matchEventSearchableList = new ArrayList<>(endMatchState.getNumberOfPlayers() + 1);
         for (JsonNode player: getAllEntities(endMatchState)) {
             if (saveSearchable()) {
@@ -71,6 +73,6 @@ public abstract class AbstractPositionEventProcessor extends AbstractBasicEventP
         y -= newPosition.get("y").asLong();
         z -= newPosition.get("z").asLong();
 
-        return Math.round(Math.sqrt(x * x + y * y + z * z));
+        return Math.round(Math.sqrt((x * x + y * y + z * z)));
     }
 }

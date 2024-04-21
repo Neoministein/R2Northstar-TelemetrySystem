@@ -58,7 +58,7 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
 
     @Column(name = "END_DATE")
         @JsonView(Views.Public.class)
-    private Instant endDate = Instant.now();
+    private Instant endDate;
 
     @Column(name = "MILLI_SEC_BETWEEN_STATE", nullable = false)
         @JsonView(Views.Public.class)
@@ -76,19 +76,33 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
 
     @ManyToOne(optional = false)
         @JsonIgnore
-    private ApplicationUser user;
+    private ApplicationUser creator;
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "match")
         @JsonIgnore
     private List<Heatmap> heatmaps = new ArrayList<>();
+
+    public Match(String nsServerName, String map, String gamemode, int maxPlayers, int milliSecBetweenState, ApplicationUser creator, List<String> tags) {
+        this.nsServerName = nsServerName;
+        this.map = map;
+        this.gamemode = gamemode;
+        this.maxPlayers = maxPlayers;
+        this.creator = creator;
+        this.tags = tags;
+        this.milliSecBetweenState = milliSecBetweenState;
+    }
+
+    protected Match() {
+        //Required by JPA
+    }
 
 
     public UUID getId() {
         return id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public String getStringId() {
+        return id.toString();
     }
 
     public boolean getIsRunning() {
@@ -139,12 +153,12 @@ public class Match extends AuditableDataBaseEntity implements PersistenceEntity 
         this.startDate = startDate;
     }
 
-    public ApplicationUser getUser() {
-        return user;
+    public ApplicationUser getCreator() {
+        return creator;
     }
 
-    public void setUser(ApplicationUser owner) {
-        this.user = owner;
+    public void setCreator(ApplicationUser owner) {
+        this.creator = owner;
     }
 
     public List<Heatmap> getHeatmaps() {

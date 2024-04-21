@@ -314,15 +314,7 @@
                         <goals>
                             <goal>rendex</goal>
                         </goals>
-                        <phase>process-test-classes</phase>
-                        <configuration>
-                            <indexDir>${project.build.directory}/test-classes/META-INF</indexDir>
-                            <fileSets>
-                                <fileSet>
-                                    <directory>${project.build.directory}/test-classes/</directory>
-                                </fileSet>
-                            </fileSets>
-                        </configuration>
+                        <phase>process-classes</phase>
                     </execution>
                 </executions>
             </plugin>

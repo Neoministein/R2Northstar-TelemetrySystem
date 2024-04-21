@@ -1,29 +1,36 @@
 package com.neo.r2.ts.impl.match.event.processor.player;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.impl.repository.searchable.PlayerLookUpRepository;
 import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class PlayerConnectEventProcessor extends AbstractBasicEventProcessor implements MatchEventProcessor {
 
-    @Inject
-    protected PlayerLookUpRepository playerLookUpService;
+    protected final PlayerLookUpRepository playerLookUpRepository;
 
-    @Override
-    public void handleIncomingEvent(String matchId, JsonNode event, MatchStateWrapper matchStateWrapper) {
-        playerLookUpService.updatePlayerLookUp(event.get("entityId").asText(), event.get("playerName").asText());
+    @Inject
+    protected PlayerConnectEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService, PlayerLookUpRepository playerLookUpRepository) {
+        super(jsonSchemaLoader, configService);
+        this.playerLookUpRepository = playerLookUpRepository;
     }
 
     @Override
-    public void updateMatchState(JsonNode event, MatchStateWrapper matchStateToUpdate) {
+    public void handleIncomingEvent(String matchId, MatchEvent event, MatchStateWrapper matchStateWrapper) {
+        playerLookUpRepository.updatePlayerLookUp(event.get("entityId").asText(), event.get("playerName").asText());
+    }
+
+    @Override
+    public void updateMatchState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {
         super.updateMatchState(event, matchStateToUpdate);
         ObjectNode player = JsonUtil.emptyObjectNode();
         String entityId = event.get("entityId").asText();

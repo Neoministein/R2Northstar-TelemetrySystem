@@ -12,8 +12,12 @@ public class HeatmapFactory {
 
     protected static final int DEFAULT_PIXEL_DENSITY = 4;
 
+    protected final ConfigService configService;
+
     @Inject
-    protected ConfigService configService;
+    public HeatmapFactory(ConfigService configService) {
+        this.configService = configService;
+    }
 
     public Heatmap createForMatch(Match match, HeatmapEnums.Type type) {
         Heatmap heatmap = new Heatmap();

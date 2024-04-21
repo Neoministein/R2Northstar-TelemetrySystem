@@ -1,16 +1,24 @@
 package com.neo.r2.ts.impl.match.event.processor.npc;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.util.common.impl.json.JsonUtil;
+import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class NpcSpawnEventProcessor extends AbstractBasicEventProcessor implements MatchEventProcessor {
+
+    @Inject
+    public NpcSpawnEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        super(jsonSchemaLoader, configService);
+    }
 
     @Override
     protected String getSchemaName() {
@@ -23,7 +31,7 @@ public class NpcSpawnEventProcessor extends AbstractBasicEventProcessor implemen
     }
 
     @Override
-    public void updateMatchState(JsonNode event, MatchStateWrapper matchStateToUpdate) {
+    public void updateMatchState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {
         super.updateMatchState(event, matchStateToUpdate);
         ObjectNode npc = JsonUtil.emptyObjectNode();
         String entityId = event.get("entityId").asText();

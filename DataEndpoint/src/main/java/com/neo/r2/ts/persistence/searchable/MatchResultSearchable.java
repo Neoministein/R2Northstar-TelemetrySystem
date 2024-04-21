@@ -1,7 +1,7 @@
 package com.neo.r2.ts.persistence.searchable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.web.rest.result.MatchResultDto;
 import com.neo.util.common.impl.json.JsonUtil;
@@ -92,7 +92,7 @@ public class MatchResultSearchable extends AbstractSearchable implements Searcha
         player.pgsDetonationScore().ifPresent(v -> this.pgsDetonationScore = v);
     }
 
-    public MatchResultSearchable(JsonNode event, MatchStateWrapper matchStateWrapper) {
+    public MatchResultSearchable(MatchEvent event, MatchStateWrapper matchStateWrapper) {
         this.matchId = matchStateWrapper.getMatchId();
         this.map = matchStateWrapper.getMap();
         this.gamemode = matchStateWrapper.getGameMode();

@@ -29,14 +29,18 @@ public class MatchResultRepository implements SearchableRepository {
 
     protected static final String MATCH_STATS_CACHE = "matchStatsCache";
 
-    @Inject
-    protected SearchProvider searchProvider;
-
-    protected String indexName;
+    protected final String indexName;
+    protected final SearchProvider searchProvider;
 
     @Inject
-    public void init(IndexNamingService indexNamingService) {
-        indexName = indexNamingService.getIndexNamePrefixFromClass(MatchResultSearchable.class, true);
+    public MatchResultRepository(SearchProvider searchProvider, IndexNamingService indexNamingService) {
+        this.indexName = indexNamingService.getIndexNamePrefixFromClass(MatchResultSearchable.class, true);
+        this.searchProvider = searchProvider;
+    }
+
+    @Override
+    public String getIndexName() {
+        return indexName;
     }
 
     @CacheInvalidateAll(cacheName = MATCH_STATS_CACHE)
@@ -177,10 +181,5 @@ public class MatchResultRepository implements SearchableRepository {
 
         SearchResult<JsonNode> result = searchProvider.fetch(indexName, searchQuery);
         return ((SimpleAggregationResult) result.getAggregations().get("count")).getValue().intValue();
-    }
-
-    @Override
-    public String getIndexName() {
-        return indexName;
     }
 }

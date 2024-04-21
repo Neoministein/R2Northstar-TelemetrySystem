@@ -1,5 +1,6 @@
 package com.neo.r2.ts.impl.repository.searchable;
 
+import com.neo.r2.ts.api.SearchableRepository;
 import com.neo.r2.ts.impl.player.PlayerLookUpObject;
 import com.neo.r2.ts.persistence.searchable.PlayerUidSearchable;
 import com.neo.util.framework.api.cache.spi.CacheInvalidate;
@@ -25,20 +26,24 @@ import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
-public class PlayerLookUpRepository {
+public class PlayerLookUpRepository implements SearchableRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlayerLookUpRepository.class);
 
     private static final String PLAYER_LOOK_UP_CACHE = "playerLookUp";
 
-    protected String playerUid;
+    protected final String indexName;
+    protected final SearchProvider searchProvider;
 
     @Inject
-    protected SearchProvider searchProvider;
+    public PlayerLookUpRepository(SearchProvider searchProvider, IndexNamingService indexNamingService) {
+        this.indexName = indexNamingService.getIndexNamePrefixFromClass(PlayerUidSearchable.class, true);
+        this.searchProvider = searchProvider;
+    }
 
-    @Inject
-    public void init(IndexNamingService indexNamingService) {
-        playerUid = indexNamingService.getIndexNamePrefixFromClass(PlayerUidSearchable.class, true);
+    @Override
+    public String getIndexName() {
+        return indexName;
     }
 
     @CacheResult(cacheName = PLAYER_LOOK_UP_CACHE)
@@ -48,7 +53,7 @@ public class PlayerLookUpRepository {
         searchQuery.setMaxResults(1);
         searchQuery.setFields(List.of(PlayerUidSearchable.PLAYER_NAME, PlayerUidSearchable.U_ID));
         searchQuery.setFilters(List.of(new ExplicitSearchCriteria("_id",uid)));
-        SearchResult<PlayerLookUpObject> result = searchProvider.fetch(playerUid, searchQuery, PlayerLookUpObject.class);
+        SearchResult<PlayerLookUpObject> result = searchProvider.fetch(indexName, searchQuery, PlayerLookUpObject.class);
 
         return result.getHits().stream().findFirst();
     }
@@ -59,9 +64,20 @@ public class PlayerLookUpRepository {
         searchQuery.setMaxResults(1);
         searchQuery.setFields(List.of(PlayerUidSearchable.PLAYER_NAME, PlayerUidSearchable.U_ID));
         searchQuery.setFilters(List.of(new ExplicitSearchCriteria(PlayerUidSearchable.PLAYER_NAME, playerName)));
-        SearchResult<PlayerLookUpObject> result = searchProvider.fetch(playerUid, searchQuery, PlayerLookUpObject.class);
+        SearchResult<PlayerLookUpObject> result = searchProvider.fetch(indexName, searchQuery, PlayerLookUpObject.class);
 
         return result.getHits().stream().findFirst();
+    }
+
+    public List<PlayerLookUpObject> searchByPlayerName(String playerName) {
+        LOGGER.info("Looking up uid by player name [{}]", playerName);
+        SearchQuery searchQuery = new SearchQuery();
+        searchQuery.setMaxResults(10);
+        searchQuery.setFields(List.of(PlayerUidSearchable.PLAYER_NAME, PlayerUidSearchable.U_ID));
+        searchQuery.setFilters(List.of(new ExplicitSearchCriteria(PlayerUidSearchable.PLAYER_NAME, "*" + playerName + "*", true)));
+        SearchResult<PlayerLookUpObject> result = searchProvider.fetch(indexName, searchQuery, PlayerLookUpObject.class);
+
+        return result.getHits();
     }
 
     @CacheResult(cacheName = PLAYER_LOOK_UP_CACHE)
@@ -76,7 +92,7 @@ public class PlayerLookUpRepository {
         searchQuery.addFilters(new DateSearchCriteria(PlayerUidSearchable.LAST_UPDATE, Instant.now().minus(duration), Instant.now()));
         searchQuery.addAggregations(new SimpleFieldAggregation("count", PlayerUidSearchable.U_ID, SimpleFieldAggregation.Type.COUNT));
 
-        return ((SimpleAggregationResult) searchProvider.fetch(playerUid, searchQuery).getAggregations().get("count")).getValue().longValue();
+        return ((SimpleAggregationResult) searchProvider.fetch(indexName, searchQuery).getAggregations().get("count")).getValue().longValue();
     }
 
     @CacheResult(cacheName = PLAYER_LOOK_UP_CACHE)
@@ -90,7 +106,7 @@ public class PlayerLookUpRepository {
 
         for (int i = 0; i < numberQueries;i++) {
             searchQuery.setOffset(i * 10_000);
-            SearchResult<PlayerLookUpObject> result = searchProvider.fetch(playerUid, searchQuery, PlayerLookUpObject.class);
+            SearchResult<PlayerLookUpObject> result = searchProvider.fetch(indexName, searchQuery, PlayerLookUpObject.class);
             resultList.addAll(result.getHits());
         }
 

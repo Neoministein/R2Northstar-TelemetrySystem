@@ -25,13 +25,13 @@ public class PlayerResource {
     public static final String RESOURCE_LOCATION = "api/v1/player";
 
     @Inject
-    protected PlayerLookUpRepository playerLookUpService;
+    protected PlayerLookUpRepository playerLookUpRepository;
 
     @GET
     @Path("/uid/{uid}")
     @ClientCacheControl(maxAge = 1, timeUnit = TimeUnit.HOURS)
     public PlayerLookUpObject getPlayerNameByUid(@PathParam("uid") String uid) {
-        return playerLookUpService.fetchByUId(uid)
+        return playerLookUpRepository.fetchByUId(uid)
                 .orElseThrow(() -> new NoContentFoundException(CustomConstants.EX_PLAYER_FOUND, uid));
     }
 
@@ -39,8 +39,16 @@ public class PlayerResource {
     @Path("/name/{name}")
     @ClientCacheControl(maxAge = 1, timeUnit = TimeUnit.HOURS)
     public PlayerLookUpObject getUidByPlayerName(@PathParam("name") String playerName) {
-        return playerLookUpService.fetchByPlayerName(playerName)
+        return playerLookUpRepository.fetchByPlayerName(playerName)
                 .orElseThrow(() -> new NoContentFoundException(CustomConstants.EX_PLAYER_FOUND, playerName));
+    }
+
+
+    @GET
+    @Path("search/name/{name}")
+    @ClientCacheControl(maxAge = 1, timeUnit = TimeUnit.HOURS)
+    public HitsDto<PlayerLookUpObject> searchByPlayerName(@PathParam("name") String playerName) {
+        return new HitsDto<>(playerLookUpRepository.searchByPlayerName(playerName));
     }
 
     @POST
@@ -49,7 +57,7 @@ public class PlayerResource {
     public ObjectNode searchForPlayerNameByUid(PlayerSearchLookUpDto playerLookUpDto) {
         ObjectNode result = JsonUtil.emptyObjectNode();
         for (String player: playerLookUpDto.playerUIds()) {
-            result.put(player, playerLookUpService.fetchByUId(player).map(PlayerLookUpObject::playerName).orElse("UNKNOWN_PLAYER"));
+            result.put(player, playerLookUpRepository.fetchByUId(player).map(PlayerLookUpObject::playerName).orElse("UNKNOWN_PLAYER"));
         }
 
         return result;
@@ -57,13 +65,13 @@ public class PlayerResource {
 
     @GET
     @Path("/all")
-    public HitsDto allPlayers() {
-        return new HitsDto(playerLookUpService.fetchAllPlayers());
+    public HitsDto<PlayerLookUpObject> allPlayers() {
+        return new HitsDto<>(playerLookUpRepository.fetchAllPlayers());
     }
 
     @GET
     @Path("/unqiue")
-    public ValueDto uniquePlayers() {
-        return new ValueDto(playerLookUpService.countUniquePlayers());
+    public ValueDto<Long> uniquePlayers() {
+        return new ValueDto<>(playerLookUpRepository.countUniquePlayers());
     }
 }

@@ -13,17 +13,18 @@ import jakarta.transaction.Transactional;
 @ApplicationScoped
 public class HeatmapCreationScheduler {
 
-    @Inject
-    protected MapService mapService;
+    protected final MapService mapService;
+    protected final HeatmapFactory heatmapFactory;
+    protected final HeatmapRepository heatmapRepository;
+    protected final HeatmapQueueService heatmapQueueService;
 
     @Inject
-    protected HeatmapFactory heatmapFactory;
-
-    @Inject
-    protected HeatmapRepository heatmapRepository;
-
-    @Inject
-    protected HeatmapQueueService heatmapQueueService;
+    public HeatmapCreationScheduler(MapService mapService, HeatmapFactory heatmapFactory, HeatmapRepository heatmapRepository, HeatmapQueueService heatmapQueueService) {
+        this.mapService = mapService;
+        this.heatmapFactory = heatmapFactory;
+        this.heatmapRepository = heatmapRepository;
+        this.heatmapQueueService = heatmapQueueService;
+    }
 
     @Transactional
     @CronSchedule(value = "HeatmapCreationScheduler", cron = "0 1 * * *")

@@ -1,8 +1,8 @@
 package com.neo.r2.ts.impl.match.event.processor;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
 import com.neo.util.common.impl.json.JsonUtil;
@@ -10,7 +10,6 @@ import com.neo.util.framework.api.config.Config;
 import com.neo.util.framework.api.config.ConfigService;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import com.networknt.schema.JsonSchema;
-import jakarta.inject.Inject;
 
 import java.util.List;
 
@@ -24,9 +23,8 @@ public abstract class AbstractBasicEventProcessor implements MatchEventProcessor
 
     protected abstract String getSchemaName();
 
-    @Inject
-    public void init(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
-        this.jsonSchema = jsonSchemaLoader.getJsonSchema(getSchemaName()).orElseThrow();
+    protected AbstractBasicEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        this.jsonSchema = jsonSchemaLoader.requestJsonSchema(getSchemaName());
         Config config = configService.get("r2ts").get("match").get("event").get(getEventName());
         enabled = config.get("enabled").asBoolean().orElse(true);
         modulo = config.get("modulo").asInt().orElse(1);
@@ -37,15 +35,15 @@ public abstract class AbstractBasicEventProcessor implements MatchEventProcessor
     }
 
     @Override
-    public void handleIncomingEvent(String matchId, JsonNode event, MatchStateWrapper matchStateWrapper) {}
+    public void handleIncomingEvent(String matchId, MatchEvent event, MatchStateWrapper matchStateWrapper) {}
 
     @Override
-    public void updateMatchState(JsonNode event, MatchStateWrapper matchStateToUpdate) {
+    public void updateMatchState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {
         matchStateToUpdate.addEvent(getEventName(), event);
     }
 
     @Override
-    public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
+    public List<MatchEventSearchable> parseToSearchable(MatchEvent event, MatchStateWrapper endMatchState) {
         if (!saveSearchable()) {
             return List.of();
         }
@@ -56,11 +54,7 @@ public abstract class AbstractBasicEventProcessor implements MatchEventProcessor
     }
 
     @Override
-    public void cleanUpState(JsonNode event, MatchStateWrapper matchStateToUpdate) {
-        if (shouldBeAddedToMatchState()) {
-            matchStateToUpdate.clearEvents(getEventName());
-        }
-    }
+    public void cleanUpState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {}
 
     protected ObjectNode parseBackupEntity(String entityId) {
         return JsonUtil.emptyObjectNode().put("entityId", entityId);

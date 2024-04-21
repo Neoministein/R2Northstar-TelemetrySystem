@@ -1,34 +1,26 @@
 package com.neo.r2.ts.impl.repository.entity;
 
 import com.neo.r2.ts.persistence.entity.ApplicationUser;
+import com.neo.util.common.impl.exception.NoContentFoundException;
 import com.neo.util.framework.api.FrameworkMapping;
+import com.neo.util.framework.database.api.PersistenceContextProvider;
 import com.neo.util.framework.database.impl.AbstractDatabaseRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.NoResultException;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.neo.util.framework.rest.impl.entity.AbstractEntityRestEndpoint.EX_ENTITY_NOT_FOUND;
+
 @ApplicationScoped
-public class UserTokenRepository extends AbstractDatabaseRepository<ApplicationUser> {
+public class ApplicationRepository extends AbstractDatabaseRepository<ApplicationUser> {
 
-    public UserTokenRepository() {
-        super(ApplicationUser.class);
-    }
-
-    public Optional<ApplicationUser> fetchByKey(String key) {
-        String query = """
-                SELECT t
-                FROM ApplicationUser t
-                LEFT JOIN FETCH t.roles
-                WHERE t.apiKey =:apiKey""";
-        try {
-            return Optional.of(pcs.getEm().createQuery(query, ApplicationUser.class)
-                    .setParameter(ApplicationUser.C_API_KEY, key).getSingleResult());
-        } catch (NoResultException ex) {
-            return Optional.empty();
-        }
+    @Inject
+    public ApplicationRepository(PersistenceContextProvider pcp) {
+        super(pcp, ApplicationUser.class);
     }
 
     public Optional<ApplicationUser> fetchByUid(String uId) {
@@ -43,11 +35,15 @@ public class UserTokenRepository extends AbstractDatabaseRepository<ApplicationU
                 LEFT JOIN FETCH t.roles
                 WHERE t.uid =:uid""";
         try {
-            return Optional.of(pcs.getEm().createQuery(query, ApplicationUser.class)
+            return Optional.of(pcp.getEm().createQuery(query, ApplicationUser.class)
                     .setParameter(ApplicationUser.C_UID, optUId.get()).getSingleResult());
         } catch (NoResultException ex) {
             return Optional.empty();
         }
+    }
+
+    public ApplicationUser requestByUid(String uId) {
+        return fetchByUid(uId).orElseThrow(() -> new NoContentFoundException(EX_ENTITY_NOT_FOUND, uId));
     }
 
     public List<ApplicationUser> fetchByState(boolean isDisabled) {
@@ -56,7 +52,7 @@ public class UserTokenRepository extends AbstractDatabaseRepository<ApplicationU
                 FROM ApplicationUser t
                 LEFT JOIN FETCH t.roles
                 WHERE t.disabled =:disabled""";
-        return pcs.getEm().createQuery(query, ApplicationUser.class)
+        return pcp.getEm().createQuery(query, ApplicationUser.class)
                 .setParameter(ApplicationUser.C_DISABLED, isDisabled).getResultList();
     }
 }

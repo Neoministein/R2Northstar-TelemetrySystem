@@ -3,7 +3,6 @@ package com.neo.r2.ts.impl.map.heatmap;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.impl.map.scaling.MapScale;
 import com.neo.r2.ts.impl.map.scaling.MapService;
 import com.neo.r2.ts.impl.match.event.processor.player.movement.PlayerPositionEventProcessor;
@@ -12,7 +11,6 @@ import com.neo.r2.ts.impl.repository.entity.HeatmapRepository;
 import com.neo.r2.ts.impl.repository.searchable.MatchEventRepository;
 import com.neo.r2.ts.persistence.HeatmapEnums;
 import com.neo.r2.ts.persistence.entity.Heatmap;
-import com.neo.util.common.impl.exception.ConfigurationException;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.persistence.aggregation.CriteriaAggregation;
 import com.neo.util.framework.api.persistence.aggregation.CriteriaAggregationResult;
@@ -46,16 +44,18 @@ public class HeatmapService {
     protected static final SimpleFieldAggregation COUNT_AGGREGATION = new SimpleFieldAggregation(COUNT, MatchStateWrapper.MATCH_ID, SimpleFieldAggregation.Type.COUNT);
 
 
-    @Inject
-    protected SearchProvider searchProvider;
+    protected final SearchProvider searchProvider;
+    protected final MapService mapService;
+    protected final MatchEventRepository matchEventRepository;
+    protected final HeatmapRepository heatmapRepository;
 
     @Inject
-    protected MapService mapService;
-
-    @Inject
-    protected MatchEventRepository matchEventRepository;
-    @Inject
-    protected HeatmapRepository heatmapRepository;
+    public HeatmapService(SearchProvider searchProvider, MapService mapService, MatchEventRepository matchEventRepository, HeatmapRepository heatmapRepository) {
+        this.searchProvider = searchProvider;
+        this.mapService = mapService;
+        this.matchEventRepository = matchEventRepository;
+        this.heatmapRepository = heatmapRepository;
+    }
 
     public Heatmap calculateHeatmap(long heatmapId) {
         return calculateHeatmap(heatmapRepository.fetch(heatmapId).orElseThrow());
@@ -86,10 +86,6 @@ public class HeatmapService {
     }
 
     protected void generateHeatmap(Heatmap heatmap, List<SearchCriteria> basicCriteria) {
-        if (!searchProvider.enabled()) {
-            throw new ConfigurationException(CustomConstants.EX_SERVICE_UNAVAILABLE);
-        }
-
         MapScale mapScale = mapService.requestMap(heatmap.getMap()).scale();
 
         ObjectNode result =  JsonUtil.emptyObjectNode();

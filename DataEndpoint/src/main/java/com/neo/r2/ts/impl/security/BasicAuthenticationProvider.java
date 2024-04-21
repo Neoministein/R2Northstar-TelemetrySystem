@@ -1,6 +1,6 @@
 package com.neo.r2.ts.impl.security;
 
-import com.neo.r2.ts.impl.repository.entity.UserTokenRepository;
+import com.neo.r2.ts.impl.repository.entity.ApplicationRepository;
 import com.neo.r2.ts.persistence.entity.ApplicationUser;
 import com.neo.util.framework.api.PriorityConstants;
 import com.neo.util.framework.api.request.UserRequestDetails;
@@ -8,7 +8,6 @@ import com.neo.util.framework.api.security.AuthenticationProvider;
 import com.neo.util.framework.api.security.AuthenticationScheme;
 import com.neo.util.framework.api.security.RolePrincipal;
 import com.neo.util.framework.api.security.credential.BearerCredentials;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -31,17 +30,22 @@ public class BasicAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicAuthenticationProvider.class);
 
+    protected final ApplicationRepository applicationRepository;
+
     protected Map<String, ApplicationUser> tokenCache = new HashMap<>();
     protected Instant lastTokenUpdate = Instant.now();
 
     @Inject
-    protected UserTokenRepository userTokenRepository;
+    public BasicAuthenticationProvider(ApplicationRepository applicationRepository) {
+        this.applicationRepository = applicationRepository;
 
-    @PostConstruct
+        reloadUserTokens();
+    }
+
     public void reloadUserTokens() {
         LOGGER.info("Loading Users...");
         Map<String, ApplicationUser> newTokenCache = new HashMap<>();
-        for (ApplicationUser userToken: userTokenRepository.fetchByState(false)) {
+        for (ApplicationUser userToken: applicationRepository.fetchByState(false)) {
             newTokenCache.put(userToken.getApiKey(), userToken);
         }
         LOGGER.debug("There are [{}] new user, last update was [{}] seconds ago", newTokenCache.size() - tokenCache.size(), Instant.now().getEpochSecond() - lastTokenUpdate.getEpochSecond());

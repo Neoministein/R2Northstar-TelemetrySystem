@@ -1,53 +1,68 @@
 package com.neo.r2.ts.web.socket;
 
+import com.neo.r2.ts.impl.match.MatchStatusEvent;
+import com.neo.util.framework.websocket.api.NeoUtilWebsocket;
 import com.neo.util.framework.websocket.api.WebserverHttpHeaderForwarding;
-import com.neo.util.framework.websocket.impl.monitoring.AbstractMonitorableWebsocket;
+import com.neo.util.framework.websocket.api.WebsocketStateContext;
+import com.neo.util.framework.websocket.impl.WebsocketUtil;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
+import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@NeoUtilWebsocket
 @ApplicationScoped
 @ServerEndpoint(value = MatchStateOutputSocket.WS_LOCATION, configurator = WebserverHttpHeaderForwarding.class)
-public class MatchStateOutputSocket extends AbstractMonitorableWebsocket {
+public class MatchStateOutputSocket {
 
     public static final String WS_LOCATION = "/ws/v1/state/output/{id}";
 
-    protected Map<String, List<Session>> sessionMap = new ConcurrentHashMap<>();
+    protected static final String BROADCAST_END = "MATCH_END";
 
-    @Override
-    protected void onOpen(Session session) {
-        String id = getPathParameter(session, "id");
-        List<Session> sessions = sessionMap.get(id);
-        if (sessions == null) {
-            sessions = new ArrayList<>();
-            sessions.add(session);
-            sessionMap.put(id, sessions);
-        } else {
-            sessions.add(session);
+    protected Map<String, List<WebsocketStateContext>> stateContextMap = new ConcurrentHashMap<>();
+
+    public void matchStatusEvent(@Observes MatchStatusEvent matchStatusEvent) throws IOException {
+        if (MatchStatusEvent.Type.CREATED.equals(matchStatusEvent.type())) {
+            stateContextMap.put(matchStatusEvent.matchId(), new ArrayList<>());
+        } else if (MatchStatusEvent.Type.ENDED.equals(matchStatusEvent.type())) {
+            for (WebsocketStateContext context: stateContextMap.remove(matchStatusEvent.matchId())) {
+                context.broadcast(BROADCAST_END);
+                context.getSession().close();
+            }
         }
     }
 
-    @Override
-    protected void onClose(Session session) {
-        String id = getPathParameter(session, "id");
-        List<Session> sessions = sessionMap.computeIfPresent(id, (key, val) -> {
-            val.remove(session);
-            return val;
-        });
-        if (sessions != null && sessions.isEmpty()) {
-            sessionMap.remove(id);
+    @OnOpen
+    public void onOpen(Session session, EndpointConfig config, @PathParam("id") String id) throws IOException {
+        List<WebsocketStateContext> contexts = stateContextMap.get(id);
+        if (contexts == null) {
+            session.close();
+        } else {
+            contexts.add(WebsocketUtil.getWebsocketContext(session));
+        }
+    }
+
+    @OnClose
+    protected void onClose(Session session, @PathParam("id") String id) {
+        List<WebsocketStateContext> contexts = stateContextMap.get(id);
+        if (contexts != null) {
+            contexts.remove(WebsocketUtil.getWebsocketContext(session));
         }
     }
 
     public void broadcast(String id ,String message) {
-        sessionMap.computeIfPresent(id, (key, val) -> {
-            val.forEach(session -> super.broadcast(session, message));
-            return val;
-        });
+        for (WebsocketStateContext context: stateContextMap.get(id)) {
+            context.broadcastAsync(message);
+        }
     }
 }

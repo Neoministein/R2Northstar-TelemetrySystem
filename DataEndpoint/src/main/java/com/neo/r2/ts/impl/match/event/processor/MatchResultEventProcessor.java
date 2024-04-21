@@ -1,10 +1,12 @@
 package com.neo.r2.ts.impl.match.event.processor;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.impl.repository.searchable.MatchResultRepository;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
 import com.neo.r2.ts.persistence.searchable.MatchResultSearchable;
+import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -13,31 +15,31 @@ import java.util.List;
 @ApplicationScoped
 public class MatchResultEventProcessor extends AbstractBasicEventProcessor {
 
+    protected final MatchResultRepository matchResultRepository;
+
     @Inject
-    protected MatchResultRepository matchResultRepository;
+    protected MatchResultEventProcessor(MatchResultRepository matchResultRepository ,JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        super(jsonSchemaLoader, configService);
+        this.matchResultRepository = matchResultRepository;
+    }
 
     @Override
-    public void handleIncomingEvent(String matchId, JsonNode event, MatchStateWrapper matchStateWrapper) {
+    public void handleIncomingEvent(String matchId, MatchEvent event, MatchStateWrapper matchStateWrapper) {
         matchResultRepository.saveResult(new MatchResultSearchable(event, matchStateWrapper));
     }
 
     @Override
-    public void updateMatchState(JsonNode event, MatchStateWrapper matchStateToUpdate) {
+    public void updateMatchState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {
 
     }
 
     @Override
-    public List<MatchEventSearchable> parseToSearchable(JsonNode event, MatchStateWrapper endMatchState) {
+    public List<MatchEventSearchable> parseToSearchable(MatchEvent event, MatchStateWrapper endMatchState) {
         return List.of();
     }
 
     @Override
-    public void cleanUpState(JsonNode event, MatchStateWrapper matchStateToUpdate) {}
-
-    @Override
-    public boolean shouldBeAddedToMatchState() {
-        return false;
-    }
+    public void cleanUpState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {}
 
     @Override
     public String getEventName() {
