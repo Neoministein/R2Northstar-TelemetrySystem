@@ -10,6 +10,9 @@ public class CustomConstants {
     public static final ExceptionDetails EX_UNSUPPORTED_EVENT_TYPE = new ExceptionDetails(
             "r2ts/match/unsupported-event", "Unsupported event type [{0}].");
 
+    public static final ExceptionDetails EX_NO_INTERNAL_MATCHSTATE = new ExceptionDetails(
+            "r2ts/match/no-internal-state", "There isn't an internal state for match [{0}]");
+
     public static final ExceptionDetails EX_MATCH_NON_EXISTENT = new ExceptionDetails(
             "r2ts/match/no-match", "The provided match {0} does not exist.");
 

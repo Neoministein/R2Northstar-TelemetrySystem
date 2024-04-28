@@ -2,16 +2,19 @@ package com.neo.r2.ts.impl.repository.entity;
 
 import com.neo.r2.ts.persistence.HeatmapEnums;
 import com.neo.r2.ts.persistence.entity.Heatmap;
+import com.neo.util.framework.database.api.PersistenceContextProvider;
 import com.neo.util.framework.database.impl.AbstractDatabaseRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.util.Optional;
 
 @ApplicationScoped
 public class HeatmapRepository extends AbstractDatabaseRepository<Heatmap> {
 
-    public HeatmapRepository() {
-        super(Heatmap.class);
+    @Inject
+    public HeatmapRepository(PersistenceContextProvider pcp) {
+        super(pcp, Heatmap.class);
     }
 
     public Optional<Heatmap> fetchFullMapAggregation(String map) {

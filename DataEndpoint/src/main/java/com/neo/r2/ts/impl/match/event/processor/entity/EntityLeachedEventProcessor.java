@@ -2,7 +2,7 @@ package com.neo.r2.ts.impl.match.event.processor.entity;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
-import com.neo.r2.ts.impl.match.event.MatchEvent;
+import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
@@ -33,7 +33,7 @@ public class EntityLeachedEventProcessor extends AbstractBasicEventProcessor imp
     }
 
     @Override
-    public List<MatchEventSearchable> parseToSearchable(MatchEvent event, MatchStateWrapper endMatchState) {
+    public List<MatchEventSearchable> parseToSearchable(MatchEventWrapper event, MatchStateWrapper endMatchState) {
         if (!saveSearchable()) {
             return List.of();
         }

@@ -1,9 +1,9 @@
 package com.neo.r2.ts.impl.match.event.processor.player.movement;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
 import com.neo.r2.ts.impl.match.event.processor.AbstractPositionEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
+import com.neo.r2.ts.impl.match.state.PlayerStateWrapper;
 import com.neo.util.framework.api.config.ConfigService;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -28,12 +28,12 @@ public class PlayerPositionEventProcessor extends AbstractPositionEventProcessor
     }
 
     @Override
-    protected Optional<ObjectNode> getEntity(MatchStateWrapper matchStateToUpdate, String entityId) {
+    protected Optional<PlayerStateWrapper> getEntity(MatchStateWrapper matchStateToUpdate, String entityId) {
         return matchStateToUpdate.getPlayer(entityId);
     }
 
     @Override
-    protected Collection<ObjectNode> getAllEntities(MatchStateWrapper matchStateWrapper) {
+    protected Collection<PlayerStateWrapper> getAllEntities(MatchStateWrapper matchStateWrapper) {
         return matchStateWrapper.getPlayers();
     }
 }

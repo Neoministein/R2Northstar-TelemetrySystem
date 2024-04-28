@@ -1,16 +1,25 @@
 package com.neo.r2.ts.impl.match.event.processor.player;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
-import com.neo.r2.ts.impl.match.event.MatchEvent;
+import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
+import com.neo.r2.ts.impl.match.state.PlayerStateWrapper;
+import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
+import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.util.Optional;
 
 @ApplicationScoped
 public class PlayerNewLoadoutEventProcessor extends AbstractBasicEventProcessor implements MatchEventProcessor {
+
+    @Inject
+    public PlayerNewLoadoutEventProcessor(SearchProvider searchProvider, JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        super(searchProvider, jsonSchemaLoader, configService);
+    }
 
     @Override
     public String getEventName() {
@@ -23,15 +32,17 @@ public class PlayerNewLoadoutEventProcessor extends AbstractBasicEventProcessor 
     }
 
     @Override
-    public void updateMatchState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {
-        super.updateMatchState(event, matchStateToUpdate);
-        Optional<ObjectNode> optPlayer = matchStateToUpdate.getPlayer(event.get("entityId").asText());
+    public void processEvent(MatchEventWrapper event, MatchStateWrapper matchState) {
+        Optional<PlayerStateWrapper> optPlayer = matchState.getPlayer(event.getEntityId());
         if (optPlayer.isPresent()) {
-            ObjectNode equipment = optPlayer.get().withObject("/equipment");
-            equipment.set("primary",   event.get("primary"));
-            equipment.set("secondary", event.get("secondary"));
-            equipment.set("weapon3",   event.get("weapon3"));
-            equipment.set("special",   event.get("special"));
+            PlayerStateWrapper player = optPlayer.get();
+            player.setPrimary(  event.get("primary").asText());
+            player.setSecondary(event.get("secondary").asText());
+            player.setWeapon3(  event.get("weapon3").asText());
+            player.setSpecial(  event.get("special").asText());
+
+            matchState.addEvent(getEventName(), event);
+            saveSearchable(createBasicSearchable(event, matchState));
         }
     }
 }

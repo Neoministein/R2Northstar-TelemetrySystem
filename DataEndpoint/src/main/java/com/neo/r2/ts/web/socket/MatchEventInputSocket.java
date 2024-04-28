@@ -2,8 +2,8 @@ package com.neo.r2.ts.web.socket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.neo.r2.ts.impl.match.MatchStatusEvent;
-import com.neo.r2.ts.impl.match.event.MatchEvent;
 import com.neo.r2.ts.impl.match.event.MatchEventService;
+import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
 import com.neo.util.common.impl.exception.ValidationException;
 import com.neo.util.common.impl.json.JsonSchemaUtil;
 import com.neo.util.common.impl.json.JsonUtil;
@@ -71,7 +71,7 @@ public class MatchEventInputSocket {
         try {
             JsonNode event = JsonUtil.fromJson(message);
             JsonSchemaUtil.isValidOrThrow(event, eventSchema);
-            matchEventService.delegateToEventProcessor(new MatchEvent(id ,event));
+            matchEventService.processIncomingEvent(new MatchEventWrapper(id ,event));
         } catch (ValidationException ex) {
             LOGGER.warn("A validation exception occurred [{}], body [{}]", ex.getMessage(), message);
         } catch (Exception ex) {

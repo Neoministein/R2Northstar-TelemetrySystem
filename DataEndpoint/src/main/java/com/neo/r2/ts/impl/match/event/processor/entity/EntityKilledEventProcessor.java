@@ -3,7 +3,7 @@ package com.neo.r2.ts.impl.match.event.processor.entity;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
-import com.neo.r2.ts.impl.match.event.MatchEvent;
+import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
@@ -41,7 +41,7 @@ public class EntityKilledEventProcessor extends AbstractBasicEventProcessor impl
     }
 
     @Override
-    public void handleIncomingEvent(String matchId, MatchEvent event, MatchStateWrapper matchStateWrapper) {
+    public void handleIncomingEvent(String matchId, MatchEventWrapper event, MatchStateWrapper matchStateWrapper) {
         String attackerId = event.get("attackerId").asText();
         String victimId = event.get("victimId").asText();
 
@@ -53,8 +53,8 @@ public class EntityKilledEventProcessor extends AbstractBasicEventProcessor impl
     }
 
     @Override
-    public void updateMatchState(MatchEvent event, MatchStateWrapper matchStateToUpdate) {
-        super.updateMatchState(event, matchStateToUpdate);
+    public void processEvent(MatchEventWrapper event, MatchStateWrapper matchStateToUpdate) {
+        super.processEvent(event, matchStateToUpdate);
         Optional<ObjectNode> victimPlayer = matchStateToUpdate.getPlayer(event.get("victimId").asText());
         if (victimPlayer.isPresent()) {
             ObjectNode player = victimPlayer.get();
@@ -66,12 +66,12 @@ public class EntityKilledEventProcessor extends AbstractBasicEventProcessor impl
             player.put("isCrouching", false);
             player.put("isAlive", false);
             player.put("isRodeoing", false);
-            player.put("isTitan", CustomConstants.UNKNOWN);
+            player.put("titanClass", CustomConstants.UNKNOWN);
         }
     }
 
     @Override
-    public List<MatchEventSearchable> parseToSearchable(MatchEvent event, MatchStateWrapper endMatchState) {
+    public List<MatchEventSearchable> parseToSearchable(MatchEventWrapper event, MatchStateWrapper endMatchState) {
         if (!saveSearchable()) {
             return List.of();
         }

@@ -3,7 +3,7 @@ package com.neo.r2.ts.impl.match.state;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.neo.r2.ts.impl.match.event.MatchEvent;
+import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
 import com.neo.r2.ts.persistence.entity.Match;
 import com.neo.util.common.impl.json.JsonUtil;
 
@@ -20,11 +20,12 @@ public class MatchStateWrapper {
     public static final String NPCS = "npcs";
     public static final String EVENTS = "events";
     public static final String TIME_PASSED = "timePassed";
+    public static final String MATCH_TIME = "matchTime";
 
     public static final String TAGS = "tags";
 
-    private final Map<String, ObjectNode> players = new HashMap<>();
-    private final Map<String, ObjectNode> npcs = new HashMap<>();
+    private final Map<String, PlayerStateWrapper> players = new HashMap<>();
+    private final Map<String, EntityStateWrapper> npcs = new HashMap<>();
 
     private final ObjectNode matchState;
     private final Instant startTime;
@@ -67,34 +68,34 @@ public class MatchStateWrapper {
         return matchState.get(PLAYERS).size();
     }
 
-    public Collection<ObjectNode> getPlayers() {
+    public Collection<PlayerStateWrapper> getPlayers() {
         return players.values();
     }
 
-    public Collection<ObjectNode> getNpcs() {
+    public Collection<EntityStateWrapper> getNpcs() {
         return npcs.values();
     }
 
-    public Optional<ObjectNode> getEntity(String entityId) {
-        return getPlayer(entityId).or(() -> getNpc(entityId));
+    public Optional<EntityStateWrapper> getEntity(String entityId) {
+        return getNpc(entityId).or(() -> getPlayer(entityId));
     }
 
-    public Optional<ObjectNode> getPlayer(String entityId) {
+    public Optional<PlayerStateWrapper> getPlayer(String entityId) {
         return Optional.ofNullable(players.get(entityId));
     }
 
-    public Optional<ObjectNode> getNpc(String entityId) {
+    public Optional<EntityStateWrapper> getNpc(String entityId) {
         return Optional.ofNullable(npcs.get(entityId));
     }
 
-    public void addPlayer(String entityId, ObjectNode player) {
-        matchState.withArray(PLAYERS).add(player);
-        players.put(entityId, player);
+    public void addPlayer(PlayerStateWrapper player) {
+        matchState.withArray(PLAYERS).add(player.getRawData());
+        players.put(player.getEntityId(), player);
     }
 
-    public void addNpc(String entityId, ObjectNode npc) {
-        matchState.withArray(NPCS).add(npc);
-        npcs.put(entityId, npc);
+    public void addNpc(EntityStateWrapper npc) {
+        matchState.withArray(NPCS).add(npc.getRawData());
+        npcs.put(npc.getEntityId(), npc);
     }
     public Optional<ObjectNode> removePlayer(String entityId) {
         players.remove(entityId);
@@ -118,7 +119,7 @@ public class MatchStateWrapper {
         return Optional.empty();
     }
 
-    public void addEvent(String eventName, MatchEvent event) {
+    public void addEvent(String eventName, MatchEventWrapper event) {
         matchState.withObject("/" + EVENTS).withArray(eventName).add(event.getRawData());
     }
 
@@ -142,8 +143,9 @@ public class MatchStateWrapper {
         return tags;
     }
 
-    public void updateTimeStamp() {
+    public void updateTimeStamp(int matchTime) {
         lastUpdated = Instant.now();
         matchState.put(TIME_PASSED, Duration.between(startTime, lastUpdated).toMillis());
+        matchState.put(MATCH_TIME, matchTime);
     }
 }

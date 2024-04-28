@@ -1,8 +1,10 @@
 package com.neo.r2.ts.impl.match.state;
 
+import com.neo.r2.ts.api.CustomConstants;
 import com.neo.r2.ts.impl.match.MatchStatusEvent;
 import com.neo.r2.ts.impl.repository.entity.MatchRepository;
 import com.neo.r2.ts.persistence.entity.Match;
+import com.neo.util.common.impl.exception.NoContentFoundException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -40,6 +42,10 @@ public class GlobalMatchState {
 
     public Optional<MatchStateWrapper> getCurrentMatchState(String matchId) {
         return Optional.ofNullable(matchStateMap.get(matchId));
+    }
+
+    public MatchStateWrapper requestCurrentMatchState(String matchId) {
+        return getCurrentMatchState(matchId).orElseThrow(() -> new NoContentFoundException(CustomConstants.EX_NO_INTERNAL_MATCHSTATE, matchId));
     }
 
 }
