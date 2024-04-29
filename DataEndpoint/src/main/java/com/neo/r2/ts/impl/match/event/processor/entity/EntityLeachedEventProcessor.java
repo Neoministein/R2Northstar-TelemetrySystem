@@ -4,22 +4,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
 import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
+import com.neo.r2.ts.impl.match.state.EntityStateWrapper;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
 import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import java.util.List;
-import java.util.Optional;
 
 @ApplicationScoped
 public class EntityLeachedEventProcessor extends AbstractBasicEventProcessor implements MatchEventProcessor {
 
     @Inject
-    protected EntityLeachedEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
-        super(jsonSchemaLoader, configService);
+    protected EntityLeachedEventProcessor(SearchProvider searchProvider, JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        super(searchProvider, jsonSchemaLoader, configService);
     }
 
     @Override
@@ -33,14 +32,10 @@ public class EntityLeachedEventProcessor extends AbstractBasicEventProcessor imp
     }
 
     @Override
-    public List<MatchEventSearchable> parseToSearchable(MatchEventWrapper event, MatchStateWrapper endMatchState) {
-        if (!saveSearchable()) {
-            return List.of();
-        }
+    public void processEvent(MatchEventWrapper event, MatchStateWrapper matchState) {
+        ObjectNode entity = matchState.getEntity(event.getEntityId()).map(EntityStateWrapper::getRawData).orElse(null);
+        ObjectNode leachedSpecter = matchState.getNpc(event.get("specterId").asText()).map(EntityStateWrapper::getRawData).orElse(null);
 
-        Optional<ObjectNode> player = endMatchState.getPlayer(event.get("entityId").asText());
-        MatchEventSearchable searchable = new MatchEventSearchable(endMatchState, getEventName(), player.orElse(null));
-        endMatchState.getNpc(event.get("specterId").asText()).ifPresent(searchable::setData);
-        return List.of(searchable);
+        saveSearchable(new MatchEventSearchable(matchState, getEventName(), entity, leachedSpecter));
     }
 }

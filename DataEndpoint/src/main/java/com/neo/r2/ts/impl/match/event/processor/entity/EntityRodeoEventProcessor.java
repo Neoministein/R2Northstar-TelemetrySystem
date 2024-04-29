@@ -1,25 +1,25 @@
 package com.neo.r2.ts.impl.match.event.processor.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
 import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
 import com.neo.r2.ts.impl.match.event.processor.AbstractPlayerStateEventProcessor;
+import com.neo.r2.ts.impl.match.state.EntityStateWrapper;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
+import com.neo.r2.ts.impl.match.state.PlayerStateWrapper;
 import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
 import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import java.util.List;
 
 @ApplicationScoped
 public class EntityRodeoEventProcessor extends AbstractPlayerStateEventProcessor implements MatchEventProcessor {
 
     @Inject
-    public EntityRodeoEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
-        super(jsonSchemaLoader, configService);
+    public EntityRodeoEventProcessor(SearchProvider searchProvider, JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        super(searchProvider, jsonSchemaLoader, configService);
     }
 
     @Override
@@ -33,22 +33,19 @@ public class EntityRodeoEventProcessor extends AbstractPlayerStateEventProcessor
     }
 
     @Override
-    public List<MatchEventSearchable> parseToSearchable(MatchEventWrapper event, MatchStateWrapper endMatchState) {
-        if (!saveSearchable()) {
-            return List.of();
-        }
+    public void processEvent(MatchEventWrapper event, MatchStateWrapper matchState) {
+        super.processEvent(event, matchState);
 
-        String entityId = event.get("entityId").asText();
-        String rodeoEntityId = event.get("rodeoEntityId").asText();
+        ObjectNode entity = matchState.getEntity(event.getEntityId()).map(EntityStateWrapper::getRawData).orElse(null);
+        ObjectNode rodeoEntity = matchState.getEntity(event.get("rodeoEntityId").asText()).map(EntityStateWrapper::getRawData).orElse(null);
 
-        MatchEventSearchable searchable = new MatchEventSearchable(endMatchState, getEventName(),
-                endMatchState.getEntity(entityId).orElse(parseBackupEntity(entityId)));
-        searchable.setData(endMatchState.getEntity(rodeoEntityId).orElse(parseBackupEntity(rodeoEntityId)));
-        return List.of(searchable);
+        saveSearchable(new MatchEventSearchable(matchState, getEventName(), entity, rodeoEntity));
     }
 
     @Override
-    protected void setStateOnPlayer(JsonNode state, ObjectNode player) {
-        player.set("isRodeoing", state);
+    protected void setStateOnPlayer(boolean state, EntityStateWrapper entity) {
+        if (entity instanceof PlayerStateWrapper player) {
+            player.setIsRodeoing(state);
+        }
     }
 }

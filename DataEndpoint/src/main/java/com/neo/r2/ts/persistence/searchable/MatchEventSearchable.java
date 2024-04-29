@@ -24,11 +24,16 @@ public class MatchEventSearchable extends AbstractSearchable implements Searchab
     private Instant timestamp = Instant.now();
 
     public MatchEventSearchable(MatchStateWrapper matchState, String eventType, JsonNode entity) {
+        this(matchState, eventType, entity, null);
+    }
+
+    public MatchEventSearchable(MatchStateWrapper matchState, String eventType, JsonNode entity, JsonNode data) {
         this.matchId = matchState.getMatchId();
         this.map = matchState.getMap();
         this.timePassed = matchState.getTimePassed();
         this.eventType = eventType;
         this.entity = entity;
+        this.data = data;
     }
 
     protected MatchEventSearchable() {

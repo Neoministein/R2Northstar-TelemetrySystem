@@ -15,8 +15,8 @@ public class EntityStateWrapper {
         entityId = creationEvent.get("entityId").asText();
 
         rawData.put("entityId", entityId);
-        rawData.put("team", creationEvent.get("team").asInt());
         rawData.put("entityType", entityType);
+        rawData.put("team", creationEvent.get("team").asInt());
         rawData.set("titanClass", creationEvent.get("titanClass"));
         rawData.put("health", 100);
         rawData.put("distance", 0);
@@ -47,6 +47,10 @@ public class EntityStateWrapper {
 
     public ObjectNode getRawData() {
         return rawData;
+    }
+
+    public void setTeam(int team) {
+        rawData.put("team", team);
     }
 
     public void setHealth(int health) {
