@@ -6,6 +6,7 @@ import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
 import com.neo.r2.ts.impl.match.event.processor.AbstractBasicEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.impl.match.state.PlayerStateWrapper;
+import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
 import com.neo.util.framework.api.config.ConfigService;
 import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
@@ -41,7 +42,7 @@ public class TitanBecomesPlayerEventProcessor extends AbstractBasicEventProcesso
             player.setIsTitan(false);
 
             matchState.addEvent(getEventName(), event);
-            saveSearchable(createBasicSearchable(event, matchState));
+            saveSearchable(new MatchEventSearchable(matchState, getEventName(), player));
         }
     }
 }

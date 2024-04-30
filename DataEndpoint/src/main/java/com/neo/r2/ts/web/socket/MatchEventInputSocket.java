@@ -60,10 +60,19 @@ public class MatchEventInputSocket {
     @OnOpen
     public void onOpen(Session session, EndpointConfig config, @PathParam("id") String id) throws IOException {
         if (stateContextMap.containsKey(id)) {
-            stateContextMap.put(id, WebsocketUtil.getWebsocketContext(session));
+            WebsocketStateContext context = stateContextMap.get(id);
+            if (context == null) {
+                LOGGER.info("Connection established for match [{}]", id);
+                stateContextMap.put(id, WebsocketUtil.getWebsocketContext(session));
+                return;
+            } else {
+                LOGGER.warn("A second client tried to connect to match [{}]", id);
+            }
         } else {
-            session.close();
+            LOGGER.warn("The match [{}] isn't currnetly running or does not exist", id);
         }
+
+        session.close();
     }
 
     @OnMessage

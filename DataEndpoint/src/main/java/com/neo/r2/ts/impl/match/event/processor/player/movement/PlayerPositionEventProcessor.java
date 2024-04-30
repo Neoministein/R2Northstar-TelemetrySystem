@@ -5,11 +5,11 @@ import com.neo.r2.ts.impl.match.event.processor.AbstractPositionEventProcessor;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.r2.ts.impl.match.state.PlayerStateWrapper;
 import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.util.Collection;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -18,8 +18,8 @@ public class PlayerPositionEventProcessor extends AbstractPositionEventProcessor
     public static final String EVENT_NAME = "PlayerPosition";
 
     @Inject
-    public PlayerPositionEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
-        super(jsonSchemaLoader, configService);
+    public PlayerPositionEventProcessor(SearchProvider searchProvider, JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        super(searchProvider, jsonSchemaLoader, configService);
     }
 
     @Override
@@ -30,10 +30,5 @@ public class PlayerPositionEventProcessor extends AbstractPositionEventProcessor
     @Override
     protected Optional<PlayerStateWrapper> getEntity(MatchStateWrapper matchStateToUpdate, String entityId) {
         return matchStateToUpdate.getPlayer(entityId);
-    }
-
-    @Override
-    protected Collection<PlayerStateWrapper> getAllEntities(MatchStateWrapper matchStateWrapper) {
-        return matchStateWrapper.getPlayers();
     }
 }

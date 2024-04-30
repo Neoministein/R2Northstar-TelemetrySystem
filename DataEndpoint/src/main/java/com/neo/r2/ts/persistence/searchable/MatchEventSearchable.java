@@ -1,6 +1,7 @@
 package com.neo.r2.ts.persistence.searchable;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.neo.r2.ts.impl.match.state.EntityStateWrapper;
 import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
 import com.neo.util.framework.api.persistence.search.AbstractSearchable;
 import com.neo.util.framework.api.persistence.search.IndexPeriod;
@@ -22,6 +23,10 @@ public class MatchEventSearchable extends AbstractSearchable implements Searchab
     private String eventType;
     private JsonNode data;
     private Instant timestamp = Instant.now();
+
+    public MatchEventSearchable(MatchStateWrapper matchState, String eventType, EntityStateWrapper entity) {
+        this(matchState, eventType, entity.getRawData());
+    }
 
     public MatchEventSearchable(MatchStateWrapper matchState, String eventType, JsonNode entity) {
         this(matchState, eventType, entity, null);

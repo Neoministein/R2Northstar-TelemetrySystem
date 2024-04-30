@@ -22,6 +22,6 @@ public abstract class AbstractPlayerStateEventProcessor extends AbstractBasicEve
 
     @Override
     public void processEvent(MatchEventWrapper event, MatchStateWrapper matchStateToUpdate) {
-        matchStateToUpdate.getEntity(event.get("entityId").asText()).ifPresent(p -> setStateOnPlayer(event.get("state").asBoolean(), p));
+        matchStateToUpdate.getEntity(event.getEntityId()).ifPresent(p -> setStateOnPlayer(event.get("state").asBoolean(), p));
     }
 }

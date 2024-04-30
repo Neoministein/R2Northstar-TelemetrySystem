@@ -1,4 +1,4 @@
-package com.neo.r2.ts.impl.match.event.processor.player;
+package com.neo.r2.ts.impl.match.event.processor.player.movement;
 
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
 import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
@@ -15,10 +15,10 @@ import jakarta.inject.Inject;
 import java.util.Optional;
 
 @ApplicationScoped
-public class PlayerRespawnedEventProcessor extends AbstractBasicEventProcessor implements MatchEventProcessor {
+public class PlayerMantleProcessor extends AbstractBasicEventProcessor implements MatchEventProcessor {
 
     @Inject
-    public PlayerRespawnedEventProcessor(SearchProvider searchProvider, JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+    public PlayerMantleProcessor(SearchProvider searchProvider, JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
         super(searchProvider, jsonSchemaLoader, configService);
     }
 
@@ -29,22 +29,14 @@ public class PlayerRespawnedEventProcessor extends AbstractBasicEventProcessor i
 
     @Override
     public String getEventName() {
-        return "PilotRespawned";
+        return "PlayerMantle";
     }
-
 
     @Override
     public void processEvent(MatchEventWrapper event, MatchStateWrapper matchState) {
         Optional<PlayerStateWrapper> optPlayer = matchState.getPlayer(event.getEntityId());
-
         if (optPlayer.isPresent()) {
-            PlayerStateWrapper player = optPlayer.get();
-
-            player.setHealth(100);
-            player.setIsAlive(true);
-
-            matchState.addEvent(getEventName(), event);
-            saveSearchable(new MatchEventSearchable(matchState, getEventName(), player));
+            saveSearchable(new MatchEventSearchable(matchState, getEventName(), optPlayer.get()));
         }
     }
 }

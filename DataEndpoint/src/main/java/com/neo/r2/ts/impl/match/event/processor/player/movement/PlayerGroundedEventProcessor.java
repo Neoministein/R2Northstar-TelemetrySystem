@@ -1,10 +1,11 @@
 package com.neo.r2.ts.impl.match.event.processor.player.movement;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
 import com.neo.r2.ts.impl.match.event.processor.AbstractPlayerStateEventProcessor;
+import com.neo.r2.ts.impl.match.state.EntityStateWrapper;
+import com.neo.r2.ts.impl.match.state.PlayerStateWrapper;
 import com.neo.util.framework.api.config.ConfigService;
+import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -13,17 +14,19 @@ import jakarta.inject.Inject;
 public class PlayerGroundedEventProcessor extends AbstractPlayerStateEventProcessor implements MatchEventProcessor {
 
     @Inject
-    public PlayerGroundedEventProcessor(JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
-        super(jsonSchemaLoader, configService);
+    public PlayerGroundedEventProcessor(SearchProvider searchProvider, JsonSchemaLoader jsonSchemaLoader, ConfigService configService) {
+        super(searchProvider, jsonSchemaLoader, configService);
+    }
+
+    @Override
+    protected void setStateOnPlayer(boolean state, EntityStateWrapper entity) {
+        if (entity instanceof PlayerStateWrapper player) {
+            player.setIsGrounded(state);
+        }
     }
 
     @Override
     public String getEventName() {
         return "PlayerGrounded";
-    }
-
-    @Override
-    protected void setStateOnPlayer(JsonNode state, ObjectNode player) {
-        player.set("isGrounded", state);
     }
 }

@@ -1,19 +1,12 @@
 package com.neo.r2.ts.impl.match.event.processor;
 
 import com.neo.r2.ts.api.match.event.MatchEventProcessor;
-import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
-import com.neo.r2.ts.impl.match.state.EntityStateWrapper;
-import com.neo.r2.ts.impl.match.state.MatchStateWrapper;
-import com.neo.r2.ts.persistence.searchable.MatchEventSearchable;
-import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.api.config.Config;
 import com.neo.util.framework.api.config.ConfigService;
 import com.neo.util.framework.api.persistence.search.SearchProvider;
 import com.neo.util.framework.api.persistence.search.Searchable;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import com.networknt.schema.JsonSchema;
-
-import java.util.Optional;
 
 public abstract class AbstractBasicEventProcessor implements MatchEventProcessor {
 
@@ -22,7 +15,7 @@ public abstract class AbstractBasicEventProcessor implements MatchEventProcessor
     protected boolean enabled;
     protected int modulo;
 
-    protected int moduloCount = 0;
+    protected int moduloCount;
 
     protected abstract String getSchemaName();
 
@@ -38,16 +31,6 @@ public abstract class AbstractBasicEventProcessor implements MatchEventProcessor
         if (enabled && moduloCount++ % modulo == 0) {
             searchProvider.index(searchable);
         }
-    }
-
-    protected Searchable createBasicSearchable(MatchEventWrapper event, MatchStateWrapper matchState) {
-        Optional<EntityStateWrapper> entityState = matchState.getEntity(event.getEntityId());
-
-        if (entityState.isPresent()) {
-            return new MatchEventSearchable(matchState, getEventName(), entityState.get().getRawData());
-        }
-
-        return new MatchEventSearchable(matchState, getEventName(), JsonUtil.emptyObjectNode().put("entityId", event.getEntityId()));
     }
 
     @Override
