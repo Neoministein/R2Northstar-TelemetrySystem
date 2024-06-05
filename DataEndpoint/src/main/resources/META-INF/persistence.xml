@@ -12,8 +12,14 @@
     <class>com.neo.r2.ts.persistence.entity.Heatmap</class>
 
     <properties>
+        <!-- PostgreSQL -->
+        <!--
         <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
         <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
+        -->
+        <!--SQL Lite -->
+        <property name="jakarta.persistence.jdbc.driver" value="org.sqlite.JDBC"/>
+        <property name="hibernate.dialect" value="org.hibernate.community.dialect.SQLiteDialect" />
         <property name="hibernate.temp.use_jdbc_metadata_defaults" value="true"/>
         <property name="hibernate.hbm2ddl.auto" value="update" />
         <property name="hibernate.show_sql" value="false"/>
