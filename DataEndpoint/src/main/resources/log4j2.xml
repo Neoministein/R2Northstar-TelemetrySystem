@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="error" name="PropertiesConfig">
+
+    <!-- Logging config -->
+    <Loggers>
+        <Logger name="com.neo" level="debug" additivity="false">
+            <AppenderRef ref="stdout"/>
+            <AppenderRef ref="file"/>
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="stdout"/>
+            <AppenderRef ref="file"/>
+        </Root>
+
+        <!-- Logger for org.elasticsearch -->
+        <Logger name="org.elasticsearch" level="info" additivity="false">
+            <AppenderRef ref="elasticsearchFile"/>
+        </Logger>
+    </Loggers>
+
+    <!-- Appenders -->
+    <Appenders>
+
+        <!-- Console Appender -->
+        <Console name="stdout" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %X{traceId} - %X{contextType}:%X{requestId} - %m%n"/>
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+
+        <!-- File Appender -->
+        <RollingFile name="file" fileName="./log/application.log" filePattern="./log/%d{yyyy-MM-dd}-application.log.gz">
+            <PatternLayout pattern="###%d{yyyy-MM-dd HH:mm:ss}|%-5p|%c{1}:%L|%equals{%X{instance}}{}{-}|%equals{%X{contextType}}{}{-}|%equals{%X{requestId}}{}{-}|%equals{%X{traceId}}{}{-}|%m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- Elasticsearch File Appender -->
+        <RollingFile name="elasticsearchFile" fileName="./log/elasticsearch.log" filePattern="./log/%d{yyyy-MM-dd}-elasticsearch.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
+    </Appenders>
+</Configuration>
