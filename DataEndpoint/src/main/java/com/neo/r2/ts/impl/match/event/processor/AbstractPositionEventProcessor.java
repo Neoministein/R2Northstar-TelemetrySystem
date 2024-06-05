@@ -60,9 +60,10 @@ public abstract class AbstractPositionEventProcessor extends AbstractBasicEventP
             return 0;
         }
 
-        x -= newPosition.get("x").asLong();
-        y -= newPosition.get("y").asLong();
-        z -= newPosition.get("z").asLong();
+
+        x = Math.abs(x - newPosition.get("x").asLong());
+        y = Math.abs(y - newPosition.get("y").asLong());
+        z = Math.abs(z - newPosition.get("z").asLong());
 
         return Math.round(Math.sqrt((x * x + y * y + z * z)));
     }
