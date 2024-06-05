@@ -40,7 +40,7 @@ public class RssFeedSocket {
     }
 
     @OnOpen
-    protected void onOpen(Session session, EndpointConfig config, @PathParam("id") String id) throws IOException {
+    public void onOpen(Session session, EndpointConfig config, @PathParam("id") String id) throws IOException {
         List<WebsocketStateContext> sessions = sessionMap.get(id);
         if (sessions == null) {
             session.close();
@@ -50,7 +50,7 @@ public class RssFeedSocket {
     }
 
     @OnClose
-    protected void onClose(Session session, @PathParam("id") String id) {
+    public void onClose(Session session, @PathParam("id") String id) {
         sessionMap.get(id).remove(WebsocketUtil.getWebsocketContext(session));
     }
 

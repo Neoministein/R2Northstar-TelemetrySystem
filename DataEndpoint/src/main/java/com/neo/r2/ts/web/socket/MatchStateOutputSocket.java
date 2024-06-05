@@ -53,7 +53,7 @@ public class MatchStateOutputSocket {
     }
 
     @OnClose
-    protected void onClose(Session session, @PathParam("id") String id) {
+    public void onClose(Session session, @PathParam("id") String id) {
         List<WebsocketStateContext> contexts = stateContextMap.get(id);
         if (contexts != null) {
             contexts.remove(WebsocketUtil.getWebsocketContext(session));
