@@ -5,7 +5,6 @@ import com.neo.r2.ts.impl.match.MatchStatusEvent;
 import com.neo.r2.ts.impl.match.event.MatchEventService;
 import com.neo.r2.ts.impl.match.event.MatchEventWrapper;
 import com.neo.util.common.impl.exception.ValidationException;
-import com.neo.util.common.impl.json.JsonSchemaUtil;
 import com.neo.util.common.impl.json.JsonUtil;
 import com.neo.util.framework.impl.json.JsonSchemaLoader;
 import com.neo.util.framework.websocket.api.NeoUtilWebsocket;
@@ -78,8 +77,7 @@ public class MatchEventInputSocket {
     @OnMessage
     public void onMessage(Session session, @PathParam("id") String id, String message) throws IOException {
         try {
-            JsonNode event = JsonUtil.fromJson(message);
-            JsonSchemaUtil.isValidOrThrow(event, eventSchema);
+            JsonNode event = JsonUtil.fromJsonAndVeryfy(message, eventSchema);
             matchEventService.processIncomingEvent(new MatchEventWrapper(id ,event));
         } catch (ValidationException ex) {
             LOGGER.warn("A validation exception occurred [{}], body [{}]", ex.getMessage(), message);
